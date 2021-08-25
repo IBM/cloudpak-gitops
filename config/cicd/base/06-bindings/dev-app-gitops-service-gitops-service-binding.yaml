@@ -1,0 +1,20 @@
+---
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: TriggerBinding
+metadata:
+  creationTimestamp: null
+  name: dev-app-gitops-service-gitops-service-binding
+  namespace: cicd
+  annotations:
+    argocd.argoproj.io/sync-wave: "30"
+spec:
+  params:
+    - name: imageRepo
+      value: image-registry.openshift-image-registry.svc:5000/dev/gitops-service
+    - name: dockerfile
+      value: ./Dockerfile
+    - name: context
+      value: ./JMS
+    - name: tlsVerify
+      value: "false"
+status: {}

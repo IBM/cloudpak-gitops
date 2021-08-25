@@ -1,0 +1,22 @@
+---
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  creationTimestamp: null
+  annotations:
+    argocd.argoproj.io/sync-wave: "300"
+  name: openjdk
+  namespace: dev
+spec:
+  lookupPolicy:
+    local: false
+  tags:
+    - name: 11-jre-slim-buster
+      annotations:
+        openshift.io/imported-from: openjdk:11-jre-slim-buster
+      from:
+        kind: DockerImage
+        name: openjdk:11-jre-slim-buster
+      importPolicy: {}
+      referencePolicy:
+        type: Source

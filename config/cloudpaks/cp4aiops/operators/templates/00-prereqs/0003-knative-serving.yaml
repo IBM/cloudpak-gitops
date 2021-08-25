@@ -1,0 +1,19 @@
+---
+apiVersion: operator.knative.dev/v1alpha1
+kind: KnativeServing
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "3"
+  name: knative-serving
+  namespace: knative-serving
+  labels:
+    ibm-aiops-install/install: knative-serving
+spec:
+  config:
+    autoscaler:
+      enable-scale-to-zero: "true"
+    domain:
+      svc.cluster.local: |
+        selector:
+          sdlc.visibility: cluster-local
