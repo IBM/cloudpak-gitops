@@ -1,0 +1,46 @@
+---
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: EventListener
+metadata:
+  creationTimestamp: null
+  name: cicd-event-listener
+  namespace: cicd
+  annotations:
+    argocd.argoproj.io/sync-wave: "30"
+spec:
+  serviceAccountName: pipeline
+  triggers:
+    - bindings:
+        - ref: github-push-binding
+      interceptors:
+        - github:
+            secretRef:
+              secretKey: webhook-secret-key
+              secretName: gitops-webhook-secret
+        - cel:
+            filter: (header.match('X-GitHub-Event', 'push') && body.repository.full_name == 'cloudpakbringup/gitops')
+            overlays:
+              - expression: body.ref.split('/')[2]
+                key: ref
+      name: ci-dryrun-from-push
+      template:
+        name: ci-dryrun-from-push-template
+    - bindings:
+        - ref: dev-app-gitops-service-gitops-service-binding
+        - ref: github-push-binding
+      interceptors:
+        - github:
+            secretRef:
+              secretKey: webhook-secret-key
+              secretName: webhook-secret-dev-gitops-service
+        - cel:
+            filter: (header.match('X-GitHub-Event', 'push') && body.repository.full_name == 'nastacio/mq-dev-patterns')
+            overlays:
+              - expression: body.ref.split('/')[2]
+                key: ref
+      name: app-ci-build-from-push-gitops-service
+      template:
+        name: app-ci-template
+status:
+  configuration:
+    generatedName: ""

@@ -1,0 +1,17 @@
+---
+serviceaccount:
+  argocd_application_controller: argocd-cluster-argocd-application-controller
+metadata:
+  argocd_app_namespace: ibm-cloudpaks
+  argocd_namespace: openshift-gitops
+spec:
+  shared_configuration:
+    sc_deployment_hostname_suffix: to-be-set-via-presync-hook
+    sc_deployment_platform: ROKS
+storageclass:
+  gold: cp4a-file-retain-gold-gid
+  silver: cp4a-file-retain-silver-gid
+  bronze: cp4a-file-retain-bronze-gid
+  aws: ocs-storagecluster-cephfs
+  fyre: rook-cephfs
+  roksgen2: ocs-storagecluster-cephfs

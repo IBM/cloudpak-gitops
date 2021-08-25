@@ -1,0 +1,37 @@
+---
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  creationTimestamp: null
+  annotations:
+    argocd.argoproj.io/sync-wave: "300"
+  name: mq-dev-patterns-jms
+  namespace: dev
+spec:
+  runPolicy: Serial
+  triggers:
+    - type: "GitHub"
+      github:
+        secret: "secret101"
+    - type: "Generic"
+      generic:
+        secret: "secret101"
+    - type: "ImageChange"
+  source:
+    contextDir: JMS
+    git:
+      uri: https://github.com/nastacio/mq-dev-patterns.git
+    type: Git
+  strategy:
+    dockerStrategy:
+      from:
+        kind: ImageStreamTag
+        name: openjdk:11-jre-slim-buster
+    type: Docker
+  output:
+    to:
+      kind: DockerImage
+      name: image-registry.openshift-image-registry.svc:5000/dev/mq-dev-patterns-jms:latest
+  postCommit: {}
+  failedBuildsHistoryLimit: 5
+  successfulBuildsHistoryLimit: 5

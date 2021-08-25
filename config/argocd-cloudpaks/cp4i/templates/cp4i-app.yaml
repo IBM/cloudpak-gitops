@@ -1,0 +1,57 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  creationTimestamp: null
+  name: cp4i-app
+  namespace: openshift-gitops
+  annotations:
+    argocd.argoproj.io/sync-wave: "100"
+spec:
+  destination:
+    namespace: {{.Values.metadata.argocd_app_namespace}}
+    server: https://kubernetes.default.svc
+  ignoreDifferences:
+    - group: argoproj.io
+      jsonPointers:
+        - /status
+      kind: Application
+    - group: route.openshift.io
+      jsonPointers:
+        - /spec/host
+      kind: Route
+    - group: bitnami.com
+      jsonPointers:
+        - /status
+      kind: SealedSecret
+  project: default
+  source:
+    helm:
+      parameters:
+        - name: argocd_app_name
+          value: ${ARGOCD_APP_NAME}
+        - name: argocd_app_namespace
+          value: ${ARGOCD_APP_NAMESPACE}
+        - name: metadata.argocd_app_namespace
+          value: {{.Values.metadata.argocd_app_namespace}}
+        - name: storageclass.rwo.effective
+          value: {{.Values.storageclass.rwo.effective}}
+        - name: storageclass.rwx.effective
+          value: {{.Values.storageclass.rwx.effective}}
+        - name: serviceaccount.argocd_application_controller
+          value: {{.Values.serviceaccount.argocd_application_controller}}
+    path: config/argocd-cloudpaks/cp4i
+    repoURL: https://github.com/IBM/cloudpak-gitops.git
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+status:
+  health: {}
+  summary: {}
+  sync:
+    comparedTo:
+      destination: {}
+      source:
+        repoURL: ""
+    status: ""

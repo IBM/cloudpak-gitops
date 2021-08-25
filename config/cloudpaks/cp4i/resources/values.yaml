@@ -1,0 +1,10 @@
+---
+serviceaccount:
+  argocd_application_controller: argocd-cluster-argocd-application-controller
+metadata:
+  argocd_namespace: openshift-gitops
+storageclass:
+  rwo:
+    effective: ibmc-file-gold-gid
+  rwx:
+    effective: ibmc-file-gold-gid

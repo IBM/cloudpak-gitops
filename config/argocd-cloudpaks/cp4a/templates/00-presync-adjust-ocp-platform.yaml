@@ -1,0 +1,55 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: cp4a-adjust-ocp-platform
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+  namespace: openshift-gitops
+spec:
+  template:
+    spec:
+      containers:
+        - name: config
+          image: quay.io/openshift/origin-cli:latest
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "250m"
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
+          env:
+            - name: ARGOCD_APP_NAME
+              value: cp4a-app
+            - name: ARGOCD_NAMESPACE
+              value: openshift-gitops
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -eo pipefail
+              set -x
+              # https://www.ibm.com/docs/en/cloud-paks/cp-biz-automation/21.0.x?topic=deployment-installing-capabilities-in-operator-hub
+              platform=$(oc get Infrastructure cluster  -o jsonpath={.status.platform})
+              if [ "${platform}" != "IBMCloud" ]; then
+                  helm_params=$(oc get Application "${ARGOCD_APP_NAME}" --namespace "${ARGOCD_NAMESPACE}" -o yaml -o jsonpath={.spec.source.helm.parameters})
+                  if [[ ! ${helm_params} == *OCP* ]]; then
+                      oc patch Application "${ARGOCD_APP_NAME}" \
+                          --namespace "${ARGOCD_NAMESPACE}" \
+                          -o yaml \
+                          --type=json \
+                          -p "[{\"op\":\"add\", \"path\":\"/spec/source/helm/parameters/0\", \"value\": {\"forceString\": true, \"name\": \"spec.shared_configuration.sc_deployment_platform\", \"value\": \"OCP\"}} ]" \
+                      && echo "INFO: Patched CR ${ARGOCD_APP_NAME}." \
+                      || echo "ERROR: Failed to patch application ${ARGOCD_APP_NAME}."
+                  else
+                      echo "INFO: Application ${ARGOCD_APP_NAME} was already patched."
+                  fi
+                  echo "INFO: Application ${ARGOCD_APP_NAME} current helm parameters:"
+                  oc get Application "${ARGOCD_APP_NAME}" \
+                        --namespace "${ARGOCD_NAMESPACE}" \
+                        -o jsonpath={.spec.source.helm.parameters}
+              fi
+      restartPolicy: Never
+      serviceAccountName: {{.Values.serviceaccount.argocd_application_controller}}
+  backoffLimit: 2

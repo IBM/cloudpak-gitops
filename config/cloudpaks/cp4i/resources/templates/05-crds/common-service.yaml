@@ -1,0 +1,38 @@
+---
+# https://github.ibm.com/IBMPrivateCloud/roadmap/issues/48099
+apiVersion: operator.ibm.com/v3
+kind: CommonService
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: "209"
+  creationTimestamp: null
+  name: common-service
+  namespace: ibm-common-services
+spec:
+  size: small
+  storageClass: {{.Values.storageclass.rwx.effective}}
+  services:
+    - name: ibm-cert-manager-operator
+      spec:
+        certManager:
+          certManagerCAInjector:
+            resources:
+              limits:
+                cpu: 100m
+                memory: 512Mi
+              requests:
+                cpu: 50m
+                memory: 256Mi
+    # https://github.ibm.com/cloudpakbringup/cpbringup/issues/546
+    # https://www.ibm.com/docs/en/cpfs?topic=templates-linux-x86-64-clusters
+    - name: ibm-platform-api-operator
+      spec:
+        platformApi:
+          platformApi:
+            resources:
+              limits:
+                cpu: 200m
+                memory: 512Mi
+              requests:
+                cpu: 50m
+                memory: 128Mi

@@ -1,0 +1,4 @@
+---
+metadata:
+  argocd_namespace: openshift-gitops
+  individual_namespace: cp4i
