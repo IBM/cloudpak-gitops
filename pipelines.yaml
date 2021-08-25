@@ -1,0 +1,32 @@
+config:
+  argocd:
+    namespace: openshift-gitops
+  git:
+    drivers:
+      github.ibm.com: github
+  pipelines:
+    name: cicd
+environments:
+- apps:
+  - name: app-gitops-service
+    services:
+    - name: gitops-service
+      pipelines:
+        integration:
+          bindings:
+          - dev-app-gitops-service-gitops-service-binding
+          - github-push-binding
+      source_url: https://github.com/nastacio/mq-dev-patterns.git
+      webhook:
+        secret:
+          name: webhook-secret-dev-gitops-service
+          namespace: cicd
+  name: dev
+  pipelines:
+    integration:
+      bindings:
+      - github-push-binding
+      template: app-ci-template
+- name: stage
+gitops_url: https://github.ibm.com/cloudpakbringup/gitops.git
+version: 1

@@ -1,0 +1,73 @@
+---
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  creationTimestamp: null
+  name: app-ci-pipeline
+  namespace: cicd
+  annotations:
+    argocd.argoproj.io/sync-wave: "30"
+spec:
+  params:
+    - name: REPO
+      type: string
+    - name: COMMIT_SHA
+      type: string
+    - name: TLSVERIFY
+      type: string
+    - name: BUILD_EXTRA_ARGS
+      type: string
+    - name: IMAGE
+      type: string
+    - name: DOCKERFILE
+      type: string
+      default: ./Dockerfile
+    - name: CONTEXT
+      type: string
+      default: .
+    - name: GIT_REF
+      type: string
+    - name: COMMIT_DATE
+      type: string
+    - name: COMMIT_AUTHOR
+      type: string
+    - name: COMMIT_MESSAGE
+      type: string
+    - name: GIT_REPO
+      type: string
+  tasks:
+    - name: clone-source
+      params:
+        - name: url
+          value: $(params.GIT_REPO)
+        - name: revision
+          value: $(params.GIT_REF)
+      taskRef:
+        kind: ClusterTask
+        name: git-clone
+      workspaces:
+        - name: output
+          workspace: shared-data
+    - name: build-image
+      params:
+        - name: DOCKERFILE
+          value: $(params.DOCKERFILE)
+        - name: CONTEXT
+          value: $(params.CONTEXT)
+        - name: TLSVERIFY
+          value: $(params.TLSVERIFY)
+        - name: BUILD_EXTRA_ARGS
+          value: --label=io.openshift.build.commit.author='$(params.COMMIT_AUTHOR)' --label=io.openshift.build.commit.date='$(params.COMMIT_DATE)' --label=io.openshift.build.commit.id='$(params.COMMIT_SHA)' --label=io.openshift.build.commit.message='$(params.COMMIT_MESSAGE)' --label=io.openshift.build.commit.ref='$(params.GIT_REF)' --label=my.org.label=dev
+        - name: IMAGE
+          value: $(params.IMAGE)
+      runAfter:
+        - clone-source
+      taskRef:
+        kind: ClusterTask
+        name: buildah
+      workspaces:
+        - name: source
+          workspace: shared-data
+  workspaces:
+    - description: This workspace will receive the cloned git repo.
+      name: shared-data

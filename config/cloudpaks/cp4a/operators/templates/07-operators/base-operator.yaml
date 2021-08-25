@@ -1,0 +1,16 @@
+---
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: ibm-cp4a-operator
+  creationTimestamp: null
+  namespace: {{.Values.argocd_app_namespace}}
+  annotations:
+    argocd.argoproj.io/sync-wave: "110"
+spec:
+  channel: v21.2
+  installPlanApproval: Automatic
+  name: ibm-cp4a-operator
+  source: ibm-operator-catalog
+  sourceNamespace: openshift-marketplace
+  startingCSV: ibm-cp4a-operator.v21.2.2

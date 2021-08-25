@@ -1,0 +1,51 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  creationTimestamp: null
+  name: cp-shared-app
+  namespace: openshift-gitops
+  annotations:
+    argocd.argoproj.io/sync-wave: "100"
+spec:
+  destination:
+    namespace: ibm-cloudpaks
+    server: https://kubernetes.default.svc
+  ignoreDifferences:
+    - group: argoproj.io
+      jsonPointers:
+        - /status
+      kind: Application
+    - group: route.openshift.io
+      jsonPointers:
+        - /spec/host
+      kind: Route
+    - group: bitnami.com
+      jsonPointers:
+        - /status
+      kind: SealedSecret
+  project: default
+  source:
+    helm:
+      parameters:
+        - name: argocd_app_name
+          value: ${ARGOCD_APP_NAME}
+        - name: argocd_app_namespace
+          value: ${ARGOCD_APP_NAMESPACE}
+    path: config/argocd-cloudpaks/cp-shared
+    repoURL: https://github.ibm.com/cloudpakbringup/gitops.git
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+status:
+  health: {}
+  summary: {}
+  sync:
+    comparedTo:
+      destination: {}
+      source:
+        repoURL: ""
+    status: ""

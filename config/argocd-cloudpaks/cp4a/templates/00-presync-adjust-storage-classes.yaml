@@ -1,0 +1,106 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: cp4a-storage-classes
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+  namespace: openshift-gitops
+spec:
+  template:
+    spec:
+      containers:
+        - name: config
+          image: quay.io/openshift/origin-cli:latest
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "250m"
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
+          env:
+            - name: ARGOCD_APP_NAME
+              value: cp4a-app
+            - name: ARGOCD_NAMESPACE
+              value: openshift-gitops
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -eo pipefail
+              set -x
+              api_url=$(oc get Infrastructure cluster  -o jsonpath={.status.apiServerURL})
+
+              storage_class=""
+              if [[ "${api_url}" == *fyre.ibm.com* ]]; then
+                 storage_class="{{.Values.storageclass.fyre}}"
+              else
+                platform=$(oc get Infrastructure cluster  -o jsonpath={.status.platform})
+                if [ "${platform}" == "AWS" ]; then
+                  storage_class="{{.Values.storageclass.aws}}"
+                elif [ "${platform}" == "IBMCloud" ]; then
+                  vpc_class=$(oc get StorageClass | grep -c "ibmc-vpc" || result=0)
+                  if [ ${vpc_class} -gt 0 ]; then
+                      storage_class="{{.Values.storageclass.roksgen2}}"
+                  fi
+                fi
+              fi
+              if [ -z "${storage_class}" ]; then
+                exit
+              fi
+
+              app_patch=/tmp/patch.json
+              cat<<EOF > "${app_patch}"
+              [
+                {
+                  "op": "add",
+                  "path": "/spec/source/helm/parameters/0",
+                  "value": {
+                    "forceString": true,
+                    "name": "storageclass.gold",
+                    "value": "${storage_class}"
+                  }
+                },
+                {
+                  "op": "add",
+                  "path": "/spec/source/helm/parameters/0",
+                  "value": {
+                    "forceString": true,
+                    "name": "storageclass.silver",
+                    "value": "${storage_class}"
+                  }
+                },
+                {
+                  "op": "add",
+                  "path": "/spec/source/helm/parameters/0",
+                  "value": {
+                    "forceString": true,
+                    "name": "storageclass.bronze",
+                    "value": "${storage_class}"
+                  }
+                }
+              ]
+              EOF
+
+              echo "INFO: Patching application ${ARGOCD_APP_NAME}."
+              helm_params=$(oc get Application "${ARGOCD_APP_NAME}" --namespace "${ARGOCD_NAMESPACE}" -o yaml -o jsonpath={.spec.source.helm.parameters})
+              if [[ ! ${helm_params} == *${storage_class}* ]]; then
+                  oc patch Application "${ARGOCD_APP_NAME}" \
+                      --namespace "${ARGOCD_NAMESPACE}" \
+                      -o yaml \
+                      --type=json \
+                      --patch-file "${app_patch}" \
+                  && echo "INFO: Patched application ${ARGOCD_APP_NAME}." \
+                  || echo "ERROR: Failed to patch application ${ARGOCD_APP_NAME}."
+              else
+                  echo "INFO: Application ${ARGOCD_APP_NAME} was already patched."
+              fi
+              echo "INFO: Application ${ARGOCD_APP_NAME} current helm parameters:"
+              oc get Application "${ARGOCD_APP_NAME}" \
+                    --namespace "${ARGOCD_NAMESPACE}" \
+                    -o jsonpath={.spec.source.helm.parameters}
+
+      restartPolicy: Never
+      serviceAccountName: {{.Values.serviceaccount.argocd_application_controller}}
+  backoffLimit: 4

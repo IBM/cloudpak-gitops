@@ -1,0 +1,64 @@
+# https://www.ibm.com/docs/en/cloud-paks/cp-waiops/3.1.1?topic=installing-preparing-install-cloud-pak#nwk_policy
+#
+# Some Red Hat OpenShift clusters have additional network policies configured to secure pod communication traffic,
+# which can block external traffic and communication between namespaces. Extra configuration is then required to
+# allow external traffic to reach the routes.
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: configure-network-policy
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+  namespace: openshift-gitops
+spec:
+  template:
+    spec:
+      containers:
+        - name: config
+          image: quay.io/openshift/origin-cli:latest
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "250m"
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -eo pipefail
+              set -x
+
+              default_policy=$(oc get namespace default -o jsonpath={.metadata.labels.'network\.openshift\.io/policy-group'}) \
+              || {
+                echo "ERROR: Unable to get default ingress policy ."
+                exit 1
+              }
+              if [ "${default_policy}" == "ingress" ]; then
+                echo "INFO: Default network policy is already \"ingress\"."
+                exit
+              else
+                strategy=$(oc get ingresscontroller default \
+                  -n openshift-ingress-operator \
+                  -o jsonpath={.status.endpointPublishingStrategy.type}) \
+                  || {
+                    echo "ERROR: Getting ingress controller strategy failed."
+                    exit 1
+                  }
+                if [ "${strategy}" == "HostNetwork" ]; then
+                  oc patch namespace default \
+                    --type=json \
+                    -p '[{"op":"add","path":"/metadata/labels","value":{"network.openshift.io/policy-group":"ingress"}}]' \
+                  && echo "INFO: Default network policy set to \"ingress\"." \
+                  || {
+                    echo "ERROR: Patching network policy labels failed."
+                    exit 1
+                  }
+                fi
+              fi
+
+      restartPolicy: Never
+      serviceAccountName: {{.Values.serviceaccount.argocd_application_controller}}
+  backoffLimit: 1
