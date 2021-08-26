@@ -14,7 +14,7 @@ spec:
   project: default
   source:
     path: environments/stage/env/overlays
-    repoURL: https://github.ibm.com/cloudpakbringup/gitops.git
+    repoURL: https://github.com/IBM/cloudpak-gitops.git
   syncPolicy:
     automated:
       prune: true

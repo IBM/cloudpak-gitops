@@ -19,7 +19,7 @@ spec:
   project: default
   source:
     path: config/cloudpaks/cp-shared/operators
-    repoURL: https://github.ibm.com/cloudpakbringup/gitops.git
+    repoURL: https://github.com/IBM/cloudpak-gitops.git
   syncPolicy:
     automated:
       prune: true
