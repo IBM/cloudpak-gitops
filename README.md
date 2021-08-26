@@ -9,7 +9,9 @@
   * [Special note about global pull secrets on ROKS](#special-note-about-global-pull-secrets-on-roks)
   * [Installing the Red Hat OpenShift GitOps operator](#installing-the-red-hat-openshift-gitops-operator)
   * [Obtaining your entitlement key](#obtaining-your-entitlement-key)
-- [Adding Cloud Pak GitOps Applications to your GitOps server](#adding-cloud-pak-gitops-applications-to-your-gitops-server)
+- [Adding Cloud Pak GitOps Application objects to your GitOps server](#adding-cloud-pak-gitops-application-objects-to-your-gitops-server)
+  * [Using the OCP console](#using-the-ocp-console)
+  * [Using a terminal](#using-a-terminal)
 
 ## Overview
 
@@ -57,7 +59,7 @@ You can perform the reloading or replacement of workers directly from the cluste
     docker login cp.icr.io --username cp --password entitlement_key
     ```
 
-## Adding Cloud Pak GitOps Application to your GitOps server
+## Adding Cloud Pak GitOps Application objects to your GitOps server
 
 The instructions in this section assume you have administrative privileges to the cluster.
 
@@ -95,6 +97,11 @@ After completing the list of activities listed in the Prerequisites section, you
    - Scroll down to "Sync Policy" and select "Enable Auto-Sync."
    - Leave "Prune Resources" disabled
    - Enable "Self Heal" (this is required for some synchronizations where the first pass grants extra permissions to the Argo CD service account and the subsequent passes succeed with the extra permissions)
+1. Configure the [custom resource health](https://argoproj.github.io/argo-cd/operator-manual/health/) checkers in the Argo CD server:
+   - In the Administrator perspective, navigate to "Administration -> CustomResourceDefinitions", locate the "ArgoCD" definition
+   - Select the "Instances" tab. Click on the instance named either `argocd-cluster` (OCP 4.6) or `openshift-gitops` (OCP 4.7 and later.)
+   - Copy-paste the `resourceCustomizations` section of the file descriptors/resources/argocd-resource-health-patch.yaml into the `spec` section of the object instance.
+   - Click "Save"
 
 ### Using a terminal
 
@@ -108,28 +115,57 @@ After completing the list of activities listed in the Prerequisites section, you
 
    If you do not have the CLI installed, follow [these instructions](https://docs.openshift.com/container-platform/4.7/cli_reference/openshift_cli/getting-started-cli.html).
 1. [Login to the OpenShift CLI](https://docs.openshift.com/container-platform/4.7/cli_reference/openshift_cli/getting-started-cli.html#cli-logging-in_cli-developer-commands)
+1. Configure the [custom resource health](https://argoproj.github.io/argo-cd/operator-manual/health/) checkers in the Argo CD server:
+   Using OCP 4.6:
+   ```sh
+   oc patch ArgoCD/argocd-cluster \
+            --namespace openshift-gitops \
+            --type merge \
+            --patch-file descriptors/resources/argocd-resource-health-patch.yaml
+   ```
+   Using OCP 4.7 and later:
+   ```sh
+   oc patch ArgoCD/openshift-gitops \
+            --namespace openshift-gitops \
+            --type merge \
+            --patch-file descriptors/resources/argocd-resource-health-patch.yaml
+   ```
 1. [Install the Argo CD CLI](https://argoproj.github.io/argo-cd/cli_installation/)
 1. Login to the Argo CD server
-   Using OCP 4.6
+   Using OCP 4.6:
    ```sh
     argo_route=argocd-cluster-server
     argo_secret=argocd-cluster-cluster
     sa_account=argocd-cluster-argocd-application-controller
 
-    argo_pwd=$(oc get secret ${argo_secret} -n openshift-gitops -ojsonpath='{.data.admin\.password}' | base64 -d ; echo ) \
-    && argo_url=$(oc get route ${argo_route} -n openshift-gitops -ojsonpath='{.spec.host}') 
-    && argocd login "${argo_url}" --username admin --password "${argo_pwd}" --insecure
+    argo_pwd=$(oc get secret ${argo_secret} \
+                    -n openshift-gitops 
+                    -ojsonpath='{.data.admin\.password}' | base64 -d ; echo ) \
+    && argo_url=$(oc get route ${argo_route} \
+                    -n openshift-gitops \
+                    -ojsonpath='{.spec.host}') 
+    && argocd login "${argo_url}" \
+                        --username admin \
+                        --password "${argo_pwd}" \
+                        --insecure
    ```
 
-   Using OCP 4.7 and later (the object names change a little from OCP 4.6)
+   Using OCP 4.7 and later (the object names change a little from OCP 4.6:)
    ```sh
     argo_route=openshift-gitops-server
     argo_secret=openshift-gitops-cluster
     sa_account=openshift-gitops-argocd-application-controller
 
-    argo_pwd=$(oc get secret ${argo_secret} -n openshift-gitops -ojsonpath='{.data.admin\.password}' | base64 -d ; echo ) \
-    && argo_url=$(oc get route ${argo_route} -n openshift-gitops -ojsonpath='{.spec.host}') 
-    && argocd login "${argo_url}" --username admin --password "${argo_pwd}" --insecure
+    argo_pwd=$(oc get secret ${argo_secret} \
+                        -n openshift-gitops \
+                        -ojsonpath='{.data.admin\.password}' | base64 -d ; echo ) \
+    && argo_url=$(oc get route ${argo_route} \
+                        -n openshift-gitops \
+                        -ojsonpath='{.spec.host}') 
+    && argocd login "${argo_url}" \
+                        --username admin \
+                        --password "${argo_pwd}" \
+                        --insecure
    ```
 1. Add the `cp-shared` application. (this step assumes you still have shell variables assigned from previous steps) :
    ```sh
