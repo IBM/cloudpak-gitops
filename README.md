@@ -19,7 +19,7 @@ You may decide to include one or more of these `Application` objects to the targ
 
 ### IBM Cloud Paks
 
-[IBM Cloud® Paks](https://www.ibm.com/cloud/paks) helps organizations build, modernize, and manage applications securely across any cloud.
+[IBM Cloud® Paks](https://www.ibm.com/cloud/paks) help organizations build, modernize, and manage applications securely across any cloud.
 
 The supported deployment mechanisms for Cloud Paks are documented in their respective [documentation pages](https://www.ibm.com/docs/en/cloud-paks) and typically included a UI-based deployment through the Operator Hub page or, in some cases, scripted alternatives based on command-line interfaces.
 
@@ -30,17 +30,17 @@ GitOps is a declarative way to implement continuous deployment for cloud-native 
 
 ## Prerequisites
 
-- OpenShift Container Platform 4.6 or later version
-- Storage classes supporting both [RWO and RWX storage](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes), such as [OpenShift Container Storage](https://docs.openshift.com/container-platform/4.7/storage/persistent_storage/persistent-storage-ocs.html). If you have OpenShift Container Storage installed in the container, you will have then.
+- An OpenShift Container Platform cluster, version 4.6 or later.
+- Cluster storage with storage classes supporting both [RWO and RWX storage](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes), such as [OpenShift Container Storage](https://docs.openshift.com/container-platform/4.7/storage/persistent_storage/persistent-storage-ocs.html). If you installed OpenShift Container Storage installed in the cluster, it will have those storage classes.
 - [Install the OpenShift GitOps operator](#installing-the-red-hat-openshift-gitops-operator)
 - [Obtain an entitlement key to the IBM Entitled Registry](#obtaining-your-entitlement-key)
 - [Update the OCP global pull secret](https://docs.openshift.com/container-platform/4.7/openshift_images/managing_images/using-image-pull-secrets) with an entitlement key to the IBM Entitled Registry
 
 ### Special note about global pull secrets on ROKS
 
-Updating the OCP global pull secret typically triggers the staggered restart of each node in the cluster. However, the [Red Hat OpenShift on IBM Cloud](https://www.ibm.com/cloud/openshift) platform required an additional step: you will need to reload all workers in the case of ROKS classic clusters and replace all workers in the case of ROKS VPC Gen2 clusters.
+Updating the OCP global pull secret triggers the staggered restart of each node in the cluster. However, the [Red Hat OpenShift on IBM Cloud](https://www.ibm.com/cloud/openshift) platform requires an additional step: you need to either reload all workers (in the case of ROKS classic clusters) and replace all workers (in the case of ROKS VPC Gen2 clusters.)
 
-You can perform the reloading or replacement of workers directly from the cluster page in the IBM Cloud console or the command-line interface using the instructions highlighted [here](https://cloud.ibm.com/docs/openshift?topic=openshift-registry&_ga=2.262606922.775805413.1629911830-822975074.1629149367#cluster_global_pull_secret).
+You can perform the reloading or replacement of workers directly from the cluster page in the IBM Cloud console or use a command-line interface using the instructions highlighted [here](https://cloud.ibm.com/docs/openshift?topic=openshift-registry&_ga=2.262606922.775805413.1629911830-822975074.1629149367#cluster_global_pull_secret).
 
 ### Installing the Red Hat OpenShift GitOps operator
 
@@ -66,10 +66,10 @@ After completing the list of activities listed in the Prerequisites section, you
 ### Using the OCP console
 
 1. Launch the Argo CD console: Click on the grid-like icon in the upper-left section of the screen, where you should click on either "ArgoCD Console" (for OCP 4.6) or "Cluster Argo CD" (for OCP 4.7 and later)
-1. The default user is `admin .` The admin password is located in a secret in the `openshift-gitops` namespace.
-   - The secret name is either `argocd-cluster-cluster` (for OCP 4.6) or `openshift-gitops-cluster` (for OCP 4.7 and later)
-   - Switch to the "openshift-gitops" project, locate the secret in the "Workloads -> Secrets" page, scroll to the bottom, and click on "Reveal Values" to see the value of the `admin.password` field.
-   - Click "Sign In," and you should see the Argo CD console
+1. The Argo CD login screen will prompt you for an admin user and password. The default user is `admin .` The admin password is located in a secret in the `openshift-gitops` namespace.
+   - The secret name is either `argocd-cluster-cluster` (for OCP 4.6) or `openshift-gitops-cluster` (for OCP 4.7 and later.)
+   - Switch to the `openshift-gitops` project, locate the secret in the "Workloads -> Secrets" selections in the left-navigation tree of the Administrator view, scroll to the bottom, and click on "Reveal Values" to retrieve the value of the `admin.password` field.
+   - Type in the user and password listed in the previous steps, and then click the "Sign In" button.
 1. Once logged to the Argo CD console, click on the "New App+" button in the upper left of the Argo CD console and fill out the form with values matching each Cloud Pak, according to the table below:
     | Cloud Pak | Application Name | Path | Namespace |
     | --------- | ---------------- | ---- | --------- |
