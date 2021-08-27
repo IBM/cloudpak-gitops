@@ -33,8 +33,10 @@ spec:
           value: ${ARGOCD_APP_NAME}
         - name: argocd_app_namespace
           value: ${ARGOCD_APP_NAMESPACE}
+        - name: repoURL
+          value: ${ARGOCD_APP_SOURCE_REPO_URL}
     path: config/argocd-cloudpaks/cp-shared
-    repoURL: https://github.com/IBM/cloudpak-gitops.git
+    repoURL: {{.Values.repoURL}}
   syncPolicy:
     automated:
       prune: true
