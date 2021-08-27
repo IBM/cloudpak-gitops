@@ -43,8 +43,10 @@ spec:
           value: {{.Values.spec.shared_configuration.sc_deployment_platform}}
         - name: serviceaccount.argocd_application_controller
           value: {{.Values.serviceaccount.argocd_application_controller}}
+        - name: repoURL
+          value: ${ARGOCD_APP_SOURCE_REPO_URL}
     path: config/cloudpaks/cp4a/resources
-    repoURL: https://github.com/IBM/cloudpak-gitops.git
+    repoURL: {{.Values.repoURL}}
   syncPolicy: {}
 status:
   health: {}
