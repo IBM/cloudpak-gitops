@@ -15,6 +15,7 @@ spec:
     - group: argoproj.io
       jsonPointers:
         - /status
+        - /spec/source/repoURL
       kind: Application
   project: default
   source:
