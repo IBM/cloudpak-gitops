@@ -18,6 +18,10 @@
 
   The applications were tested on both managed and self-managed deployments.
 
+- Adequate worker node capacity in the cluster for the Cloud Paks to be installed.
+
+  Refer to the [Cloud Pak documentation](https://www.ibm.com/docs/en/cloud-paks) to determine the required capacity for the cluster.
+
 - Cluster storage configured with storage classes supporting both [RWO and RWX storage](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes).
 
   The applications were tested with [OpenShift Container Storage](https://docs.openshift.com/container-platform/4.7/storage/persistent_storage/persistent-storage-ocs.html), [Rook Ceph](https://github.com/rook/rook), and the built-in file storage in ROKS classic clusters.
@@ -198,11 +202,11 @@ After completing the list of activities listed in the previous sections, you hav
     sa_account=argocd-cluster-argocd-application-controller
 
     argo_pwd=$(oc get secret ${argo_secret} \
-                  -n openshift-gitops 
+                  -n openshift-gitops \
                   -o jsonpath='{.data.admin\.password}' | base64 -d ; echo ) \
     && argo_url=$(oc get route ${argo_route} \
                     -n openshift-gitops \
-                    -o jsonpath='{.spec.host}') 
+                    -o jsonpath='{.spec.host}') \
     && argocd login "${argo_url}" \
          --username admin \
          --password "${argo_pwd}" \
@@ -221,7 +225,7 @@ After completing the list of activities listed in the previous sections, you hav
                   -o jsonpath='{.data.admin\.password}' | base64 -d ; echo ) \
     && argo_url=$(oc get route ${argo_route} \
                      -n openshift-gitops \
-                     -o jsonpath='{.spec.host}') 
+                     -o jsonpath='{.spec.host}') \
     && argocd login "${argo_url}" \
          --username admin \
          --password "${argo_pwd}" \
