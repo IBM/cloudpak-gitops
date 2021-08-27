@@ -33,6 +33,8 @@ spec:
           value: ${ARGOCD_APP_NAME}
         - name: argocd_app_namespace
           value: ${ARGOCD_APP_NAMESPACE}
+        - name: repoURL
+          value: ${ARGOCD_APP_SOURCE_REPO_URL}
     path: config/argocd-cloudpaks/cp-shared
     repoURL: {{.Values.repoURL}}
   syncPolicy:

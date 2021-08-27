@@ -19,6 +19,10 @@ spec:
       kind: Application
   project: default
   source:
+    helm:
+      parameters:
+        - name: repoURL
+          value: ${ARGOCD_APP_SOURCE_REPO_URL}
     path: config/cloudpaks/cp-shared/operators
     repoURL: {{.Values.repoURL}}
   syncPolicy:
