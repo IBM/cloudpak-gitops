@@ -1,0 +1,24 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: "200"
+  name: mqsc-ini-cases
+  namespace: {{.Values.argocd_app_namespace}}
+data:
+  case1.mqsc: |
+    DEFINE QLOCAL('DEV.CASE_QUEUE.1') REPLACE
+    DEFINE QLOCAL('DEV.CASE_QUEUE.2') REPLACE
+  case2.mqsc: |
+    DEFINE QLOCAL('DEV.DEAD.LETTER.QUEUE') REPLACE
+  case3.mqsc: |
+    DEFINE CHANNEL('MQ.SVRCONN') +
+      CHLTYPE(SVRCONN) +
+      DESCR('MQ server conn channel for admin conns') +
+      REPLACE
+  case4.mqsc: |
+    ALTER QMGR CONNAUTH('') CHLAUTH(DISABLED)
+  cases.ini: |
+    Channels:
+    MQIBindType=FASTPATH

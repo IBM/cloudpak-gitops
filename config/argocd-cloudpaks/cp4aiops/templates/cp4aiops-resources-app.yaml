@@ -1,0 +1,49 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  creationTimestamp: null
+  name: cp4aiops-resources
+  namespace: openshift-gitops
+  annotations:
+    argocd.argoproj.io/sync-wave: "100"
+spec:
+  destination:
+    namespace: {{.Values.metadata.argocd_app_namespace}}
+    server: https://kubernetes.default.svc
+  ignoreDifferences:
+    - group: argoproj.io
+      jsonPointers:
+        - /status
+        - /spec/source/repoURL
+      kind: Application
+  project: default
+  source:
+    helm:
+      parameters:
+        - name: argocd_app_name
+          value: ${ARGOCD_APP_NAME}
+        - name: argocd_app_namespace
+          value: ${ARGOCD_APP_NAMESPACE}
+        - name: metadata.argocd_app_namespace
+          value: {{.Values.metadata.argocd_app_namespace}}
+        - name: serviceaccount.argocd_application_controller
+          value: {{.Values.serviceaccount.argocd_application_controller}}
+        - name: storageclass.rwo.effective
+          value: {{.Values.storageclass.rwo.effective}}
+        - name: storageclass.rwx.effective
+          value: {{.Values.storageclass.rwx.effective}}
+        - name: repoURL
+          value: ${ARGOCD_APP_SOURCE_REPO_URL}
+    path: config/cloudpaks/cp4aiops/resources
+    repoURL: {{.Values.repoURL}}
+  syncPolicy: {}
+status:
+  health: {}
+  summary: {}
+  sync:
+    comparedTo:
+      destination: {}
+      source:
+        repoURL: ""
+    status: ""

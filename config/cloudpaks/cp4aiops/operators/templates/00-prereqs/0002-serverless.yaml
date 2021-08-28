@@ -1,0 +1,20 @@
+# https://docs.openshift.com/container-platform/4.6/serverless/admin_guide/install-serverless-operator.html
+---
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+  creationTimestamp: null
+  generation: 1
+  labels:
+    operators.coreos.com/serverless-operator.openshift-serverless: ""
+  name: serverless-operator
+  namespace: openshift-serverless
+spec:
+  channel: stable
+  installPlanApproval: Automatic
+  name: serverless-operator
+  source: redhat-operators
+  sourceNamespace: openshift-marketplace
+  startingCSV: serverless-operator.v1.16.0

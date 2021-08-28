@@ -1,0 +1,310 @@
+---
+apiVersion: icp4a.ibm.com/v1
+kind: ICP4ACluster
+metadata:
+  name: icp4adeploy
+  labels:
+    app.kubernetes.io/instance: ibm-dba
+    app.kubernetes.io/managed-by: ibm-dba
+    app.kubernetes.io/name: ibm-dba
+  annotations:
+    argocd.argoproj.io/sync-wave: "201"
+  namespace: {{.Values.argocd_app_namespace}}
+spec:
+  olm_ent_workflow: false
+  olm_ent_option_bai: false
+  olm_demo_application: false
+  olm_deployment_type: demo
+  olm_ent_decisions_ads: false
+  olm_ent_option_adp:
+    cmis: false
+    css: false
+    document_processing_runtime: false
+    es: false
+    tm: false
+  olm_ibm_license: true
+  initialize_configuration:
+    ic_ldap_creation:
+      ic_ldap_admins_groups_name:
+        - ''
+    ic_obj_store_creation:
+      object_stores:
+        - oc_cpe_obj_store_conn:
+            dc_os_datasource_name: FNOS1DS
+            dc_os_xa_datasource_name: FNOS1DSXA
+          oc_cpe_obj_store_display_name: OS1
+          oc_cpe_obj_store_symb_name: OS1
+        - oc_cpe_obj_store_admin_user_groups:
+            - ''
+            - ''
+          oc_cpe_obj_store_conn:
+            dc_os_datasource_name: DEVOS1DS
+            dc_os_xa_datasource_name: DEVOS1DSXA
+          oc_cpe_obj_store_display_name: DEVOS1
+          oc_cpe_obj_store_symb_name: DEVOS1
+        - oc_cpe_obj_store_conn:
+            dc_os_datasource_name: BAWDOCS
+            dc_os_xa_datasource_name: BAWDOCSXA
+          oc_cpe_obj_store_display_name: BAWDOCS
+          oc_cpe_obj_store_symb_name: BAWDOCS
+        - oc_cpe_obj_store_conn:
+            dc_os_datasource_name: BAWDOS
+            dc_os_xa_datasource_name: BAWDOSXA
+          oc_cpe_obj_store_display_name: BAWDOS
+          oc_cpe_obj_store_symb_name: BAWDOS
+        - oc_cpe_obj_store_conn:
+            dc_os_datasource_name: BAWTOS
+            dc_os_xa_datasource_name: BAWTOSXA
+          oc_cpe_obj_store_display_name: BAWTOS
+          oc_cpe_obj_store_enable_workflow: true
+          oc_cpe_obj_store_symb_name: BAWTOS
+          oc_cpe_obj_store_workflow_admin_group: ''
+          oc_cpe_obj_store_workflow_config_group: ''
+          oc_cpe_obj_store_workflow_data_tbl_space: ''
+          oc_cpe_obj_store_workflow_pe_conn_point_name: ''
+        - oc_cpe_obj_store_conn:
+            dc_os_datasource_name: AWSINS1DOCS
+            dc_os_xa_datasource_name: AWSINS1DOCSXA
+          oc_cpe_obj_store_display_name: AWSINS1DOCS
+          oc_cpe_obj_store_symb_name: AWSINS1DOCS
+  olm_ent_option_application:
+    app_designer: false
+  olm_ent_option_ads:
+    ads_designer: true
+    ads_runtime: true
+  olm_demo_decisions: true
+  olm_demo_document_processing: false
+  olm_demo_workflow: true
+  olm_demo_content: false
+  olm_demo_option_bai: true
+  olm_ent_application: false
+  olm_ent_option_decisions:
+    decisionCenter: false
+    decisionRunner: false
+    decisionServerRuntime: false
+    ums: false
+  olm_demo_option_adp:
+    cmis: false
+    css: false
+    tm: false
+  olm_ent_option_content:
+    cmis: false
+    css: false
+    es: false
+    iccsap: false
+    ier: false
+    tm: false
+    ums: false
+  olm_ent_decisions: false
+  olm_ent_document_processing: false
+  olm_ent_content: false
+  appVersion: 21.0.2
+  olm_demo_decisions_ads: false
+  datasource_configuration:
+    dc_ca_datasource:
+      tenant_databases: []
+      dc_hadr_retry_interval_for_client_reroute: 15
+      dc_hadr_max_retries_for_client_reroute: 3
+      database_port: ''
+      dc_database_ssl_enabled: true
+      dc_hadr_standby_port: ''
+      database_ip: ''
+      database_name: ''
+      dc_hadr_standby_ip: ''
+      database_servername: ''
+      dc_hadr_validation_timeout: 15
+      dc_hadr_standby_servername: ''
+      dc_database_type: db2
+    dc_ums_datasource:
+      dc_ums_oauth_ssl: true
+      dc_ums_teamserver_host: ''
+      dc_ums_teamserver_name: ''
+      dc_ums_oauth_type: db2
+      dc_ums_teamserver_alternate_hosts: ''
+      dc_ums_teamserver_ssl_secret_name: ''
+      dc_ums_oauth_schema: OAuthDBSchema
+      dc_ums_oauth_port: ''
+      dc_ums_teamserver_ssl: true
+      dc_ums_teamserver_alternate_ports: ''
+      dc_ums_teamserver_driverfiles: ''
+      dc_ums_oauth_host: ''
+      dc_ums_teamserver_type: db2
+      dc_ums_oauth_name: ''
+      dc_ums_oauth_ssl_secret_name: ''
+      dc_ums_teamserver_port: ''
+    database_precheck: true
+    dc_odm_datasource:
+      database_servername: ''
+      dc_common_database_instance_secret: ''
+      dc_common_database_name: ''
+      dc_common_database_port: ''
+      dc_common_ssl_enabled: true
+      dc_database_type: db2
+      dc_ssl_secret_name: ''
+    dc_ssl_enabled: true
+    dc_icn_datasource:
+      database_ssl_secret_name: ''
+      dc_hadr_retry_interval_for_client_reroute: 15
+      dc_hadr_max_retries_for_client_reroute: 3
+      database_port: ''
+      dc_common_icn_datasource_name: ECMClientDS
+      dc_hadr_standby_port: ''
+      database_name: ''
+      database_servername: ''
+      dc_hadr_validation_timeout: 15
+      dc_oracle_icn_jdbc_url: ''
+      dc_hadr_standby_servername: ''
+      dc_database_type: db2
+    olm_dc_os_adp_datasources:
+      - database_name: ''
+        database_port: ''
+        database_servername: ''
+        database_ssl_secret_name: ''
+        dc_common_os_datasource_name: DEVOS1DS
+        dc_common_os_xa_datasource_name: DEVOS1DSXA
+        dc_database_type: db2
+        dc_hadr_max_retries_for_client_reroute: 3
+        dc_hadr_retry_interval_for_client_reroute: 15
+        dc_hadr_standby_port: ''
+        dc_hadr_standby_servername: ''
+        dc_hadr_validation_timeout: 15
+        dc_oracle_os_jdbc_url: ''
+        dc_os_label: devos1
+    olm_dc_os_workflow_datasources:
+      - database_name: ''
+        database_port: ''
+        database_servername: ''
+        database_ssl_secret_name: ''
+        dc_common_os_datasource_name: BAWDOCS
+        dc_common_os_xa_datasource_name: BAWDOCSXA
+        dc_database_type: db2
+        dc_hadr_max_retries_for_client_reroute: 3
+        dc_hadr_retry_interval_for_client_reroute: 15
+        dc_hadr_standby_port: ''
+        dc_hadr_standby_servername: ''
+        dc_hadr_validation_timeout: 15
+        dc_oracle_os_jdbc_url: ''
+        dc_os_label: ''
+      - database_name: ''
+        database_port: ''
+        database_servername: ''
+        database_ssl_secret_name: ''
+        dc_common_os_datasource_name: BAWDOS
+        dc_common_os_xa_datasource_name: BAWDOSXA
+        dc_database_type: db2
+        dc_hadr_max_retries_for_client_reroute: 3
+        dc_hadr_retry_interval_for_client_reroute: 15
+        dc_hadr_standby_port: ''
+        dc_hadr_standby_servername: ''
+        dc_hadr_validation_timeout: 15
+        dc_oracle_os_jdbc_url: ''
+        dc_os_label: ''
+      - database_name: ''
+        database_port: ''
+        database_servername: ''
+        database_ssl_secret_name: ''
+        dc_common_os_datasource_name: AWSINS1DOCS
+        dc_common_os_xa_datasource_name: AWSINS1DOCSXA
+        dc_database_type: db2
+        dc_hadr_max_retries_for_client_reroute: 3
+        dc_hadr_retry_interval_for_client_reroute: 15
+        dc_hadr_standby_port: ''
+        dc_hadr_standby_servername: ''
+        dc_hadr_validation_timeout: 15
+        dc_oracle_os_jdbc_url: ''
+        dc_os_label: ''
+    dc_gcd_datasource:
+      database_ssl_secret_name: ''
+      dc_oracle_gcd_jdbc_url: ''
+      dc_hadr_retry_interval_for_client_reroute: 15
+      dc_hadr_max_retries_for_client_reroute: 3
+      database_port: ''
+      dc_hadr_standby_port: ''
+      database_name: ''
+      database_servername: ''
+      dc_hadr_validation_timeout: 15
+      dc_hadr_standby_servername: ''
+      dc_common_gcd_xa_datasource_name: FNGCDDSXA
+      dc_common_gcd_datasource_name: FNGCDDS
+      dc_database_type: db2
+    olm_dc_os_ae_datasources:
+      - database_name: ''
+        database_port: ''
+        database_servername: ''
+        database_ssl_secret_name: ''
+        dc_common_os_datasource_name: AEOS
+        dc_common_os_xa_datasource_name: AEOSXA
+        dc_database_type: db2
+        dc_hadr_max_retries_for_client_reroute: 3
+        dc_hadr_retry_interval_for_client_reroute: 15
+        dc_hadr_standby_port: ''
+        dc_hadr_standby_servername: ''
+        dc_hadr_validation_timeout: 15
+        dc_oracle_os_jdbc_url: ''
+        dc_os_label: aeos
+    olm_dc_os_content_datasources:
+      - database_name: ''
+        database_port: ''
+        database_servername: ''
+        database_ssl_secret_name: ''
+        dc_common_os_datasource_name: FNOS1DS
+        dc_common_os_xa_datasource_name: FNOS1DSXA
+        dc_database_type: db2
+        dc_hadr_max_retries_for_client_reroute: 3
+        dc_hadr_retry_interval_for_client_reroute: 15
+        dc_hadr_standby_port: ''
+        dc_hadr_standby_servername: ''
+        dc_hadr_validation_timeout: 15
+        dc_oracle_os_jdbc_url: ''
+        dc_os_label: os
+  shared_configuration:
+    trusted_certificate_list: []
+    sc_deployment_baw_license: non-production
+    sc_content_verification: false
+    external_tls_certificate_secret: ''
+    storage_configuration:
+      sc_dynamic_storage_classname: {{.Values.storageclass.gold}}
+      sc_fast_file_storage_classname: {{.Values.storageclass.gold}}
+      sc_medium_file_storage_classname: {{.Values.storageclass.silver}}
+      sc_slow_file_storage_classname: {{.Values.storageclass.bronze}}
+    sc_deployment_hostname_suffix: {{.Values.spec.shared_configuration.sc_deployment_hostname_suffix}}
+    root_ca_secret: icp4a-root-ca
+    sc_content_initialization: false
+    sc_deployment_license: non-production
+    sc_ingress_enable: false
+    sc_ingress_tls_secret_name: ''
+    sc_deployment_platform: {{.Values.spec.shared_configuration.sc_deployment_platform}}
+    sc_deployment_fncm_license: non-production
+    encryption_key_secret: ''
+  olm_demo_option_content:
+    cmis: false
+    css: false
+    iccsap: false
+    ier: false
+    tm: false
+    ums: false
+  olm_ent_option_ae_data_persistence: false
+  ldap_configuration:
+    tds:
+      lc_group_filter: >-
+        (&(cn=%v)(|(objectclass=groupofnames)(objectclass=groupofuniquenames)(objectclass=groupofurls)))
+      lc_user_filter: (&(cn=%v)(objectclass=person))
+    ad:
+      lc_ad_gc_host: ''
+      lc_ad_gc_port: ''
+      lc_group_filter: (&(samAccountName=%v)(objectclass=group))
+      lc_user_filter: (&(samAccountName=%v)(objectClass=user))
+    lc_ldap_user_display_name_attr: sAMAccountName
+    lc_ldap_group_base_dn: ''
+    lc_ldap_base_dn: ''
+    lc_bind_secret: ldap-bind-secret
+    lc_ldap_user_name_attribute: 'user:sAMAccountName'
+    lc_ldap_group_member_id_map: 'memberOf:member'
+    lc_ldap_port: '636'
+    lc_ldap_server: ''
+    lc_ldap_group_membership_search_filter: (&(cn=%v)(objectcategory=group))
+    lc_selected_ldap_type: ''
+    lc_ldap_ssl_secret_name: ''
+    lc_ldap_group_name_attribute: '*:cn'
+    lc_ldap_group_display_name_attr: cn
+    lc_ldap_ssl_enabled: true

@@ -1,0 +1,17 @@
+---
+apiVersion: integration.ibm.com/v1beta1
+kind: PlatformNavigator
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: "210"
+  name: integration-navigator
+  namespace: {{.Values.argocd_app_namespace}}
+spec:
+  license:
+    accept: true
+    license: L-RJON-BZFQU2
+  mqDashboard: true
+  version: 2021.2.1
+  replicas: 1
+  storage:
+    class: {{.Values.storageclass.rwx.effective}}

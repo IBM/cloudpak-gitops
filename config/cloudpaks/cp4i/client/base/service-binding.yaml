@@ -1,0 +1,46 @@
+---
+apiVersion: binding.operators.coreos.com/v1alpha1
+kind: ServiceBinding
+metadata:
+  creationTimestamp: null
+  annotations:
+    argocd.argoproj.io/sync-wave: "300"
+  name: binding-request
+  namespace: dev
+spec:
+  application:
+    labelSelector:
+      matchLabels:
+        app.kubernetes.io/instance: cp4i-client
+    group: apps
+    version: v1
+    resource: deployments
+  bindAsFiles: true
+  mountPath: /config
+  services:
+    - group: mq.ibm.com
+      version: v1beta1
+      kind: QueueManager
+      name: case-queues-1-qmgr
+      id: mqqmgr
+      namespace: ibm-cloudpaks
+    - group: ''
+      version: v1
+      kind: Service
+      name: case-queues-1-qmgr-ibm-mq
+      id: queueservice
+      namespace: ibm-cloudpaks
+  mappings:
+    - name: env.json
+      value: |
+        {
+          "MQ_ENDPOINTS": [{
+            "HOST": "{{.queueservice.metadata.name}}.{{.queueservice.metadata.namespace}}.svc.cluster.local",
+            "PORT": "{{range .queueservice.spec.ports}}{{if eq .name "qmgr"}}{{.port}}{{end}}{{end}}",
+            "CHANNEL": "MQ.SVRCONN",
+            "QMGR": "{{.mqqmgr.spec.queueManager.name}}",
+            "APP_USER": "someuser",
+            "QUEUE_NAME": "DEV.CASE_QUEUE.1",
+            "DYNAMIC_QUEUE_PREFIX": "APP.REPLIES.*"
+          }]
+        }

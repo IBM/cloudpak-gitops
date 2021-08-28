@@ -1,0 +1,19 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: cp4a-shared-log-pvc
+  labels:
+    app.kubernetes.io/instance: ibm-dba
+    app.kubernetes.io/managed-by: ibm-dba
+    app.kubernetes.io/name: ibm-dba
+    release: 21.0.1
+  annotations:
+    argocd.argoproj.io/sync-wave: "60"
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: {{.Values.storageclass.gold}}
+  resources:
+    requests:
+      storage: 100Gi

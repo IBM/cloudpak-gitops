@@ -1,0 +1,12 @@
+# https://docs.openshift.com/container-platform/4.6/serverless/admin_guide/install-serverless-operator.html
+---
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+    olm.providedAPIs: KnativeEventing.v1alpha1.operator.knative.dev,KnativeKafka.v1alpha1.operator.serverless.openshift.io,KnativeServing.v1alpha1.operator.knative.dev
+  creationTimestamp: null
+  name: openshift-serverless-group
+  namespace: openshift-serverless
+spec: {}

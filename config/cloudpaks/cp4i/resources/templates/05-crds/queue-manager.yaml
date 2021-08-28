@@ -1,0 +1,42 @@
+---
+apiVersion: mq.ibm.com/v1beta1
+kind: QueueManager
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: "210"
+  name: case-queues-1-qmgr
+  namespace: {{.Values.argocd_app_namespace}}
+spec:
+  version: 9.2.2.0-r1
+  license:
+    accept: true
+    license: L-RJON-BXUPZ2
+    use: NonProduction
+  web:
+    enabled: true
+  queueManager:
+    name: CaseQueues1
+    mqsc:
+      - configMap:
+          name: mqsc-ini-cases
+          items:
+            - case1.mqsc
+            - case2.mqsc
+            - case3.mqsc
+            - case4.mqsc
+    ini:
+      - configMap:
+          name: mqsc-ini-cases
+          items:
+            - cases.ini
+    storage:
+      queueManager:
+        type: ephemeral
+  template:
+    pod:
+      containers:
+        - env:
+            - name: MQSNOAUT
+              value: 'yes'
+          name: qmgr
+          resources: {}

@@ -1,0 +1,25 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  creationTimestamp: null
+  name: cp4a-cp4a-operator
+  labels:
+    app.kubernetes.io/instance: ibm-dba
+    app.kubernetes.io/managed-by: ibm-dba
+    app.kubernetes.io/name: ibm-dba
+    release: 21.0.1
+  annotations:
+    argocd.argoproj.io/sync-wave: "22"
+roleRef:
+  name: ibm-cp4a-operator
+  # CP4A instructions had the apiVersion: authorization.openshift.io/v1
+  # which sidesteps the need for apiGroup and kind, but Argo 1.8.4 could
+  # not deal with that apiVersion, indicating that the resource was
+  # missing in the cluster even right after applying it.
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+subjects:
+  - kind: ServiceAccount
+    name: ibm-cp4a-operator
+    namespace: {{.Values.argocd_app_namespace}}

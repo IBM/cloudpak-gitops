@@ -1,0 +1,34 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app.kubernetes.io/name: mq-dev-patterns-node
+    app.kubernetes.io/part-of: app-mq-dev-patterns
+  annotations:
+    argocd.argoproj.io/sync-wave: "300"
+  name: mq-dev-patterns-node
+  namespace: dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: mq-dev-patterns-node
+      app.kubernetes.io/part-of: app-mq-dev-patterns
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app.kubernetes.io/name: mq-dev-patterns-node
+        app.kubernetes.io/part-of: app-mq-dev-patterns
+    spec:
+      containers:
+        - image: image-registry.openshift-image-registry.svc:5000/dev/mq-dev-patterns-node:latest
+          imagePullPolicy: Always
+          name: mq-dev-patterns-node
+          ports:
+            - containerPort: 8080
+          resources: {}
+      serviceAccountName: default
