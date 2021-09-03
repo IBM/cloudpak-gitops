@@ -93,16 +93,6 @@ After completing the list of activities listed in the previous sections, you hav
 
 ### Using the OCP console
 
-1. Configure the [custom resource health](https://argoproj.github.io/argo-cd/operator-manual/health/) checkers in the Argo CD server:
-
-   - In the Administrator perspective, navigate to "Administration -> CustomResourceDefinitions", locate the "ArgoCD" definition
-
-   - Select the "Instances" tab. Click on the instance named either `argocd-cluster` (OCP 4.6) or `openshift-gitops` (OCP 4.7 and later.)
-
-   - Copy-paste the `resourceCustomizations` section of the file "descriptors/resources/argocd-resource-health-patch.yaml" into the `spec` section of the object instance.
-
-   - Click "Save" and ignore eventual warnings about the object being managed by other resources.
-
 1. Launch the Argo CD console: Click on the grid-like icon in the upper-left section of the screen, where you should click on either "ArgoCD Console" (for OCP 4.6) or "Cluster Argo CD" (for OCP 4.7 and later.)
 
 1. The Argo CD login screen will prompt you for an admin user and password. The default user is `admin .` The admin password is located in a secret in the `openshift-gitops` namespace.
@@ -113,11 +103,45 @@ After completing the list of activities listed in the previous sections, you hav
 
    - Type in the user and password listed in the previous steps, and then click the "Sign In" button.
 
-1. Once logged to the Argo CD console, click on the "New App+" button in the upper left of the Argo CD console and fill out the form with values matching the Cloud Pak of your choice, according to the table below:
+1. (add Argo app) Once logged to the Argo CD console, click on the "New App+" button in the upper left of the Argo CD console and fill out the form with values matching the Cloud Pak of your choice, according to the table below:
+
+    For all other fields, use the following values:
+
+    | Field | Value |
+    | ----- | ----- |
+    | Application Name | argo-app | 
+    | Path (OCP 4.6) | config/argocd | 
+    | Path (OCP 4.7 and later) | config/argocd-ga | 
+    | Namespace | openshift-gitops | 
+    | Project | default |
+    | Sync policy | Automatic |
+    | Self Heal | true |
+    | Repository URL | https://github.com/IBM/cloudpak-gitops |
+    | Revision | HEAD |
+    | Cluster URL | https://kubernetes.default.svc |
+
+1. (add Cloud Pak Shared app) Click on the "New App+" button again and fill out the form with values matching the Cloud Pak of your choice, according to the table below:
+
+    For all other fields, use the following values:
+
+    | Field | Value |
+    | ----- | ----- |
+    | Application Name | cp-shared-app | 
+    | Path | config/argocd-cloudpaks/cp-shared | 
+    | Namespace | ibm-cloudpaks | 
+    | Project | default |
+    | Sync policy | Automatic |
+    | Self Heal | true |
+    | Repository URL | https://github.com/IBM/cloudpak-gitops |
+    | Revision | HEAD |
+    | Cluster URL | https://kubernetes.default.svc |
+
+1. After filling out the form details, click the "Create" button
+
+1. (add actual Cloud Pak) Click on the "New App+" button again and fill out the form with values matching the Cloud Pak of your choice, according to the table below:
 
     | Cloud Pak | Application Name | Path | Namespace |
     | --------- | ---------------- | ---- | --------- |
-    | (base prereq for all cloudpaks, always add it first) | cp-shared-app | config/argocd-cloudpaks/cp-shared | ibm-cloudpaks |
     | Business Automation | cp4a-app | config/argocd-cloudpaks/cp4a | cp4a |
     | Integration Automation | cp4i-app | config/argocd-cloudpaks/cp4i | cp4i |
     | AIOps Automation | cp4aiops-app | config/argocd-cloudpaks/cp4aiops | openshift-operators |
@@ -132,6 +156,8 @@ After completing the list of activities listed in the previous sections, you hav
     | Repository URL | https://github.com/IBM/cloudpak-gitops |
     | Revision | HEAD |
     | Cluster URL | https://kubernetes.default.svc |
+
+1. After filling out the form details, click the "Create" button
 
 1. Under "Parameters", if using OCP 4.7 or later, replace the value of the field `serviceaccount.argocd_application_controller` with the value `openshift-gitops-argocd-application-controller`
 
@@ -170,26 +196,6 @@ After completing the list of activities listed in the previous sections, you hav
 
 1. [Log in to the OpenShift CLI](https://docs.openshift.com/container-platform/4.7/cli_reference/openshift_cli/getting-started-cli.html#cli-logging-in_cli-developer-commands)
 
-1. Configure the [custom resource health](https://argoproj.github.io/argo-cd/operator-manual/health/) checkers in the Argo CD server:
-
-   Using OCP 4.6:
-
-   ```sh
-   oc patch ArgoCD/argocd-cluster \
-            --namespace openshift-gitops \
-            --type merge \
-            --patch-file descriptors/resources/argocd-resource-health-patch.yaml
-   ```
-
-   Using OCP 4.7 and later:
-
-   ```sh
-   oc patch ArgoCD/openshift-gitops \
-            --namespace openshift-gitops \
-            --type merge \
-            --patch-file descriptors/resources/argocd-resource-health-patch.yaml
-   ```
-
 1. [Install the Argo CD CLI](https://argoproj.github.io/argo-cd/cli_installation/)
 
 1. Log in to the Argo CD server
@@ -197,17 +203,18 @@ After completing the list of activities listed in the previous sections, you hav
    Using OCP 4.6:
 
    ```sh
-    argo_route=argocd-cluster-server
-    argo_secret=argocd-cluster-cluster
-    sa_account=argocd-cluster-argocd-application-controller
+   # OCP 4.6
+   argo_route=argocd-cluster-server
+   argo_secret=argocd-cluster-cluster
+   sa_account=argocd-cluster-argocd-application-controller
 
-    argo_pwd=$(oc get secret ${argo_secret} \
+   argo_pwd=$(oc get secret ${argo_secret} \
+               -n openshift-gitops \
+               -o jsonpath='{.data.admin\.password}' | base64 -d ; echo ) \
+   && argo_url=$(oc get route ${argo_route} \
                   -n openshift-gitops \
-                  -o jsonpath='{.data.admin\.password}' | base64 -d ; echo ) \
-    && argo_url=$(oc get route ${argo_route} \
-                    -n openshift-gitops \
-                    -o jsonpath='{.spec.host}') \
-    && argocd login "${argo_url}" \
+                  -o jsonpath='{.spec.host}') \
+   && argocd login "${argo_url}" \
          --username admin \
          --password "${argo_pwd}" \
          --insecure
@@ -216,62 +223,97 @@ After completing the list of activities listed in the previous sections, you hav
    Using OCP 4.7 and later (the object names change a little from OCP 4.6:)
 
    ```sh
-    argo_route=openshift-gitops-server
-    argo_secret=openshift-gitops-cluster
-    sa_account=openshift-gitops-argocd-application-controller
+   # OCP 4.7+
+   argo_route=openshift-gitops-server
+   argo_secret=openshift-gitops-cluster
+   sa_account=openshift-gitops-argocd-application-controller
 
-    argo_pwd=$(oc get secret ${argo_secret} \
+   argo_pwd=$(oc get secret ${argo_secret} \
+               -n openshift-gitops \
+               -o jsonpath='{.data.admin\.password}' | base64 -d ; echo ) \
+   && argo_url=$(oc get route ${argo_route} \
                   -n openshift-gitops \
-                  -o jsonpath='{.data.admin\.password}' | base64 -d ; echo ) \
-    && argo_url=$(oc get route ${argo_route} \
-                     -n openshift-gitops \
-                     -o jsonpath='{.spec.host}') \
-    && argocd login "${argo_url}" \
+                  -o jsonpath='{.spec.host}') \
+   && argocd login "${argo_url}" \
          --username admin \
          --password "${argo_pwd}" \
          --insecure
    ```
+
+1. Add the `argo` application. (this step assumes you still have shell variables assigned from previous steps) :
+
+   Using OCP 4.6:
+
+   ```sh
+   # OCP 4.6
+   argocd app create argo-app \
+         --project default \
+         --dest-namespace openshift-gitops \
+         --dest-server https://kubernetes.default.svc \
+         --repo https://github.com/IBM/cloudpak-gitops \
+         --path config/argocd \
+         --sync-policy automated \
+         --revision main \
+         --upsert 
+    ```
+
+   Using OCP 4.7 and later (the object names change a little from OCP 4.6:)
+
+   ```sh
+   # OCP 4.7+
+   argocd app create argo-app \
+         --project default \
+         --dest-namespace openshift-gitops \
+         --dest-server https://kubernetes.default.svc \
+         --repo https://github.com/IBM/cloudpak-gitops \
+         --path config/argocd-ga \
+         --sync-policy automated \
+         --revision main \
+         --upsert 
+    ```
+
+
 1. Add the `cp-shared` application. (this step assumes you still have shell variables assigned from previous steps) :
-   ```sh
-     argocd app create cp-shared-app \
-            --project default \
-            --dest-namespace openshift-gitops \
-            --dest-server https://kubernetes.default.svc \
-            --helm-set-string serviceaccount.argocd_application_controller=${sa_account} \
-            --repo https://github.com/IBM/cloudpak-gitops \
-            --path config/argocd-cloudpaks/cp-shared \
-            --sync-policy automated \
-            --revision main \
-            --upsert 
-    ```
-
-1. Add the respective Cloud Pak application. (this step assumes you still have shell variables assigned from previous steps) :
 
    ```sh
-     # appname=<< choose a value from the "Application Name" column in the 
-     # table of Cloud Paks above, such as cp4a-app, cp4i-app, 
-     # cp4aiops-app, etc >>
-     cp=cp4i
-     app_name=${cp}-app
-     # app_path=<< choose the respective value from the "path Name" 
-     # column in the table of Cloud Paks above, such as 
-     # config/argocd-cloudpaks/cp4i/cp4a, config/argocd-cloudpaks/cp4i, 
-     # etc
-     app_path=config/argocd-cloudpaks/${cp}
-
-     argocd app create "${app_name}" \
-            --project default \
-            --dest-namespace openshift-gitops \
-            --dest-server https://kubernetes.default.svc \
-            --helm-set-string serviceaccount.argocd_application_controller=${sa_account} \
-            --repo https://github.com/IBM/cloudpak-gitops \
-            --path "${app_path}" \
-            --sync-policy automated \
-            --upsert 
-    argocd app wait "${app_name}"
+   argocd app create cp-shared-app \
+         --project default \
+         --dest-namespace openshift-gitops \
+         --dest-server https://kubernetes.default.svc \
+         --repo https://github.com/IBM/cloudpak-gitops \
+         --path config/argocd-cloudpaks/cp-shared \
+         --sync-policy automated \
+         --revision main \
+         --upsert 
     ```
 
-1. Enable auto-synchronization for the apps automatically added by the previous step. The auto-synchronization is disabled by default in the repo if you want to further configure the applications before starting the synchronization.
+1. Add the respective Cloud Pak application (this step assumes you still have shell variables assigned from previous steps) :
+
+   ```sh
+   # appname=<< choose a value from the "Application Name" column in the 
+   # table of Cloud Paks above, such as cp4a-app, cp4i-app, 
+   # cp4aiops-app, etc >>
+   cp=cp4i
+   app_name=${cp}-app
+   # app_path=<< choose the respective value from the "path Name" 
+   # column in the table of Cloud Paks above, such as 
+   # config/argocd-cloudpaks/cp4i/cp4a, config/argocd-cloudpaks/cp4i, 
+   # etc
+   app_path=config/argocd-cloudpaks/${cp}
+
+   argocd app create "${app_name}" \
+         --project default \
+         --dest-namespace openshift-gitops \
+         --dest-server https://kubernetes.default.svc \
+         --helm-set-string serviceaccount.argocd_application_controller=${sa_account} \
+         --repo https://github.com/IBM/cloudpak-gitops \
+         --path "${app_path}" \
+         --sync-policy automated \
+         --upsert 
+   argocd app wait "${app_name}"
+    ```
+
+1. Enable auto-synchronization for the apps automatically added by the previous step. The auto-synchronization is disabled by default in the repo if you want to further configure the applications before starting the synchronization. Note that this step assumes you still have shell variables assigned from previous steps:
    ```sh
    argocd app set ${cp}-operators \
             --sync-policy automated \
@@ -285,7 +327,7 @@ After completing the list of activities listed in the previous sections, you hav
             --timeout 7200
    ```
 
-1. List all the applications to see their overall status
+1. List all the applications to see their overall status (this step assumes you still have shell variables assigned from previous steps):
 
    ```sh
    argocd app list -l app.kubernetes.io/instance=${app_name}

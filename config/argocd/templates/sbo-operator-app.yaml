@@ -18,8 +18,12 @@ spec:
       kind: Application
   project: default
   source:
-    path: config/sbo/overlays
-    repoURL: https://github.com/IBM/cloudpak-gitops.git
+    helm:
+      parameters:
+        - name: repoURL
+          value: ${ARGOCD_APP_SOURCE_REPO_URL}
+    path: config/sbo
+    repoURL: {{.Values.repoURL}}
   syncPolicy:
     automated:
       prune: true

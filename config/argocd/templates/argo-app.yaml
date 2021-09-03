@@ -1,0 +1,59 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  creationTimestamp: null
+  name: argo-app
+  namespace: openshift-gitops
+  annotations:
+    argocd.argoproj.io/sync-wave: "100"
+spec:
+  destination:
+    namespace: openshift-gitops
+    server: https://kubernetes.default.svc
+  ignoreDifferences:
+    - group: argoproj.io
+      jsonPointers:
+        - /status
+      kind: Application
+    - group: triggers.tekton.dev
+      jsonPointers:
+        - /status
+      kind: EventListener
+    - group: triggers.tekton.dev
+      jsonPointers:
+        - /status
+      kind: TriggerTemplate
+    - group: triggers.tekton.dev
+      jsonPointers:
+        - /status
+      kind: TriggerBinding
+    - group: route.openshift.io
+      jsonPointers:
+        - /spec/host
+      kind: Route
+    - group: bitnami.com
+      jsonPointers:
+        - /status
+      kind: SealedSecret
+  project: default
+  source:
+    helm:
+      parameters:
+        - name: repoURL
+          value: ${ARGOCD_APP_SOURCE_REPO_URL}
+    path: config/argocd
+    repoURL: {{.Values.repoURL}}
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+status:
+  health: {}
+  summary: {}
+  sync:
+    comparedTo:
+      destination: {}
+      source:
+        repoURL: ""
+    status: ""

@@ -3,7 +3,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   creationTimestamp: null
-  name: argo-app
+  name: sbo-operators
   namespace: openshift-gitops
   annotations:
     argocd.argoproj.io/sync-wave: "100"
@@ -16,30 +16,14 @@ spec:
       jsonPointers:
         - /status
       kind: Application
-    - group: triggers.tekton.dev
-      jsonPointers:
-        - /status
-      kind: EventListener
-    - group: triggers.tekton.dev
-      jsonPointers:
-        - /status
-      kind: TriggerTemplate
-    - group: triggers.tekton.dev
-      jsonPointers:
-        - /status
-      kind: TriggerBinding
-    - group: route.openshift.io
-      jsonPointers:
-        - /spec/host
-      kind: Route
-    - group: bitnami.com
-      jsonPointers:
-        - /status
-      kind: SealedSecret
   project: default
   source:
-    path: config/argocd
-    repoURL: https://github.com/IBM/cloudpak-gitops.git
+    helm:
+      parameters:
+        - name: repoURL
+          value: ${ARGOCD_APP_SOURCE_REPO_URL}
+    path: config/sbo
+    repoURL: {{.Values.repoURL}}
   syncPolicy:
     automated:
       prune: true
