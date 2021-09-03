@@ -39,8 +39,12 @@ spec:
       kind: SealedSecret
   project: default
   source:
+    helm:
+      parameters:
+        - name: repoURL
+          value: ${ARGOCD_APP_SOURCE_REPO_URL}
     path: config/argocd-ga
-    repoURL: https://github.com/IBM/cloudpak-gitops.git
+    repoURL: {{.Values.repoURL}}
   syncPolicy:
     automated:
       prune: true

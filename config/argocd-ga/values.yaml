@@ -1,0 +1,4 @@
+---
+repoURL: https://github.com/IBM/cloudpak-gitops
+metadata:
+  argocd_namespace: openshift-gitops
