@@ -1,0 +1,93 @@
+# https://www.ibm.com/docs/en/cloud-paks/cp-waiops/3.1.1?topic=installing-postinstallation-tasks
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: check-evt-group
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+  namespace: openshift-gitops
+spec:
+  template:
+    spec:
+      containers:
+        - name: config
+          image: quay.io/openshift/origin-cli:latest
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "250m"
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
+          env:
+            - name: TARGET_NAMESPACE
+              value: "{{.Values.metadata.argocd_app_namespace}}"
+            - name: WAIT_TIME
+              value: "{{.Values.metadata.post_install_wait}}"
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -eo pipefail
+              set -x
+
+              result=0
+
+              current_seconds=0
+              operation_limit_seconds=$(( $(date +%s) + 7200 ))
+              pods_found=0
+              while [ ${current_seconds} -lt ${operation_limit_seconds} ]; do
+                if [ $(oc get pods \
+                    -l app.kubernetes.io/managed-by=ibm-elastic-operator \
+                    -n "${TARGET_NAMESPACE}" | wc -l) -gt 1 ] && \
+                    [ $(oc get pods \
+                    -l app.kubernetes.io/component=event-grouping \
+                    -n "${TARGET_NAMESPACE}" | wc -l) -gt 1 ]; then
+                   pods_found=1
+                else
+                   pods_found=0
+                fi
+                if [ ${pods_found} -eq 0 ]; then
+                  echo "INFO: Pods not found, waiting some more."
+                  sleep 60
+                else
+                  echo "INFO: Pods found."
+                  break;
+                fi
+                current_seconds=$(( $(date +%s) ))
+              done
+
+              echo "INFO: Checking event grouping pod."
+              oc wait pods \
+                -l app.kubernetes.io/managed-by=ibm-elastic-operator \
+                -n "${TARGET_NAMESPACE}" \
+                --for=condition=Ready=true \
+                --timeout="${WAIT_TIME}" \
+              && oc wait pod \
+                -l app.kubernetes.io/component=event-grouping \
+                -n "${TARGET_NAMESPACE}" \
+                --for=condition=Ready=true \
+                --timeout="${WAIT_TIME}" \
+              || result=1
+
+              if [ ${result} -eq 0 ]; then
+                echo "INFO: All event pods are ready."
+              else
+                echo "ERROR: Event pods are not ready."
+                oc get pod -n "${TARGET_NAMESPACE}"
+              fi
+
+              cemphase=$(oc get cemformation evtmanager -n "${TARGET_NAMESPACE}" -o jsonpath='{.status.phase}')
+              if [ "${cemphase}" == "Error" ]; then
+                echo "INFO: CEM Formation phase is not OK: ${cemphase}"
+                result=1
+              else
+                echo "INFO: CEM Formation is OK."
+              fi
+
+              exit "${result}"
+
+      restartPolicy: Never
+      serviceAccountName: {{.Values.serviceaccount.argocd_application_controller}}
+  backoffLimit: 1
