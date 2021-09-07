@@ -18,6 +18,37 @@ spec:
         - name: aimanager-operator
           spec:
             aimanager:
+              minio:
+                storage:
+                  storageClassName: {{.Values.storageclass.rwx.effective}}
+                  storageSize: 100Gi
+              postgres:
+                storage:
+                  enabled: true
+                  storageClassName: {{.Values.storageclass.rwx.effective}}
+                  storageSize: 20Gi
+              storage:
+                enabled: true
+                storageClassName: {{.Values.storageclass.rwx.effective}}
+              elasticsearch:
+                storage:
+                  enabled: true
+                  storageClassName: {{.Values.storageclass.rwx.effective}}
+                  storageSize: 100Gi
+              flink:
+                storage:
+                  enabled: true
+                  storageClassName: {{.Values.storageclass.rwx.effective}}
+                  storageSize: 1Gi
+                taskmanager:
+                  replicas: 1
+                  taskmanagerSlots: 12
+              kafka:
+                autoTopicCreation: false
+                storage:
+                  enabled: true
+                  storageClassName: {{.Values.storageclass.rwx.effective}}
+                  storageSize: 50Gi
               aimanagerValues:
                 postgres:
                   livenessProbe:
