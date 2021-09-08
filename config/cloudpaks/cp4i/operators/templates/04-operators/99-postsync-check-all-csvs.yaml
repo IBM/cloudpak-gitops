@@ -44,6 +44,7 @@ spec:
                   echo "INFO: CSVs still installing."
                   sleep 60
                 else
+                  csv_installing=0
                   break
                 fi
                 current_seconds=$(( $(date +%s) ))
