@@ -1,4 +1,4 @@
-# https://www.ibm.com/docs/en/cloud-paks/cp-waiops/3.1.1?topic=installing-preparing-install-cloud-pak#nwk_policy
+# https://www.ibm.com/docs/en/cloud-paks/cp-integration/2021.2?topic=configuration-installation
 #
 # Some Red Hat OpenShift clusters have additional network policies configured to secure pod communication traffic,
 # which can block external traffic and communication between namespaces. Extra configuration is then required to
@@ -7,9 +7,9 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: configure-aiops-network-policy
+  name: configure-cp4i-network-policy
   annotations:
-    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook: PreSync
   namespace: openshift-gitops
 spec:
   template:
@@ -40,17 +40,16 @@ spec:
                 echo "INFO: Default network policy is already \"ingress\"."
                 exit
               else
+                no_strategy=0
                 strategy=$(oc get ingresscontroller default \
                   -n openshift-ingress-operator \
                   -o jsonpath={.status.endpointPublishingStrategy.type}) \
                   || {
                     echo "ERROR: Getting ingress controller strategy failed."
-                    exit 1
+                    no_strategy=1
                   }
-                if [ "${strategy}" == "HostNetwork" ]; then
-                  oc patch namespace default \
-                    --type=json \
-                    -p '[{"op":"add","path":"/metadata/labels","value":{"network.openshift.io/policy-group":"ingress"}}]' \
+                if [ "${strategy}" == "HostNetwork" ] || [ "${no_strategy}" -eq 1 ]; then
+                  oc label namespace default 'network.openshift.io/policy-group=ingress' --overwrite \
                   && echo "INFO: Default network policy set to \"ingress\"." \
                   || {
                     echo "ERROR: Patching network policy labels failed."
