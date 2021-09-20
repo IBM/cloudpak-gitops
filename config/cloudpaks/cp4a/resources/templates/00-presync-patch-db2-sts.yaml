@@ -10,8 +10,9 @@ metadata:
   # while the ICP4ACluster resource is being applied. If you make it a presync hook, then
   # the ICP4Cluster resource waits indefinitely. If you make it a postsync hook, it never
   # runs because the ICP4Cluster resource never becomes healthy.
-  # Ultimately, this job need to be in the exct same sync-wave as ICP4ACluster
+  # Ultimately, this job needs to be in the same sync-wave as ICP4ACluster
   annotations:
+    argocd.argoproj.io/hook: Sync
     argocd.argoproj.io/sync-wave: "201"
   name: cp4a-patch-db2-sts
   namespace: openshift-gitops
