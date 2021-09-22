@@ -13,7 +13,7 @@ metadata:
 spec:
   olm_ent_workflow: false
   olm_ent_option_bai: false
-  olm_demo_application: true
+  olm_demo_application: false
   olm_deployment_type: demo
   olm_ent_decisions_ads: false
   olm_ent_option_adp:
