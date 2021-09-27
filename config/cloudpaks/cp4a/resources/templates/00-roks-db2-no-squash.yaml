@@ -1,0 +1,31 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: roks-db2-root-no-squash
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+  namespace: openshift-gitops
+spec:
+  template:
+    spec:
+      containers:
+        - name: config
+          image: quay.io/openshift/origin-cli:latest
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -eo pipefail
+              set -x
+              # https://www.ibm.com/docs/en/cloud-paks/cp-biz-automation/21.0.x?topic=deployment-installing-capabilities-in-operator-hub
+              platform=$(oc get Infrastructure cluster  -o jsonpath={.status.platform})
+              if [ "${platform}" == "IBMCloud" ]; then
+                  oc get no -l node-role.kubernetes.io/worker --no-headers -o name | \
+                      xargs -I {} \
+                          -- oc debug {} \
+                          -- chroot /host sh -c 'grep "^Domain = slnfsv4.coms" /etc/idmapd.conf || ( sed -i "s/.*Domain =.*/Domain = slnfsv4.com/g" /etc/idmapd.conf; nfsidmap -c; rpc.idmapd )'
+              fi
+      restartPolicy: Never
+      serviceAccountName: {{.Values.serviceaccount.argocd_application_controller}}
+  backoffLimit: 4
