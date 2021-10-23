@@ -10,7 +10,7 @@ metadata:
   namespace: ibm-common-services
 spec:
   size: small
-  storageClass: {{.Values.storageclass.rwx.effective}}
+  storageClass: {{.Values.storageclass.rwx}}
   services:
     # https://github.ibm.com/IBMPrivateCloud/roadmap/issues/48099
     - name: ibm-cert-manager-operator

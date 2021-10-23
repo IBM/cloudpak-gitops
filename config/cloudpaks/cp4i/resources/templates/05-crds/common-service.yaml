@@ -10,7 +10,7 @@ metadata:
   namespace: ibm-common-services
 spec:
   size: small
-  storageClass: {{.Values.storageclass.rwx.effective}}
+  storageClass: {{.Values.storageclass.rwx}}
   services:
     - name: ibm-cert-manager-operator
       spec:

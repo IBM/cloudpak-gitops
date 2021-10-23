@@ -1,0 +1,78 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: common-config-map
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+  namespace: openshift-gitops
+spec:
+  template:
+    spec:
+      containers:
+        - name: config
+          image: quay.io/openshift/origin-cli:latest
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "150m"
+            limits:
+              memory: "64Mi"
+              cpu: "200m"
+          env:
+            - name: ARGOCD_NAMESPACE
+              value: "openshift-gitops"
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -eo pipefail
+              set -x
+              api_url=$(oc get Infrastructure cluster  -o jsonpath={.status.apiServerURL})
+
+              storage_class_rwo=""
+              storage_class_rwx=""
+              if [[ "${api_url}" == *fyre.ibm.com* ]]; then
+                 storage_class_rwo="{{.Values.storageclass.rwo.fyre}}"
+                 storage_class_rwx="{{.Values.storageclass.rwx.fyre}}"
+              else
+                  platform=$(oc get Infrastructure cluster  -o jsonpath={.status.platform})
+                  if [ "${platform}" == "AWS" ]; then
+                      storage_class_rwo="{{.Values.storageclass.rwo.aws}}"
+                      storage_class_rwx="{{.Values.storageclass.rwx.aws}}"
+                  elif [ "${platform}" == "IBMCloud" ]; then
+                    vpc_class=$(oc get StorageClass | grep -c "ibmc-vpc" || result=0)
+                    if [ ${vpc_class} -gt 0 ]; then
+                        storage_class_rwo="{{.Values.storageclass.rwo.roksgen2}}"
+                        storage_class_rwx="{{.Values.storageclass.rwx.roksgen2}}"
+                    else
+                        storage_class_rwo="{{.Values.storageclass.rwo.roks}}"
+                        storage_class_rwx="{{.Values.storageclass.rwx.roks}}"
+                    fi
+                  fi
+              fi
+
+              if [ -z "${storage_class_rwo}" ] || [ -z "${storage_class_rwx}" ] ; then
+                echo "ERROR: Did not find storage classes for target platform."
+                exit
+              fi
+
+              for cloudpak in cp4i cp4aiops
+              do
+                  echo "INFO: Creating or patching the RHACM configmap"
+                  config_map_name=argocd-${cloudpak}-config
+                  oc get configmap "${config_map_name}" \
+                      --namespace "${ARGOCD_NAMESPACE}" > /dev/null 2>&1 \
+                  && oc patch configmap "${config_map_name}" \
+                      --patch "{\"data\":{\"serviceaccount.argocd_application_controller\":\"{{.Values.serviceaccount.argocd_application_controller}}\", \"storageclass.rwo\":\"${storage_class_rwo}\", \"storageclass.rwx\":\"${storage_class_rwx}\" }}" \
+                      --namespace "${ARGOCD_NAMESPACE}" \
+                  || oc create configmap "${config_map_name}" \
+                      --from-literal=serviceaccount.argocd_application_controller="{{.Values.serviceaccount.argocd_application_controller}}" \
+                      --from-literal=storageclass.rwo="${storage_class_rwo}" \
+                      --from-literal=storageclass.rwx="${storage_class_rwx}" \
+                      --namespace "${ARGOCD_NAMESPACE}"
+              done
+
+      restartPolicy: Never
+      serviceAccountName: {{.Values.serviceaccount.argocd_application_controller}}
+  backoffLimit: 2

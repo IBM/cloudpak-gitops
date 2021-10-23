@@ -5,7 +5,5 @@ metadata:
   argocd_app_namespace: ibm-cloudpaks
   post_install_wait: 2h
 storageclass:
-  rwo:
-    effective: ibmc-block-gold
-  rwx:
-    effective: ibmc-file-gold-gid
+  rwo: ibmc-block-gold
+  rwx: ibmc-file-gold-gid

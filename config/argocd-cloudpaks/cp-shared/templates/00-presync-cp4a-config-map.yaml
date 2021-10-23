@@ -1,0 +1,94 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: cp4a-config-map
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+  namespace: openshift-gitops
+spec:
+  template:
+    spec:
+      containers:
+        - name: config
+          image: quay.io/openshift/origin-cli:latest
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "150m"
+            limits:
+              memory: "64Mi"
+              cpu: "200m"
+          env:
+            - name: ARGOCD_NAMESPACE
+              value: openshift-gitops
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -eo pipefail
+              set -x
+
+              result=0
+
+              # https://www.ibm.com/docs/en/cloud-paks/cp-biz-automation/21.0.x?topic=deployment-installing-capabilities-in-operator-hub
+              # Demo installation requires a hostname suffix. We want to make this setting
+              # match the hostname of the cluster
+              ocp_domain=$(oc get ingress.config.openshift.io cluster -o jsonpath={.spec.domain})
+              if [ -z "${ocp_domain}" ]; then
+                  echo "ERROR: Unable to determine cluster domain."
+                  exit 1
+              fi
+
+              # https://www.ibm.com/docs/en/cloud-paks/cp-biz-automation/21.0.x?topic=deployment-installing-capabilities-in-operator-hub
+              platform=$(oc get Infrastructure cluster  -o jsonpath={.status.platform})
+              cp4a_platform="${platform}"
+              if [ "${cp4a_platform}" != "IBMCloud" ]; then
+                cp4a_platform=OCP
+              fi
+
+              api_url=$(oc get Infrastructure cluster  -o jsonpath={.status.apiServerURL})
+
+              storage_class=""
+              if [[ "${api_url}" == *fyre.ibm.com* ]]; then
+                 storage_class="{{.Values.storageclass.rwx.fyre}}"
+              else
+                if [ "${platform}" == "AWS" ]; then
+                  storage_class="{{.Values.storageclass.rwx.aws}}"
+                elif [ "${platform}" == "IBMCloud" ]; then
+                  vpc_class=$(oc get StorageClass | grep -c "ibmc-vpc" || result=0)
+                  if [ ${vpc_class} -gt 0 ]; then
+                      storage_class="{{.Values.storageclass.rwx.roksgen2}}"
+                  fi
+                fi
+              fi
+
+              if [ -z "${storage_class}" ]; then
+                storage_class_gold=cp4a-file-retain-gold-gid
+                storage_class_silver=cp4a-file-retain-silver-gid
+                storage_class_bronze=cp4a-file-retain-bronze-gid
+              else
+                storage_class_gold=${storage_class}
+                storage_class_silver=${storage_class}
+                storage_class_bronze=${storage_class}
+              fi
+
+              echo "INFO: Creating or patching the RHACM configmap"
+              config_map_name=argocd-cp4a-config
+              oc get configmap "${config_map_name}" \
+                  --namespace "${ARGOCD_NAMESPACE}" > /dev/null 2>&1 \
+              && oc patch configmap "${config_map_name}" \
+                  --patch "{\"data\":{\"serviceaccount.argocd_application_controller\":\"{{.Values.serviceaccount.argocd_application_controller}}\", \"shared_configuration.sc_deployment_hostname_suffix\":\"${ocp_domain}\", \"shared_configuration.sc_deployment_platform\":\"${cp4a_platform}\", \"storageclass.gold\":\"${storage_class_gold}\", \"storageclass.silver\":\"${storage_class_silver}\", \"storageclass.bronze\":\"${storage_class_bronze}\" }}" \
+                  --namespace "${ARGOCD_NAMESPACE}" \
+              || oc create configmap "${config_map_name}" \
+                  --from-literal=shared_configuration.sc_deployment_hostname_suffix="${ocp_domain}" \
+                  --from-literal=serviceaccount.argocd_application_controller="{{.Values.serviceaccount.argocd_application_controller}}" \
+                  --from-literal=shared_configuration.sc_deployment_platform="${cp4a_platform}" \
+                  --from-literal=storageclass.gold="${storage_class_gold}" \
+                  --from-literal=storageclass.silver="${storage_class_silver}" \
+                  --from-literal=storageclass.bronze="${storage_class_bronze}" \
+                  --namespace "${ARGOCD_NAMESPACE}"
+
+      restartPolicy: Never
+      serviceAccountName: {{.Values.serviceaccount.argocd_application_controller}}
+  backoffLimit: 4

@@ -35,11 +35,8 @@ spec:
               # https://www.ibm.com/docs/en/cloud-paks/cp-biz-automation/21.0.x?topic=deployment-installing-capabilities-in-operator-hub
               # Demo installation requires a hostname suffix. We want to make this setting
               # match the hostname of the cluster
-              ocp_domain=$(oc get ingress.config.openshift.io cluster -o jsonpath={.spec.domain})
-              if [ -z "${ocp_domain}" ]; then
-                  echo "ERROR: Unable to determine cluster domain."
-                  exit 1
-              fi
+              ocp_domain=$(oc get configmap argocd-cp4a-config \
+                  --namespace "${ARGOCD_NAMESPACE}" -o jsonpath='{.data.shared_configuration\.sc_deployment_hostname_suffix}')
 
               echo "INFO: Patching application ${ARGOCD_APP_NAME}."
               helm_params=$(oc get Application "${ARGOCD_APP_NAME}" --namespace "${ARGOCD_NAMESPACE}" -o yaml -o jsonpath={.spec.source.helm.parameters})

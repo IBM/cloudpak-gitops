@@ -31,7 +31,9 @@ spec:
               set -eo pipefail
               set -x
               # https://www.ibm.com/docs/en/cloud-paks/cp-biz-automation/21.0.x?topic=deployment-installing-capabilities-in-operator-hub
-              platform=$(oc get Infrastructure cluster  -o jsonpath={.status.platform})
+              platform=$(oc get configmap argocd-cp4a-config \
+                  --namespace "${ARGOCD_NAMESPACE}" -o jsonpath='{.data.shared_configuration\.sc_deployment_platform}')
+
               if [ "${platform}" != "IBMCloud" ]; then
                   helm_params=$(oc get Application "${ARGOCD_APP_NAME}" --namespace "${ARGOCD_NAMESPACE}" -o yaml -o jsonpath={.spec.source.helm.parameters})
                   if [[ ! ${helm_params} == *OCP* ]]; then

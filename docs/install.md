@@ -161,7 +161,7 @@ After completing the list of activities listed in the previous sections, you hav
 
 1. Under "Parameters", if using OCP 4.7 or later, replace the value of the field `serviceaccount.argocd_application_controller` with the value `openshift-gitops-argocd-application-controller`
 
-1. Still under "Parameters", set the values for the fields `storageclass.rwo.effective` and `storageclass.rwx.effective` with the appropriate storage classes. For OpenShift Container Storage, the values will be `ocs-storagecluster-ceph-rbd` and `ocs-storagecluster-cephfs`, respectively.
+1. Still under "Parameters", set the values for the fields `storageclass.rwo` and `storageclass.rwx` with the appropriate storage classes. For OpenShift Container Storage, the values will be `ocs-storagecluster-ceph-rbd` and `ocs-storagecluster-cephfs`, respectively.
 
 1. After filling out the form details, click the "Create" button
 
@@ -240,7 +240,7 @@ After completing the list of activities listed in the previous sections, you hav
          --insecure
    ```
 
-1. Add the `argo` application. (this step assumes you still have shell variables assigned from previous steps) :
+1. Add the `argo` application. (this step assumes you still have the shell variables assigned from previous steps) :
 
    Using OCP 4.6:
 
@@ -267,13 +267,14 @@ After completing the list of activities listed in the previous sections, you hav
          --dest-server https://kubernetes.default.svc \
          --repo https://github.com/IBM/cloudpak-gitops \
          --path config/argocd-ga \
+         --helm-set-string serviceaccount.argocd_application_controller=${sa_account} \
          --sync-policy automated \
          --revision main \
          --upsert 
     ```
 
 
-1. Add the `cp-shared` application. (this step assumes you still have shell variables assigned from previous steps) :
+1. Add the `cp-shared` application. (this step assumes you still have the shell variables assigned from previous steps) :
 
    ```sh
    argocd app create cp-shared-app \
@@ -282,10 +283,11 @@ After completing the list of activities listed in the previous sections, you hav
          --dest-server https://kubernetes.default.svc \
          --repo https://github.com/IBM/cloudpak-gitops \
          --path config/argocd-cloudpaks/cp-shared \
+         --helm-set-string serviceaccount.argocd_application_controller=${sa_account} \
          --sync-policy automated \
          --revision main \
          --upsert 
-    ```
+   ```
 
 1. Add the respective Cloud Pak application (this step assumes you still have shell variables assigned from previous steps) :
 
@@ -305,9 +307,9 @@ After completing the list of activities listed in the previous sections, you hav
          --project default \
          --dest-namespace openshift-gitops \
          --dest-server https://kubernetes.default.svc \
-         --helm-set-string serviceaccount.argocd_application_controller=${sa_account} \
          --repo https://github.com/IBM/cloudpak-gitops \
          --path "${app_path}" \
+         --helm-set-string serviceaccount.argocd_application_controller=${sa_account} \
          --sync-policy automated \
          --upsert 
    argocd app wait "${app_name}"

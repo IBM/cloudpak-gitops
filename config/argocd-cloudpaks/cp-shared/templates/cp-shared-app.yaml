@@ -14,17 +14,9 @@ spec:
   ignoreDifferences:
     - group: argoproj.io
       jsonPointers:
-        - /status
         - /spec/source/repoURL
-      kind: Application
-    - group: route.openshift.io
-      jsonPointers:
-        - /spec/host
-      kind: Route
-    - group: bitnami.com
-      jsonPointers:
         - /status
-      kind: SealedSecret
+      kind: Application
   project: default
   source:
     helm:
@@ -35,8 +27,13 @@ spec:
           value: ${ARGOCD_APP_NAMESPACE}
         - name: repoURL
           value: ${ARGOCD_APP_SOURCE_REPO_URL}
+        - name: serviceaccount.argocd_application_controller
+          value: {{.Values.serviceaccount.argocd_application_controller}}
+        - name: targetRevision
+          value: ${ARGOCD_APP_SOURCE_TARGET_REVISION}
     path: config/argocd-cloudpaks/cp-shared
     repoURL: {{.Values.repoURL}}
+    targetRevision: {{.Values.targetRevision}}
   syncPolicy:
     automated:
       prune: true

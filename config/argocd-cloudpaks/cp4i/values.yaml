@@ -1,20 +1,11 @@
 ---
 repoURL: https://github.com/IBM/cloudpak-gitops
+targetRevision: main
 serviceaccount:
   argocd_application_controller: argocd-cluster-argocd-application-controller
 metadata:
   argocd_app_namespace: ibm-cloudpaks
   argocd_namespace: openshift-gitops
 storageclass:
-  rwo:
-    effective: ibmc-file-gold-gid
-    roks: ibmc-block-gold
-    fyre: rook-ceph-block
-    roksgen2: ocs-storagecluster-ceph-rbd
-    aws: ocs-storagecluster-ceph-rbd
-  rwx:
-    effective: ibmc-file-gold-gid
-    roks: ibmc-file-gold-gid
-    roksgen2: ocs-storagecluster-cephfs
-    fyre: rook-cephfs
-    aws: ocs-storagecluster-cephfs
+  rwo: ibmc-file-block
+  rwx: ibmc-file-gold-gid

@@ -4,7 +4,5 @@ serviceaccount:
 metadata:
   argocd_namespace: openshift-gitops
 storageclass:
-  rwo:
-    effective: ibmc-file-gold-gid
-  rwx:
-    effective: ibmc-file-gold-gid
+  rwo: ibmc-file-gold-gid
+  rwx: ibmc-file-gold-gid

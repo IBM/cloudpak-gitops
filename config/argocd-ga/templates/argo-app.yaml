@@ -43,8 +43,11 @@ spec:
       parameters:
         - name: repoURL
           value: ${ARGOCD_APP_SOURCE_REPO_URL}
+        - name: targetRevision
+          value: ${ARGOCD_APP_SOURCE_TARGET_REVISION}
     path: config/argocd-ga
     repoURL: {{.Values.repoURL}}
+    targetRevision: {{.Values.targetRevision}}
   syncPolicy:
     automated:
       prune: true

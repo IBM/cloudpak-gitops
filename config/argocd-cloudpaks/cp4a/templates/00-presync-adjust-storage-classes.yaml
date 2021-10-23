@@ -30,62 +30,53 @@ spec:
             - |
               set -eo pipefail
               set -x
-              api_url=$(oc get Infrastructure cluster  -o jsonpath={.status.apiServerURL})
-
-              storage_class=""
-              if [[ "${api_url}" == *fyre.ibm.com* ]]; then
-                 storage_class="{{.Values.storageclass.fyre}}"
-              else
-                platform=$(oc get Infrastructure cluster  -o jsonpath={.status.platform})
-                if [ "${platform}" == "AWS" ]; then
-                  storage_class="{{.Values.storageclass.aws}}"
-                elif [ "${platform}" == "IBMCloud" ]; then
-                  vpc_class=$(oc get StorageClass | grep -c "ibmc-vpc" || result=0)
-                  if [ ${vpc_class} -gt 0 ]; then
-                      storage_class="{{.Values.storageclass.roksgen2}}"
-                  fi
-                fi
+              storage_class_gold="$(oc get configmap argocd-cp4a-config \
+                --namespace "${ARGOCD_NAMESPACE}" -o jsonpath='{.data.storageclass\.gold}')"
+              storage_class_silver="$(oc get configmap argocd-cp4a-config \
+                --namespace "${ARGOCD_NAMESPACE}" -o jsonpath='{.data.storageclass\.silver}')"
+              storage_class_bronze="$(oc get configmap argocd-cp4a-config \
+                --namespace "${ARGOCD_NAMESPACE}" -o jsonpath='{.data.storageclass\.bronze}')"
+              if [ -z "${storage_class_gold}" ] || [ -z "${storage_class_silver}" ] || [ -z "${storage_class_bronze}" ]; then
+                echo "ERROR: Did not find storage classes for target platform."
+                exit 1
               fi
-              if [ -z "${storage_class}" ]; then
-                exit
-              fi
-
-              app_patch=/tmp/patch.json
-              cat<<EOF > "${app_patch}"
-              [
-                {
-                  "op": "add",
-                  "path": "/spec/source/helm/parameters/0",
-                  "value": {
-                    "forceString": true,
-                    "name": "storageclass.gold",
-                    "value": "${storage_class}"
-                  }
-                },
-                {
-                  "op": "add",
-                  "path": "/spec/source/helm/parameters/0",
-                  "value": {
-                    "forceString": true,
-                    "name": "storageclass.silver",
-                    "value": "${storage_class}"
-                  }
-                },
-                {
-                  "op": "add",
-                  "path": "/spec/source/helm/parameters/0",
-                  "value": {
-                    "forceString": true,
-                    "name": "storageclass.bronze",
-                    "value": "${storage_class}"
-                  }
-                }
-              ]
-              EOF
 
               echo "INFO: Patching application ${ARGOCD_APP_NAME}."
               helm_params=$(oc get Application "${ARGOCD_APP_NAME}" --namespace "${ARGOCD_NAMESPACE}" -o yaml -o jsonpath={.spec.source.helm.parameters})
-              if [[ ! ${helm_params} == *${storage_class}* ]]; then
+              if [[ ! ${helm_params} == *${storage_class_gold}* ]]; then
+                  app_patch=/tmp/patch.json
+              cat<<EOF > "${app_patch}"
+                [
+                  {
+                    "op": "add",
+                    "path": "/spec/source/helm/parameters/0",
+                    "value": {
+                      "forceString": true,
+                      "name": "storageclass.gold",
+                      "value": "${storage_class_gold}"
+                    }
+                  },
+                  {
+                    "op": "add",
+                    "path": "/spec/source/helm/parameters/0",
+                    "value": {
+                      "forceString": true,
+                      "name": "storageclass.silver",
+                      "value": "${storage_class_silver}"
+                    }
+                  },
+                  {
+                    "op": "add",
+                    "path": "/spec/source/helm/parameters/0",
+                    "value": {
+                      "forceString": true,
+                      "name": "storageclass.bronze",
+                      "value": "${storage_class_bronze}"
+                    }
+                  }
+                ]
+              EOF
+
                   oc patch Application "${ARGOCD_APP_NAME}" \
                       --namespace "${ARGOCD_NAMESPACE}" \
                       -o yaml \

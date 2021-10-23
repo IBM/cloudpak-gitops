@@ -25,18 +25,21 @@ spec:
           value: ${ARGOCD_APP_NAME}
         - name: argocd_app_namespace
           value: ${ARGOCD_APP_NAMESPACE}
+        - name: repoURL
+          value: ${ARGOCD_APP_SOURCE_REPO_URL}
+        - name: serviceaccount.argocd_application_controller
+          value: {{.Values.serviceaccount.argocd_application_controller}}
+        - name: storageclass.bronze
+          value: {{.Values.storageclass.bronze}}
         - name: storageclass.gold
           value: {{.Values.storageclass.gold}}
         - name: storageclass.silver
           value: {{.Values.storageclass.silver}}
-        - name: storageclass.bronze
-          value: {{.Values.storageclass.bronze}}
-        - name: serviceaccount.argocd_application_controller
-          value: {{.Values.serviceaccount.argocd_application_controller}}
-        - name: repoURL
-          value: ${ARGOCD_APP_SOURCE_REPO_URL}
+        - name: targetRevision
+          value: ${ARGOCD_APP_SOURCE_TARGET_REVISION}
     path: config/cloudpaks/cp4a/operators
     repoURL: {{.Values.repoURL}}
+    targetRevision: {{.Values.targetRevision}}
   syncPolicy: {}
 status:
   health: {}

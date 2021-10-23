@@ -20,25 +20,25 @@ spec:
             aimanager:
               minio:
                 storage:
-                  storageClassName: {{.Values.storageclass.rwx.effective}}
+                  storageClassName: {{.Values.storageclass.rwx}}
                   storageSize: 100Gi
               postgres:
                 storage:
                   enabled: true
-                  storageClassName: {{.Values.storageclass.rwx.effective}}
+                  storageClassName: {{.Values.storageclass.rwx}}
                   storageSize: 20Gi
               storage:
                 enabled: true
-                storageClassName: {{.Values.storageclass.rwx.effective}}
+                storageClassName: {{.Values.storageclass.rwx}}
               elasticsearch:
                 storage:
                   enabled: true
-                  storageClassName: {{.Values.storageclass.rwx.effective}}
+                  storageClassName: {{.Values.storageclass.rwx}}
                   storageSize: 100Gi
               flink:
                 storage:
                   enabled: true
-                  storageClassName: {{.Values.storageclass.rwx.effective}}
+                  storageClassName: {{.Values.storageclass.rwx}}
                   storageSize: 1Gi
                 taskmanager:
                   replicas: 1
@@ -47,7 +47,7 @@ spec:
                 autoTopicCreation: false
                 storage:
                   enabled: true
-                  storageClassName: {{.Values.storageclass.rwx.effective}}
+                  storageClassName: {{.Values.storageclass.rwx}}
                   storageSize: 50Gi
               aimanagerValues:
                 postgres:
@@ -83,12 +83,12 @@ spec:
                     name: aimanager-operator
                   persistence:
                     enabled: true
-                    storageClass: {{.Values.storageclass.rwx.effective}}
+                    storageClass: {{.Values.storageclass.rwx}}
                     size: 20Gi
     - enabled: true
       name: aiopsFoundation
     - enabled: true
       name: applicationManager
   size: small
-  storageClass: {{.Values.storageclass.rwx.effective}}
-  storageClassLargeBlock: {{.Values.storageclass.rwo.effective}}
+  storageClass: {{.Values.storageclass.rwx}}
+  storageClassLargeBlock: {{.Values.storageclass.rwo}}
