@@ -1,0 +1,65 @@
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: openshift-gitops-cloudpaks-cp4i
+  namespace: policy
+  annotations:
+    argocd.argoproj.io/compare-options: IgnoreExtraneous
+    argocd.argoproj.io/sync-options: SkipPrune
+    policy.open-cluster-management.io/standards: NIST-CSF
+    policy.open-cluster-management.io/categories: PR.DS Data Security
+    policy.open-cluster-management.io/controls: PR.DS-1 Data-at-rest
+spec:
+  remediationAction: enforce
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: openshift-gitops-cloudpaks-cp4i
+        spec:
+          remediationAction: enforce
+          severity: med
+          namespaceSelector:
+            exclude:
+              - kube-*
+            include:
+              - default
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: argoproj.io/v1alpha1
+                kind: Application
+                metadata:
+                  creationTimestamp: null
+                  name: cp4i-app
+                  namespace: openshift-gitops
+                spec:
+                  destination:
+                    namespace: '{{ "{{ fromClusterClaim \"cp4i\" }}" }}'
+                    server: https://kubernetes.default.svc
+                  project: default
+                  source:
+                    helm:
+                      parameters:
+                        - name: argocd_app_name
+                          value: ${ARGOCD_APP_NAME}
+                        - name: argocd_app_namespace
+                          value: ${ARGOCD_APP_NAMESPACE}
+                        - name: metadata.argocd_app_namespace
+                          value: '{{ "{{ fromClusterClaim \"cp4i\" }}" }}'
+                        - name: repoURL
+                          value: ${ARGOCD_APP_SOURCE_REPO_URL}
+                        - name: serviceaccount.argocd_application_controller
+                          value: '{{ "{{ fromConfigMap \"openshift-gitops\" \"argocd-cp4i-config\" \"serviceaccount.argocd_application_controller\" }}" }}'
+                        - name: storageclass.rwo
+                          value: '{{ "{{ fromConfigMap \"openshift-gitops\" \"argocd-cp4i-config\" \"storageclass.rwo\" }}" }}'
+                        - name: storageclass.rwx
+                          value: '{{ "{{ fromConfigMap \"openshift-gitops\" \"argocd-cp4i-config\" \"storageclass.rwx\" }}" }}'
+                        - name: targetRevision
+                          value: ${ARGOCD_APP_SOURCE_TARGET_REVISION}
+                    path: config/argocd-cloudpaks/cp4i
+                    repoURL: {{.Values.repoURL}}
+                    targetRevision: '{{ "{{ fromClusterClaim \"gitops-branch\" }}" }}'
