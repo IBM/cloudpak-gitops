@@ -1,5 +1,6 @@
 ---
 repoURL: https://github.com/IBM/cloudpak-gitops
+targetRevision: main
 serviceaccount:
   argocd_application_controller: argocd-cluster-argocd-application-controller
 metadata:
@@ -13,6 +14,3 @@ storageclass:
   gold: cp4a-file-retain-gold-gid
   silver: cp4a-file-retain-silver-gid
   bronze: cp4a-file-retain-bronze-gid
-  aws: ocs-storagecluster-cephfs
-  fyre: rook-cephfs
-  roksgen2: ocs-storagecluster-cephfs

@@ -14,4 +14,4 @@ spec:
   version: 2021.2.1
   replicas: 1
   storage:
-    class: {{.Values.storageclass.rwx.effective}}
+    class: {{.Values.storageclass.rwx}}

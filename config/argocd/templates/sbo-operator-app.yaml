@@ -22,12 +22,12 @@ spec:
       parameters:
         - name: repoURL
           value: ${ARGOCD_APP_SOURCE_REPO_URL}
+        - name: targetRevision
+          value: ${ARGOCD_APP_SOURCE_TARGET_REVISION}
     path: config/sbo
     repoURL: {{.Values.repoURL}}
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
+    targetRevision: {{.Values.targetRevision}}
+  syncPolicy: {}
 status:
   health: {}
   summary: {}

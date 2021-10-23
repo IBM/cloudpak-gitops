@@ -14,8 +14,8 @@ spec:
   ignoreDifferences:
     - group: argoproj.io
       jsonPointers:
-        - /status
         - /spec/source/repoURL
+        - /status
       kind: Application
   project: default
   source:
@@ -27,16 +27,19 @@ spec:
           value: ${ARGOCD_APP_NAMESPACE}
         - name: metadata.argocd_app_namespace
           value: {{.Values.metadata.argocd_app_namespace}}
-        - name: serviceaccount.argocd_application_controller
-          value: {{.Values.serviceaccount.argocd_application_controller}}
-        - name: storageclass.rwo.effective
-          value: {{.Values.storageclass.rwo.effective}}
-        - name: storageclass.rwx.effective
-          value: {{.Values.storageclass.rwx.effective}}
         - name: repoURL
           value: ${ARGOCD_APP_SOURCE_REPO_URL}
+        - name: serviceaccount.argocd_application_controller
+          value: {{.Values.serviceaccount.argocd_application_controller}}
+        - name: storageclass.rwo
+          value: {{.Values.storageclass.rwo}}
+        - name: storageclass.rwx
+          value: {{.Values.storageclass.rwx}}
+        - name: targetRevision
+          value: ${ARGOCD_APP_SOURCE_TARGET_REVISION}
     path: config/cloudpaks/cp4aiops/resources
     repoURL: {{.Values.repoURL}}
+    targetRevision: {{.Values.targetRevision}}
   syncPolicy: {}
 status:
   health: {}

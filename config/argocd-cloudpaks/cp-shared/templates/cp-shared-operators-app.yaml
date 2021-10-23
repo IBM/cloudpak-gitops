@@ -14,8 +14,8 @@ spec:
   ignoreDifferences:
     - group: argoproj.io
       jsonPointers:
-        - /status
         - /spec/source/repoURL
+        - /status
       kind: Application
   project: default
   source:
@@ -23,8 +23,13 @@ spec:
       parameters:
         - name: repoURL
           value: ${ARGOCD_APP_SOURCE_REPO_URL}
+        - name: serviceaccount.argocd_application_controller
+          value: {{.Values.serviceaccount.argocd_application_controller}}
+        - name: targetRevision
+          value: ${ARGOCD_APP_SOURCE_TARGET_REVISION}
     path: config/cloudpaks/cp-shared/operators
     repoURL: {{.Values.repoURL}}
+    targetRevision: {{.Values.targetRevision}}
   syncPolicy:
     automated:
       prune: true
