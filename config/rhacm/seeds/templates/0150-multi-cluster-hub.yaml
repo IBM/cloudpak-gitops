@@ -1,0 +1,23 @@
+---
+apiVersion: operator.open-cluster-management.io/v1
+kind: MultiClusterHub
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "150"
+  creationTimestamp: null
+  name: multiclusterhub
+  namespace: open-cluster-management
+  finalizers:
+    - finalizer.operator.open-cluster-management.io
+spec:
+  availabilityConfig: High
+  ingress:
+    sslCiphers:
+      - ECDHE-ECDSA-AES256-GCM-SHA384
+      - ECDHE-RSA-AES256-GCM-SHA384
+      - ECDHE-ECDSA-CHACHA20-POLY1305
+      - ECDHE-RSA-CHACHA20-POLY1305
+      - ECDHE-ECDSA-AES128-GCM-SHA256
+      - ECDHE-RSA-AES128-GCM-SHA256
+  separateCertificateManagement: false

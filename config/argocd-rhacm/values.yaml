@@ -1,0 +1,5 @@
+---
+repoURL: https://github.com/IBM/cloudpak-gitops
+targetRevision: main
+serviceaccount:
+  argocd_application_controller: openshift-gitops-argocd-application-controller

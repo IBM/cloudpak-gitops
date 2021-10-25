@@ -2,11 +2,12 @@
 apiVersion: policy.open-cluster-management.io/v1
 kind: Policy
 metadata:
-  name: openshift-gitops-preview-installed
+  name: openshift-gitops-installed
   namespace: policy
   annotations:
     argocd.argoproj.io/compare-options: IgnoreExtraneous
-    argocd.argoproj.io/sync-options: SkipPrune
+    argocd.argoproj.io/sync-options: SkipPrune=true, SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "200"
     policy.open-cluster-management.io/standards: NIST-CSF
     policy.open-cluster-management.io/categories: PR.DS Data Security
     policy.open-cluster-management.io/controls: PR.DS-1 Data-at-rest
@@ -18,7 +19,7 @@ spec:
         apiVersion: policy.open-cluster-management.io/v1
         kind: ConfigurationPolicy
         metadata:
-          name: openshift-gitops-preview-installed
+          name: openshift-gitops-installed
         spec:
           remediationAction: enforce
           severity: med
@@ -36,9 +37,23 @@ spec:
                   name: openshift-gitops-operator
                   namespace: openshift-operators
                 spec:
-                  channel: preview
+                  channel: stable
                   installPlanApproval: Automatic
                   name: openshift-gitops-operator
                   source: redhat-operators
                   sourceNamespace: openshift-marketplace
-                  startingCSV: openshift-gitops-operator.v1.0.0
+                  startingCSV: openshift-gitops-operator.v1.3.0
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: operators.coreos.com/v1alpha1
+                kind: Subscription
+                metadata:
+                  name: openshift-pipelines-operator-rh
+                  namespace: openshift-operators
+                spec:
+                  channel: stable
+                  installPlanApproval: Automatic
+                  name: openshift-pipelines-operator-rh
+                  source: redhat-operators
+                  sourceNamespace: openshift-marketplace
+                  startingCSV: redhat-openshift-pipelines.v1.4.1

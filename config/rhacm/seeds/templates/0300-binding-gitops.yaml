@@ -1,18 +1,18 @@
-{{- range tuple "cp4a" "cp4aiops" "cp4i" }}
 ---
 apiVersion: policy.open-cluster-management.io/v1
 kind: PlacementBinding
 metadata:
   annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     argocd.argoproj.io/sync-wave: "300"
-  name: binding-cloudpak-{{.}}
+  name: binding-openshift-gitops-preview-rhacm
   namespace: policy
 placementRef:
-  name: openshift-gitops-{{.}}
+  name: all-openshift-gitops-preview-rhacm
   kind: PlacementRule
   apiGroup: apps.open-cluster-management.io
 subjects:
-  - name: openshift-gitops-cloudpaks-cp-shared
+  - name: openshift-gitops-preview-installed
     kind: Policy
     apiGroup: policy.open-cluster-management.io
 ---
@@ -20,15 +20,15 @@ apiVersion: policy.open-cluster-management.io/v1
 kind: PlacementBinding
 metadata:
   annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     argocd.argoproj.io/sync-wave: "300"
-  name: binding-preview-cloudpak-{{.}}
+  name: binding-openshift-gitops-rhacm
   namespace: policy
 placementRef:
-  name: openshift-gitops-preview-{{.}}
+  name: all-openshift-gitops-rhacm
   kind: PlacementRule
   apiGroup: apps.open-cluster-management.io
 subjects:
-  - name: openshift-gitops-preview-cloudpaks-cp-shared
+  - name: openshift-gitops-installed
     kind: Policy
     apiGroup: policy.open-cluster-management.io
-{{- end }}

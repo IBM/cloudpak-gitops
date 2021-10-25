@@ -3,6 +3,8 @@
 apiVersion: apps.open-cluster-management.io/v1
 kind: PlacementRule
 metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: "200"
   name: placement-openshift-gitops-cloudpaks-{{.}}
   namespace: policy
 spec:
@@ -19,7 +21,7 @@ apiVersion: policy.open-cluster-management.io/v1
 kind: PlacementBinding
 metadata:
   annotations:
-    argocd.argoproj.io/sync-wave: "20"
+    argocd.argoproj.io/sync-wave: "300"
   name: binding-openshift-gitops-cloudpaks-{{.}}
   namespace: policy
 placementRef:

@@ -1,11 +1,11 @@
-{{- range tuple "cp4a" "cp4aiops" "cp4i" }}
 ---
 apiVersion: apps.open-cluster-management.io/v1
 kind: PlacementRule
 metadata:
   annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     argocd.argoproj.io/sync-wave: "200"
-  name: openshift-gitops-preview-{{.}}
+  name: all-openshift-gitops-preview-rhacm
   namespace: policy
 spec:
   clusterConditions:
@@ -13,9 +13,10 @@ spec:
       type: ManagedClusterConditionAvailable
   clusterSelector:
     matchExpressions:
-      - key: {{.}}
-        operator: Exists
-        values: []
+      - key: local-cluster
+        operator: In
+        values:
+          - "true"
       - key: openshiftVersion
         operator: In
         values:
@@ -43,44 +44,13 @@ spec:
           - 4.6.51
           - 4.6.52
 ---
-apiVersion: policy.open-cluster-management.io/v1
-kind: PlacementBinding
-metadata:
-  annotations:
-    argocd.argoproj.io/sync-wave: "300"
-  name: binding-openshift-gitops-preview-{{.}}
-  namespace: policy
-placementRef:
-  name: openshift-gitops-preview-{{.}}
-  kind: PlacementRule
-  apiGroup: apps.open-cluster-management.io
-subjects:
-  - name: openshift-gitops-preview-installed
-    kind: Policy
-    apiGroup: policy.open-cluster-management.io
----
-apiVersion: policy.open-cluster-management.io/v1
-kind: PlacementBinding
-metadata:
-  annotations:
-    argocd.argoproj.io/sync-wave: "300"
-  name: binding-argocd-app-preview-{{.}}
-  namespace: policy
-placementRef:
-  name: openshift-gitops-preview-{{.}}
-  kind: PlacementRule
-  apiGroup: apps.open-cluster-management.io
-subjects:
-  - name: openshift-gitops-preview-argo-app
-    kind: Policy
-    apiGroup: policy.open-cluster-management.io
----
 apiVersion: apps.open-cluster-management.io/v1
 kind: PlacementRule
 metadata:
   annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     argocd.argoproj.io/sync-wave: "200"
-  name: openshift-gitops-{{.}}
+  name: all-openshift-gitops-rhacm
   namespace: policy
 spec:
   clusterConditions:
@@ -88,9 +58,10 @@ spec:
       type: ManagedClusterConditionAvailable
   clusterSelector:
     matchExpressions:
-      - key: {{.}}
-        operator: Exists
-        values: []
+      - key: local-cluster
+        operator: In
+        values:
+          - "true"
       - key: openshiftVersion
         operator: In
         values:
@@ -138,36 +109,3 @@ spec:
           - 4.8.28
           - 4.8.29
           - 4.8.30
----
-apiVersion: policy.open-cluster-management.io/v1
-kind: PlacementBinding
-metadata:
-  annotations:
-    argocd.argoproj.io/sync-wave: "300"
-  name: binding-openshift-gitops-{{.}}
-  namespace: policy
-placementRef:
-  name: openshift-gitops-{{.}}
-  kind: PlacementRule
-  apiGroup: apps.open-cluster-management.io
-subjects:
-  - name: openshift-gitops-installed
-    kind: Policy
-    apiGroup: policy.open-cluster-management.io
----
-apiVersion: policy.open-cluster-management.io/v1
-kind: PlacementBinding
-metadata:
-  annotations:
-    argocd.argoproj.io/sync-wave: "300"
-  name: binding-argocd-app-{{.}}
-  namespace: policy
-placementRef:
-  name: openshift-gitops-{{.}}
-  kind: PlacementRule
-  apiGroup: apps.open-cluster-management.io
-subjects:
-  - name: openshift-gitops-argo-app
-    kind: Policy
-    apiGroup: policy.open-cluster-management.io
-{{- end }}
