@@ -2,6 +2,9 @@
 apiVersion: apps.open-cluster-management.io/v1
 kind: PlacementRule
 metadata:
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "200"
   name: all-openshift
   namespace: policy
 spec:
@@ -18,6 +21,9 @@ spec:
 apiVersion: apps.open-cluster-management.io/v1
 kind: PlacementRule
 metadata:
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "200"
   name: all-openshift
   namespace: openshift-config
 spec:
@@ -34,6 +40,9 @@ spec:
 apiVersion: apps.open-cluster-management.io/v1
 kind: PlacementRule
 metadata:
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "200"
   name: all-openshift-46
   namespace: policy
 spec:
