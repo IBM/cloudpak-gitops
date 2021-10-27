@@ -32,27 +32,21 @@ These steps assume you  logged in to the OCP server with the `oc` command-line i
    argo_route=argocd-cluster-server
    argo_secret=argocd-cluster-cluster
    sa_account=argocd-cluster-argocd-application-controller
-
-   argo_pwd=$(oc get secret ${argo_secret} \
-               -n openshift-gitops \
-               -o jsonpath='{.data.admin\.password}' | base64 -d ; echo ) \
-   && argo_url=$(oc get route ${argo_route} \
-                  -n openshift-gitops \
-                  -o jsonpath='{.spec.host}') \
-   && argocd login "${argo_url}" \
-         --username admin \
-         --password "${argo_pwd}" \
-         --insecure
    ```
 
-   Using OCP 4.7 and later (the object names change a little from OCP 4.6:)
+   Using OCP 4.7 and later:
 
    ```sh
    # OCP 4.7+
    argo_route=openshift-gitops-server
    argo_secret=openshift-gitops-cluster
    sa_account=openshift-gitops-argocd-application-controller
+   ```
 
+1. Add the Argo application:
+
+   ```sh
+   #  Tthis step assumes you still have the shell variables assigned from previous actions
    argo_pwd=$(oc get secret ${argo_secret} \
                -n openshift-gitops \
                -o jsonpath='{.data.admin\.password}' | base64 -d ; echo ) \
@@ -61,13 +55,8 @@ These steps assume you  logged in to the OCP server with the `oc` command-line i
                   -o jsonpath='{.spec.host}') \
    && argocd login "${argo_url}" \
          --username admin \
-         --password "${argo_pwd}" \
-         --insecure
-   ```
+         --password "${argo_pwd}"
 
-1. Add the Argo application. (this step assumes you still have the shell variables assigned from previous actions) :
-
-   ```sh
    argocd app create rhacm-app \
          --project default \
          --dest-namespace openshift-gitops \

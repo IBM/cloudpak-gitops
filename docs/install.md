@@ -136,6 +136,8 @@ After completing the list of activities listed in the previous sections, you hav
     | Revision | HEAD |
     | Cluster URL | https://kubernetes.default.svc |
 
+1. Under "Parameters", if using OCP 4.6, replace the value of the field `serviceaccount.argocd_application_controller` with the value `openshift-gitops-argocd-application-controller`
+
 1. After filling out the form details, click the "Create" button
 
 1. (add actual Cloud Pak) Click on the "New App+" button again and fill out the form with values matching the Cloud Pak of your choice, according to the table below:
@@ -159,7 +161,7 @@ After completing the list of activities listed in the previous sections, you hav
 
 1. After filling out the form details, click the "Create" button
 
-1. Under "Parameters", if using OCP 4.7 or later, replace the value of the field `serviceaccount.argocd_application_controller` with the value `openshift-gitops-argocd-application-controller`
+1. Under "Parameters", if using OCP 4.6, replace the value of the field `serviceaccount.argocd_application_controller` with the value `argocd-cluster-argocd-application-controller`
 
 1. Still under "Parameters", set the values for the fields `storageclass.rwo` and `storageclass.rwx` with the appropriate storage classes. For OpenShift Container Storage, the values will be `ocs-storagecluster-ceph-rbd` and `ocs-storagecluster-cephfs`, respectively.
 

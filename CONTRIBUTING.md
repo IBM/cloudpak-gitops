@@ -20,7 +20,8 @@ Making changes to this repository requires a working knowledge of Argo CD admini
     argocd app set <app-name> \
         --repo <url-fork-or-clone> \
         --revision <branch-in-repo> \
-        --helm-set repoURL=<url-fork-or-clone>
+        --helm-set repoURL=<url-fork-or-clone> \
+        --helm-set targetRevisiton=<branch-in-repo>
     ```
 
     For instance, assuming you cloned this repo into https://github.com/nastacio/cloudpak-gitops, and you wanted to make changes to the `cp4i-app` Application in a branch named `new-feature`, you would run the command like this:
@@ -29,7 +30,8 @@ Making changes to this repository requires a working knowledge of Argo CD admini
     argocd app set cp4i-app \
         --repo https://github.com/nastacio/cloudpak-gitops \
         --revision new-feature \
-        --helm-set repoURL=https://github.com/nastacio/cloudpak-gitops
+        --helm-set repoURL=https://github.com/nastacio/cloudpak-gitops \
+        --helm-set targetRevisiton=new-feature
     ```
 
     Since the application has an automated synchronization policy, the synchronization with the new repository and branch would start immediately.
