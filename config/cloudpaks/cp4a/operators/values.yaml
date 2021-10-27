@@ -2,4 +2,4 @@
 metadata:
   individual_namespace: cp4a
 serviceaccount:
-  argocd_application_controller: argocd-cluster-argocd-application-controller
+  argocd_application_controller: openshift-gitops-argocd-application-controller

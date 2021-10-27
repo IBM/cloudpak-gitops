@@ -2,3 +2,5 @@
 metadata:
   argocd_namespace: openshift-gitops
   individual_namespace: cp4i
+serviceaccount:
+  argocd_application_controller: openshift-gitops-argocd-application-controller
