@@ -7,9 +7,8 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "100"
 spec:
-  channel: beta
+  channel: stable
   installPlanApproval: Automatic
   name: rh-service-binding-operator
   source: redhat-operators
   sourceNamespace: openshift-marketplace
-  startingCSV: service-binding-operator.v0.9.1

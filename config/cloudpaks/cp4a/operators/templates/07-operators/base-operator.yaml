@@ -13,4 +13,3 @@ spec:
   name: ibm-cp4a-operator
   source: ibm-operator-catalog
   sourceNamespace: openshift-marketplace
-  startingCSV: ibm-cp4a-operator.v21.2.3
