@@ -42,7 +42,6 @@ spec:
                   name: openshift-gitops-operator
                   source: redhat-operators
                   sourceNamespace: openshift-marketplace
-                  startingCSV: openshift-gitops-operator.v1.3.0
             - complianceType: musthave
               objectDefinition:
                 apiVersion: operators.coreos.com/v1alpha1
@@ -56,4 +55,3 @@ spec:
                   name: openshift-pipelines-operator-rh
                   source: redhat-operators
                   sourceNamespace: openshift-marketplace
-                  startingCSV: redhat-openshift-pipelines.v1.4.1

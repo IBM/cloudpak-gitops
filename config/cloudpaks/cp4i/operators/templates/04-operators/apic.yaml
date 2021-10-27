@@ -13,4 +13,3 @@ spec:
   name: ibm-apiconnect
   source: ibm-operator-catalog
   sourceNamespace: openshift-marketplace
-  startingCSV: ibm-apiconnect.v2.3.0

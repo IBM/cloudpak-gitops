@@ -13,4 +13,3 @@ spec:
   name: ibm-mq
   source: ibm-operator-catalog
   sourceNamespace: openshift-marketplace
-  startingCSV: ibm-mq.v1.5.0
