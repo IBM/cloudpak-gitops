@@ -10,7 +10,7 @@ metadata:
 spec:
   host: ""
   port:
-    targetPort: 8080
+    targetPort: http-listener
   to:
     kind: Service
     name: el-cicd-event-listener
