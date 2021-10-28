@@ -4,6 +4,7 @@ kind: CatalogSource
 metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "7"
+    olm.catalogImageTemplate: "icr.io/cpopen/ibm-operator-catalog:v{kube_major_version}.{kube_minor_version}"
   name: ibm-aiops-catalog
   namespace: openshift-marketplace
 spec:
