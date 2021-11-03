@@ -7,10 +7,10 @@ metadata:
   name: case-queues-1-qmgr
   namespace: {{.Values.argocd_app_namespace}}
 spec:
-  version: 9.2.2.0-r1
+  version: {{.Values.queue_manager.version}}
   license:
     accept: true
-    license: L-RJON-BXUPZ2
+    license: {{.Values.queue_manager.license}}
     use: NonProduction
   web:
     enabled: true
