@@ -6,4 +6,5 @@ resources:
   - mq-dev-patterns-node-deployment.yaml
   - openjdk-imagestream.yaml
   - node-imagestream.yaml
+  - sbo-account-role-binding.yaml
   - service-binding.yaml
