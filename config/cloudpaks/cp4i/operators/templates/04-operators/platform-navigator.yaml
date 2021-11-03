@@ -11,7 +11,7 @@ metadata:
   labels:
     operators.coreos.com/ibm-integration-platform-navigator.ibm-cloudpaks: ''
 spec:
-  channel: v5.0
+  channel: v5.1
   installPlanApproval: Automatic
   name: ibm-integration-platform-navigator
   source: ibm-operator-catalog

@@ -8,7 +8,7 @@ metadata:
   name: ibm-mq-ibm-operator
   namespace: {{.Values.argocd_app_namespace}}
 spec:
-  channel: v1.5
+  channel: v1.6
   installPlanApproval: Automatic
   name: ibm-mq
   source: ibm-operator-catalog
