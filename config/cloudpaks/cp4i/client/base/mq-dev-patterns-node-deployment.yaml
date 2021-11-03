@@ -25,7 +25,10 @@ spec:
         app.kubernetes.io/part-of: app-mq-dev-patterns
     spec:
       containers:
-        - image: image-registry.openshift-image-registry.svc:5000/dev/mq-dev-patterns-node:latest
+        - env:
+            - name: SERVICE_BINDING_ROOT
+              value: /config
+          image: image-registry.openshift-image-registry.svc:5000/dev/mq-dev-patterns-node:latest
           imagePullPolicy: Always
           name: mq-dev-patterns-node
           ports:

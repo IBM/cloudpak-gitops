@@ -16,7 +16,6 @@ spec:
     version: v1
     resource: deployments
   bindAsFiles: true
-  mountPath: /config
   services:
     - group: mq.ibm.com
       version: v1beta1

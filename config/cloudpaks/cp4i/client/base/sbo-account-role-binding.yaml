@@ -1,0 +1,18 @@
+---
+# https://github.ibm.com/IBMPrivateCloud/roadmap/issues/48099
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  creationTimestamp: null
+  name: sbo-admin-cloudpaks
+  namespace: ibm-cloudpaks
+  annotations:
+    argocd.argoproj.io/sync-wave: "10"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: admin
+subjects:
+  - kind: ServiceAccount
+    name: service-binding-operator
+    namespace: openshift-operators
