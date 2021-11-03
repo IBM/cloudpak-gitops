@@ -1,4 +1,5 @@
 ---
+# https://ibm.biz/integration-documentation
 apiVersion: apiconnect.ibm.com/v1beta1
 kind: APIConnectCluster
 metadata:
@@ -14,7 +15,7 @@ spec:
   license:
     accept: true
     use: nonproduction
-    license: L-RJON-C2YLGB
+    license: {{.Values.api_connect.license}}
   storageClassName: {{.Values.storageclass.rwo}}
   profile: n1xc10.m48
-  version: 10.0.3.0
+  version: {{.Values.api_connect.version}}

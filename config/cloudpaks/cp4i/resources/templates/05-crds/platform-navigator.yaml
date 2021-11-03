@@ -1,4 +1,5 @@
 ---
+# https://ibm.biz/integration-documentation
 apiVersion: integration.ibm.com/v1beta1
 kind: PlatformNavigator
 metadata:
@@ -9,9 +10,9 @@ metadata:
 spec:
   license:
     accept: true
-    license: L-RJON-BZFQU2
+    license: {{.Values.platform_navigator.license}}
   mqDashboard: true
-  version: 2021.2.1
+  version: {{.Values.platform_navigator.version}}
   replicas: 1
   storage:
     class: {{.Values.storageclass.rwx}}
