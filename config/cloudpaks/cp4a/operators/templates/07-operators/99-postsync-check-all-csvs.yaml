@@ -13,13 +13,14 @@ spec:
       containers:
         - name: config
           image: quay.io/openshift/origin-cli:latest
+          imagePullPolicy: IfNotPresent
           resources:
             requests:
               memory: "64Mi"
               cpu: "250m"
             limits:
-              memory: "128Mi"
-              cpu: "500m"
+              memory: "96Mi"
+              cpu: "300m"
           env:
             - name: TARGET_NAMESPACE
               value: "{{.Values.argocd_app_namespace}}"
@@ -38,10 +39,12 @@ spec:
               operation_limit_seconds=$(( $(date +%s) + 2400 ))
               csv_installing=0
               while [ ${current_seconds} -lt ${operation_limit_seconds} ]; do
-                if [ $(oc get csv -n "${TARGET_NAMESPACE}" | grep -vc Succeeded) -gt 1 ] || \
-                   [ $(oc get csv -n ibm-common-services | grep -vc Succeeded) -gt 1 ]; then
+                if [ $(oc get csv -n ibm-common-services | grep -vc Succeeded) -gt 1 ] || \
+                   [ $(oc get csv -n ${TARGET_NAMESPACE} | grep -vc Succeeded) -gt 1 ]; then
                   csv_installing=1
                   echo "INFO: CSVs still installing."
+                  oc get csv -n ibm-common-services | grep -vc Succeeded
+                  oc get csv -n ${TARGET_NAMESPACE} | grep -vc Succeeded
                   sleep 60
                 else
                   csv_installing=0

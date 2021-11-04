@@ -1,0 +1,96 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: "11"
+    argocd.argoproj.io/hook: PreSync
+  name: cp4aiops-patch-shared-iaf
+  namespace: openshift-gitops
+spec:
+  template:
+    spec:
+      containers:
+        - name: config
+          image: quay.io/openshift/origin-cli:latest
+          imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "150m"
+            limits:
+              memory: "128Mi"
+              cpu: "200m"
+          env:
+            - name: ARGOCD_NAMESPACE
+              value: "openshift-gitops"
+            - name: TARGET_NAMESPACE
+              value: "{{.Values.metadata.argocd_app_namespace}}"
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -eo pipefail
+              set -x
+
+              automation_base_instance_name="$(oc get AutomationBase --namespace "${TARGET_NAMESPACE}" -o jsonpath='{.items[].metadata.name}')" \
+              && reuse_iaf_ab=1 \
+              || reuse_iaf_ab=0
+
+              storage_class_rwx="$(oc get configmap argocd-cp4aiops-config \
+                --namespace "${ARGOCD_NAMESPACE}" -o jsonpath='{.data.storageclass\.rwx}')"
+
+              result=0
+              if [ "${reuse_iaf_ab}" -eq 0 ]; then
+                  echo "INFO: Did not find an existing instance of AutomationBase in the namespace."
+              else
+                  echo "INFO: Found an existing instance of AutomationBase in the namespace."
+                  abase_params=$(oc get AutomationBase "${automation_base_instance_name}" --namespace ${TARGET_NAMESPACE} -o jsonpath='{.spec}')
+                  if [[ ! ${abase_params} == *aiops* ]]; then
+                      echo "INFO: Patching it with AIOps requirements."
+                      app_patch=/tmp/patch.json
+                      cat<<EOF > "${app_patch}"
+              [
+                {
+                  "op": "add",
+                  "path": "/spec/elasticsearch/nodegroupspecs/0",
+                  "value": {
+                    "config": [
+                      {
+                        "key": "node.master",
+                        "value": "true"
+                      },
+                      {
+                        "key": "node.data",
+                        "value": "true"
+                      }
+                    ],
+                    "name": "aiops",
+                    "replicas": 3,
+                    "storage": {
+                      "class": "${storage_class_rwx}",
+                    }
+                  }
+                },
+                {
+                  "op": "replace",
+                  "path": "/spec/zen",
+                  "value": true
+                }
+              ]
+              EOF
+
+                      oc patch AutomationBase "${automation_base_instance_name}" \
+                        --namespace "${TARGET_NAMESPACE}" \
+                        --output yaml \
+                        --patch-file "${app_patch}" \
+                        --type=json \
+                      || result=0
+                  fi
+              fi
+
+              exit ${result}
+
+      restartPolicy: Never
+      serviceAccountName: {{.Values.serviceaccount.argocd_application_controller}}
+  backoffLimit: 2
