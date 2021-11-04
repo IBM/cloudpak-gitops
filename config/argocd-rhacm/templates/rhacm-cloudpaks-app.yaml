@@ -17,6 +17,11 @@ spec:
         - /spec/syncPolicy
         - /status
       kind: Application
+    - group: v1
+      # Due to serverless prereqs modifying annotations
+      jsonPointers:
+        - /metadata/annotations
+      kind: Namespace
   project: default
   source:
     helm:

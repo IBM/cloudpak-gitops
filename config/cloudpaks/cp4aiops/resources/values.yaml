@@ -1,4 +1,6 @@
 ---
+automation_base_instance_name: ""
+automation_ui_config_instance_name: ""
 serviceaccount:
   argocd_application_controller: openshift-gitops-argocd-application-controller
 metadata:

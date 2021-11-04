@@ -12,13 +12,14 @@ spec:
       containers:
         - name: config
           image: quay.io/openshift/origin-cli:latest
+          imagePullPolicy: IfNotPresent
           resources:
             requests:
               memory: "64Mi"
               cpu: "250m"
             limits:
               memory: "128Mi"
-              cpu: "500m"
+              cpu: "300m"
           env:
             - name: ARGOCD_APP_NAME
               value: cp4a-app

@@ -15,8 +15,13 @@ spec:
     - group: argoproj.io
       jsonPointers:
         - /spec/source/repoURL
+        - /spec/source/targetRevision
         - /status
       kind: Application
+    - group: v1
+      jsonPointers:
+        - /metadata/labels
+      kind: Namespace
   project: default
   source:
     helm:
