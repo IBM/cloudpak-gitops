@@ -6,8 +6,15 @@
 - [Installation](#installation)
   * [OpenShift GitOps installed in the RHACM server](#openshift-gitops-installed-in-the-rhacm-server)
   * [OpenShift GitOps is not installed in the RHACM server](#openshift-gitops-is-not-installed-in-the-rhacm-server)
+- [Using the policies](#using-the-policies)
+  * [Policies:](#policies-)
+  * [Label your clusters:](#label-your-clusters-)
+  * [Examples](#examples)
 - [Contributing](#contributing)
 - [References](#references)
+
+
+---
 
 ## Overview
 
@@ -85,6 +92,62 @@ Log in to the OpenShift cluster using the `oc` CLI, then issue the following com
       --set-string serviceaccount.argocd_application_controller=${sa_account} | \
    oc apply -f -
    ```
+
+## Using the policies
+
+Once Argo completes synchronizing the applications, your cluster will have policies, placement rules, and placement bindings to deploy Cloud Paks to matching clusters.
+
+### Policies:
+
+- `openshift-gitops-argo-app`: Configures an Argo server with custom health checks for Cloud Paks.
+- `openshift-gitops-cloudpaks-cp-shared`: Deploys common Cloud Pak prerequisites.
+- `openshift-gitops-cloudpaks-cp4a`: Deploys the Argo applications for Cloud Pak for Business Automation.
+- `openshift-gitops-cloudpaks-cp4aiops`: Deploys the Argo applications for Cloud Pak for Watson AIOps.
+- `openshift-gitops-cloudpaks-cp4i`: Deploys the Argo applications for Cloud Pak for Integration.
+- `openshift-gitops-installed`: Deploys OpenShift GitOps.
+- `openshift-gitops-preview-argo-app`: Same as "openshift-gitops-argo-app", but for the preview version of OpenShift GitOps shipped for OCP 4.6.
+- `openshift-gitops-preview-cloudpaks-cp-shared`: Same as "openshift-gitops-cloudpaks-cp-shared", but for the preview version of OpenShift GitOps shipped for OCP 4.6.
+- `openshift-gitops-preview-installed`: Same as "openshift-gitops-installed", but for the preview version of OpenShift GitOps shipped for OCP 4.6.
+
+### Label your clusters:
+
+Labels:
+
+- `gitops-branch` + `cp4a`: Placement for Cloud Pak for Business Automation.
+- `gitops-branch` + `cp4aiops`: Placement for Cloud Pak  for Cloud Pak for Watson AIOps.
+- `gitops-branch` + `cp4i`: Placement for Cloud Pak for Integration.
+
+Values for each label:
+
+- `gitops-branch`: Branch of this repo for the Argo applications, unless you are testing a change use `main`.
+- cp4a: Namespace for deploying the Cloud Pak, unless you want multiple Cloud Paks in the cluster but using different namespaces, use `ibm-cloudpaks`.
+- `cp4aiops`: Namespace for deploying the Cloud Pak, unless you want multiple Cloud Paks in the cluster but using different namespaces, use `ibm-cloudpaks`.
+- `cp4i`: Namespace for deploying the Cloud Pak, unless you want multiple Cloud Paks in the cluster but using different namespaces, use `ibm-cloudpaks`.
+
+### Examples
+
+Labeling an OCP 4.8 cluster with `gitops-branch=main` and `cp4i=ibm-cloudpaks` will deploy the following policies to a target cluster:
+
+- `openshift-gitops-installed`
+- `openshift-gitops-argo-app`
+- `openshift-gitops-cloudpaks-cp-shared`
+- `openshift-gitops-cloudpaks-cp4i`
+
+Labeling an OCP 4.8 cluster with `gitops-branch=main` and `cp4i=ibm-cloudpaks` will deploy the following policies to a target cluster:
+
+- `openshift-gitops-installed`: The latest version of the OpenShift GitOps operator.
+- `openshift-gitops-argo-app`: The Argo configuration is pulled from the `main` branch of this repository.
+`openshift-gitops-cloudpaks-cp-shared`: The Argo configuration is pulled from this repository's `main` branch.
+- `openshift-gitops-cloudpaks-cp4i`: The Cloud Pak is deployed to the namespace `ibm-cloudpaks`
+
+Labeling an OCP 4.6 cluster with `gitops-branch=56-feature-X`, `cp4i=ibm-cp4i`, `cp4a=ibm-cp4a` will deploy the following policies to a target cluster:
+
+- `openshift-gitops-preview-installed`: The pre-GA version of the OpenShift GitOps operator.
+`openshift-gitops-preview-argo-app`: The Argo configuration is pulled from this repository's `56-feature-X` branch.
+- `openshift-gitops-preview-cloudpaks-cp-shared`: The Argo configuration is pulled from the `56-feature-X` branch of this repository.
+- `openshift-gitops-cloudpaks-cp4i`: The Cloud Pak is deployed by Argo using the Cloud Pak Application definitions from the branch `56-feature-X` and targetting the namespace `ibm-cp4i`.
+- `openshift-gitops-cloudpaks-cp4a`: The Cloud Pak is deployed by Argo using the Cloud Pak Application definitions from the branch `56-feature-X` and targetting the namespace `ibm-cp4a`.
+
 
 ## Contributing
 
