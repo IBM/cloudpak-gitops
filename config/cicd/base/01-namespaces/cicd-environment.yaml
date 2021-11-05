@@ -4,7 +4,6 @@ kind: Namespace
 metadata:
   annotations:
     app.openshift.io/vcs-uri: https://github.com/IBM/cloudpak-gitops.git?ref=main
-    argocd.argoproj.io/sync-wave: "0"
   creationTimestamp: null
   name: cicd
 spec: {}

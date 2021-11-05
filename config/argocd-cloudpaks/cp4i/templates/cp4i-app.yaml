@@ -15,6 +15,7 @@ spec:
     - group: argoproj.io
       jsonPointers:
         - /spec/source/repoURL
+        - /spec/source/targetRevision
         - /status
       kind: Application
     - group: route.openshift.io

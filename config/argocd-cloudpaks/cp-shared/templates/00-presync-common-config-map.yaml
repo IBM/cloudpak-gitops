@@ -12,6 +12,7 @@ spec:
       containers:
         - name: config
           image: quay.io/openshift/origin-cli:latest
+          imagePullPolicy: IfNotPresent
           resources:
             requests:
               memory: "64Mi"

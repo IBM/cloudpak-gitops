@@ -9,12 +9,13 @@ metadata:
     argocd.argoproj.io/sync-wave: "100"
 spec:
   destination:
-    namespace: ibm-cloudpaks
+    namespace: {{.Values.argocd_app_namespace}}
     server: https://kubernetes.default.svc
   ignoreDifferences:
     - group: argoproj.io
       jsonPointers:
         - /spec/source/repoURL
+        - /spec/source/targetRevision
         - /status
       kind: Application
   project: default

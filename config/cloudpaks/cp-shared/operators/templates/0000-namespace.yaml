@@ -1,0 +1,15 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ibm-cloudpaks
+spec: {}
+status: {}
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  creationTimestamp: null
+  name: ibm-common-services
+spec: {}
+status: {}

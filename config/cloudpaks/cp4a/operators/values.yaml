@@ -3,3 +3,7 @@ metadata:
   individual_namespace: cp4a
 serviceaccount:
   argocd_application_controller: openshift-gitops-argocd-application-controller
+storageclass:
+  gold: cp4a-file-retain-gold-gid
+  silver: cp4a-file-retain-silver-gid
+  bronze: cp4a-file-retain-bronze-gid

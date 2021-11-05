@@ -14,8 +14,9 @@ spec:
   ignoreDifferences:
     - group: argoproj.io
       jsonPointers:
-        - /status
         - /spec/source/repoURL
+        - /spec/source/targetRevision
+        - /status
       kind: Application
   project: default
   source:

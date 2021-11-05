@@ -34,7 +34,6 @@ spec:
                 apiVersion: argoproj.io/v1alpha1
                 kind: Application
                 metadata:
-                  creationTimestamp: null
                   name: cp4i-app
                   namespace: openshift-gitops
                 spec:
@@ -64,3 +63,29 @@ spec:
                     path: config/argocd-cloudpaks/cp4i
                     repoURL: {{.Values.repoURL}}
                     targetRevision: '{{ "{{ fromClusterClaim \"gitops-branch\" }}" }}'
+                  syncPolicy:
+                    automated:
+                      prune: true
+                      selfHeal: true
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: argoproj.io/v1alpha1
+                kind: Application
+                metadata:
+                  name: cp4i-operators
+                  namespace: openshift-gitops
+                spec:
+                  syncPolicy:
+                    automated:
+                      selfHeal: true
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: argoproj.io/v1alpha1
+                kind: Application
+                metadata:
+                  name: cp4i-resources
+                  namespace: openshift-gitops
+                spec:
+                  syncPolicy:
+                    automated:
+                      selfHeal: true
