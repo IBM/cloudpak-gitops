@@ -5,8 +5,13 @@
 - [Overview](#overview)
   * [IBM Cloud Paks](#ibm-cloud-paks)
   * [GitOps](#gitops)
+  * [Governance Policies](#governance-policies)
 - [Installation](#installation)
+  * [Individual clusters](#individual-clusters)
+  * [Fleet of clusters with governance](#fleet-of-clusters-with-governance)
 - [Contributing](#contributing)
+
+---
 
 ## Overview
 
@@ -24,12 +29,25 @@ The supported deployment mechanisms for Cloud Paks are documented in their respe
 
 GitOps is a declarative way to implement continuous deployment for cloud-native applications. The Red Hat® OpenShift® Container Platform offers the [OpenShift GitOps operator](https://docs.openshift.com/container-platform/4.7/cicd/gitops/understanding-openshift-gitops.html), which manages the entire lifecycle for [Argo CD](https://argoproj.github.io/argo-cd/) and its components.
 
+### Governance Policies
+
+Practicing GitOps at scale, with dozens or even hundreds of clusters, benefits from a level of abstraction where each cluster follows a few select policies. This repository contains a simple deployment of governance policies for the deployment of OpenShift GitOps and Cloud Paks to a fleet of clusters.
+
 
 ## Installation
+
+### Individual clusters
 
 Argo applications are added to the Argo CD server. An application defines the source of the Kubernetes resources and the target cluster where those resources should be deployed. The Argo CD server "installs" a Cloud Pak by synchronizing the applications representing the Cloud Pak into the target cluster.
 
 Refer to the [installation page](docs/install.md) for instructions on configuring an OCP server with the OpenShift GitOps operator and then adding the Cloud Pak GitOps resources to the default GitOps server created by the operator.
+
+### Fleet of clusters with governance
+
+Use governance policies and placement rules to configure entire clusters with GitOps infrastructure and manage Cloud Pak deployments from Red Hat Advanced Cluster Management for Kubernetes (RHACM.)
+
+Refer to the [RHACM page](docs/rhacm.md) for an overview and instructions on how to add RHACM to an existing OpenShift cluster.
+
 
 ## Contributing
 

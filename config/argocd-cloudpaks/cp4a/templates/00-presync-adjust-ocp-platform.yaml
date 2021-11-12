@@ -35,24 +35,37 @@ spec:
               platform=$(oc get configmap argocd-cp4a-config \
                   --namespace "${ARGOCD_NAMESPACE}" -o jsonpath='{.data.shared_configuration\.sc_deployment_platform}')
 
-              if [ "${platform}" != "IBMCloud" ]; then
-                  helm_params=$(oc get Application "${ARGOCD_APP_NAME}" --namespace "${ARGOCD_NAMESPACE}" -o yaml -o jsonpath={.spec.source.helm.parameters})
-                  if [[ ! ${helm_params} == *OCP* ]]; then
-                      oc patch Application "${ARGOCD_APP_NAME}" \
-                          --namespace "${ARGOCD_NAMESPACE}" \
-                          -o yaml \
-                          --type=json \
-                          -p "[{\"op\":\"add\", \"path\":\"/spec/source/helm/parameters/0\", \"value\": {\"forceString\": true, \"name\": \"spec.shared_configuration.sc_deployment_platform\", \"value\": \"OCP\"}} ]" \
-                      && echo "INFO: Patched CR ${ARGOCD_APP_NAME}." \
-                      || echo "ERROR: Failed to patch application ${ARGOCD_APP_NAME}."
-                  else
-                      echo "INFO: Application ${ARGOCD_APP_NAME} was already patched."
-                  fi
-                  echo "INFO: Application ${ARGOCD_APP_NAME} current helm parameters:"
-                  oc get Application "${ARGOCD_APP_NAME}" \
-                        --namespace "${ARGOCD_NAMESPACE}" \
-                        -o jsonpath={.spec.source.helm.parameters}
+              if [ "${platform}" == "IBMCloud" ]; then
+                  exit
               fi
+
+              echo "INFO: Install Argo CLI."
+              # Install it from cluster, not from Internet, so airgap scenarios still work
+              argo_route=openshift-gitops-server
+              argo_secret=openshift-gitops-cluster
+              if [ {{.Values.serviceaccount.argocd_application_controller}} == argocd-cluster-argocd-application-controller ]; then
+                  argo_route=argocd-cluster-server
+                  argo_secret=argocd-cluster-cluster
+              fi
+
+              export HOME=/tmp
+              argo_cmd="${HOME}/argocd"
+              result=0
+
+              argo_url=$(oc get route ${argo_route} -n ${ARGOCD_NAMESPACE} -ojsonpath='{.spec.host}') \
+              && curl -skL "${argo_url}/download/argocd-linux-amd64" -o "${argo_cmd}" \
+              && chmod 755 "${argo_cmd}" \
+              && argo_pwd=$(oc get secret ${argo_secret} -n ${ARGOCD_NAMESPACE} -ojsonpath='{.data.admin\.password}' | base64 -d ; echo ) \
+              && "${argo_cmd}" login "${argo_url}" --username admin --password "${argo_pwd}" --insecure \
+              && "${argo_cmd}" app set "${ARGOCD_APP_NAME}" \
+                  --helm-set-string spec.shared_configuration.sc_deployment_platform="${platform}" \
+              && echo "INFO: ${ARGOCD_APP_NAME} successfully updated storage classes." \
+              || result=1
+
+              echo "INFO: Application ${ARGOCD_APP_NAME} current parameters:"
+              "${argo_cmd}" app get "${ARGOCD_APP_NAME}" --show-params
+
+              exit ${result}
       restartPolicy: Never
       serviceAccountName: {{.Values.serviceaccount.argocd_application_controller}}
   backoffLimit: 2

@@ -53,7 +53,7 @@ These steps assume you  logged in to the OCP server with the `oc` command-line i
 1. Add the Argo application:
 
    ```sh
-   #  Tthis step assumes you still have the shell variables assigned from previous actions
+   #  This step assumes you still have the shell variables assigned from previous actions
    argo_pwd=$(oc get secret ${argo_secret} \
                -n openshift-gitops \
                -o jsonpath='{.data.admin\.password}' | base64 -d ; echo ) \
@@ -119,28 +119,28 @@ Labels:
 
 Values for each label:
 
-- `gitops-branch`: Branch of this repo for the Argo applications, unless you are testing a change use `main`.
-- cp4a: Namespace for deploying the Cloud Pak, unless you want multiple Cloud Paks in the cluster but using different namespaces, use `ibm-cloudpaks`.
-- `cp4aiops`: Namespace for deploying the Cloud Pak, unless you want multiple Cloud Paks in the cluster but using different namespaces, use `ibm-cloudpaks`.
-- `cp4i`: Namespace for deploying the Cloud Pak, unless you want multiple Cloud Paks in the cluster but using different namespaces, use `ibm-cloudpaks`.
+- `gitops-branch`: Branch of this repo for the Argo applications. Unless you are developing and testing on a new branch, use the default value `main`.
+- cp4a: Namespace for deploying the Cloud Pak. Unless you want multiple Cloud Paks in different namespaces of the cluster, use the default value `ibm-cloudpaks`.
+- `cp4aiops`: Namespace for deploying the Cloud Pak. Unless you want multiple Cloud Paks in different namespaces of the cluster, use the default value `ibm-cloudpaks`.
+- `cp4i`: Namespace for deploying the Cloud Pak. Unless you want multiple Cloud Paks in different namespaces of the cluster, use the default value `ibm-cloudpaks`.
 
 ### Examples
 
-Labeling an OCP 4.8 cluster with `gitops-branch=main` and `cp4i=ibm-cloudpaks` will deploy the following policies to a target cluster:
+Labeling an OCP 4.8 cluster with `gitops-branch=main` and `cp4i=ibm-cloudpaks` deploys the following policies to a target cluster:
 
 - `openshift-gitops-installed`
 - `openshift-gitops-argo-app`
 - `openshift-gitops-cloudpaks-cp-shared`
 - `openshift-gitops-cloudpaks-cp4i`
 
-Labeling an OCP 4.8 cluster with `gitops-branch=main` and `cp4i=ibm-cloudpaks` will deploy the following policies to a target cluster:
+Labeling an OCP 4.8 cluster with `gitops-branch=main` and `cp4i=ibm-cloudpaks` deploys the following policies to a target cluster:
 
 - `openshift-gitops-installed`: The latest version of the OpenShift GitOps operator.
 - `openshift-gitops-argo-app`: The Argo configuration is pulled from the `main` branch of this repository.
 `openshift-gitops-cloudpaks-cp-shared`: The Argo configuration is pulled from this repository's `main` branch.
 - `openshift-gitops-cloudpaks-cp4i`: The Cloud Pak is deployed to the namespace `ibm-cloudpaks`
 
-Labeling an OCP 4.6 cluster with `gitops-branch=56-feature-X`, `cp4i=ibm-cp4i`, `cp4a=ibm-cp4a` will deploy the following policies to a target cluster:
+Labeling an OCP 4.6 cluster with `gitops-branch=56-feature-X`, `cp4i=ibm-cp4i`, `cp4a=ibm-cp4a` deploys the following policies to a target cluster:
 
 - `openshift-gitops-preview-installed`: The pre-GA version of the OpenShift GitOps operator.
 `openshift-gitops-preview-argo-app`: The Argo configuration is pulled from this repository's `56-feature-X` branch.
