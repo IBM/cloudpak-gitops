@@ -286,7 +286,6 @@ spec:
       sc_fast_file_storage_classname: {{.Values.storageclass.gold}}
       sc_medium_file_storage_classname: {{.Values.storageclass.silver}}
       sc_slow_file_storage_classname: {{.Values.storageclass.bronze}}
-    sc_deployment_hostname_suffix: {{.Values.spec.shared_configuration.sc_deployment_hostname_suffix}}
     root_ca_secret: icp4a-root-ca
     sc_content_initialization: false
     sc_deployment_license: non-production

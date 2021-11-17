@@ -42,56 +42,42 @@ spec:
                 exit 1
               fi
 
-              echo "INFO: Patching application ${ARGOCD_APP_NAME}."
-              helm_params=$(oc get Application "${ARGOCD_APP_NAME}" --namespace "${ARGOCD_NAMESPACE}" -o yaml -o jsonpath={.spec.source.helm.parameters})
-              if [[ ! ${helm_params} == *${storage_class_gold}* ]]; then
-                  app_patch=/tmp/patch.json
-              cat<<EOF > "${app_patch}"
-                [
-                  {
-                    "op": "add",
-                    "path": "/spec/source/helm/parameters/0",
-                    "value": {
-                      "forceString": true,
-                      "name": "storageclass.gold",
-                      "value": "${storage_class_gold}"
-                    }
-                  },
-                  {
-                    "op": "add",
-                    "path": "/spec/source/helm/parameters/0",
-                    "value": {
-                      "forceString": true,
-                      "name": "storageclass.silver",
-                      "value": "${storage_class_silver}"
-                    }
-                  },
-                  {
-                    "op": "add",
-                    "path": "/spec/source/helm/parameters/0",
-                    "value": {
-                      "forceString": true,
-                      "name": "storageclass.bronze",
-                      "value": "${storage_class_bronze}"
-                    }
-                  }
-                ]
-              EOF
-
-                  oc patch Application "${ARGOCD_APP_NAME}" \
-                      --namespace "${ARGOCD_NAMESPACE}" \
-                      -o yaml \
-                      --type=json \
-                      --patch-file "${app_patch}" \
-                  && echo "INFO: Patched application ${ARGOCD_APP_NAME}." \
-                  || echo "ERROR: Failed to patch application ${ARGOCD_APP_NAME}."
-              else
-                  echo "INFO: Application ${ARGOCD_APP_NAME} was already patched."
+              echo "INFO: Install Argo CLI."
+              # Install it from cluster, not from Internet, so airgap scenarios still work
+              argo_route=openshift-gitops-server
+              argo_secret=openshift-gitops-cluster
+              if [ {{.Values.serviceaccount.argocd_application_controller}} == argocd-cluster-argocd-application-controller ]; then
+                  argo_route=argocd-cluster-server
+                  argo_secret=argocd-cluster-cluster
               fi
+
+              export HOME=/tmp
+              argo_cmd="${HOME}/argocd"
+              result=0
+
+              argo_url=$(oc get route ${argo_route} -n ${ARGOCD_NAMESPACE} -ojsonpath='{.spec.host}') \
+              && curl -skL "${argo_url}/download/argocd-linux-amd64" -o "${argo_cmd}" \
+              && chmod 755 "${argo_cmd}" \
+              && argo_pwd=$(oc get secret ${argo_secret} -n ${ARGOCD_NAMESPACE} -ojsonpath='{.data.admin\.password}' | base64 -d ; echo ) \
+              && "${argo_cmd}" login "${argo_url}" --username admin --password "${argo_pwd}" --insecure \
+              || result=1
+
+              if [ ${result} -eq 0 ]; then
+                  echo "INFO: Patching storage for ${ARGOCD_APP_NAME}." \
+                  && "${argo_cmd}" app set "${ARGOCD_APP_NAME}" \
+                      --helm-set-string storageclass.bronze="${storage_class_bronze}" \
+                      --helm-set-string storageclass.gold="${storage_class_gold}" \
+                      --helm-set-string storageclass.silver="${storage_class_silver}" \
+                  && echo "INFO: ${ARGOCD_APP_NAME} successfully updated storage classes." \
+                  || result=1
+              else
+                  echo "ERROR: Unable to login to Argo."
+              fi
+
               echo "INFO: Application ${ARGOCD_APP_NAME} current helm parameters:"
-              oc get Application "${ARGOCD_APP_NAME}" \
-                    --namespace "${ARGOCD_NAMESPACE}" \
-                    -o jsonpath={.spec.source.helm.parameters}
+              "${argo_cmd}" app get "${ARGOCD_APP_NAME}" --show-params
+
+              exit ${result}
 
       restartPolicy: Never
       serviceAccountName: {{.Values.serviceaccount.argocd_application_controller}}

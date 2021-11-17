@@ -33,19 +33,12 @@ spec:
               result=0
 
               # https://www.ibm.com/docs/en/cloud-paks/cp-biz-automation/21.0.x?topic=deployment-installing-capabilities-in-operator-hub
-              # Demo installation requires a hostname suffix. We want to make this setting
-              # match the hostname of the cluster
-              ocp_domain=$(oc get ingress.config.openshift.io cluster -o jsonpath={.spec.domain})
-              if [ -z "${ocp_domain}" ]; then
-                  echo "ERROR: Unable to determine cluster domain."
-                  exit 1
-              fi
-
-              # https://www.ibm.com/docs/en/cloud-paks/cp-biz-automation/21.0.x?topic=deployment-installing-capabilities-in-operator-hub
               platform=$(oc get Infrastructure cluster  -o jsonpath={.status.platform})
               cp4a_platform="${platform}"
-              if [ "${cp4a_platform}" != "IBMCloud" ]; then
+              if [ "${cp4a_platform}" == "IBMCloud" ]; then
                 cp4a_platform=OCP
+              else
+                cp4a_platform=ROKS
               fi
 
               api_url=$(oc get Infrastructure cluster  -o jsonpath={.status.apiServerURL})
@@ -79,10 +72,9 @@ spec:
               oc get configmap "${config_map_name}" \
                   --namespace "${ARGOCD_NAMESPACE}" > /dev/null 2>&1 \
               && oc patch configmap "${config_map_name}" \
-                  --patch "{\"data\":{\"serviceaccount.argocd_application_controller\":\"{{.Values.serviceaccount.argocd_application_controller}}\", \"shared_configuration.sc_deployment_hostname_suffix\":\"${ocp_domain}\", \"shared_configuration.sc_deployment_platform\":\"${cp4a_platform}\", \"storageclass.gold\":\"${storage_class_gold}\", \"storageclass.silver\":\"${storage_class_silver}\", \"storageclass.bronze\":\"${storage_class_bronze}\" }}" \
+                  --patch "{\"data\":{\"serviceaccount.argocd_application_controller\":\"{{.Values.serviceaccount.argocd_application_controller}}\", \"shared_configuration.sc_deployment_platform\":\"${cp4a_platform}\", \"storageclass.gold\":\"${storage_class_gold}\", \"storageclass.silver\":\"${storage_class_silver}\", \"storageclass.bronze\":\"${storage_class_bronze}\" }}" \
                   --namespace "${ARGOCD_NAMESPACE}" \
               || oc create configmap "${config_map_name}" \
-                  --from-literal=shared_configuration.sc_deployment_hostname_suffix="${ocp_domain}" \
                   --from-literal=serviceaccount.argocd_application_controller="{{.Values.serviceaccount.argocd_application_controller}}" \
                   --from-literal=shared_configuration.sc_deployment_platform="${cp4a_platform}" \
                   --from-literal=storageclass.gold="${storage_class_gold}" \

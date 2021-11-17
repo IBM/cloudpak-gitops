@@ -71,27 +71,4 @@ spec:
                     targetRevision: '{{ "{{ fromClusterClaim \"gitops-branch\" }}" }}'
                   syncPolicy:
                     automated:
-                      prune: true
-                      selfHeal: true
-            - complianceType: musthave
-              objectDefinition:
-                apiVersion: argoproj.io/v1alpha1
-                kind: Application
-                metadata:
-                  name: cp4a-operators
-                  namespace: openshift-gitops
-                spec:
-                  syncPolicy:
-                    automated:
-                      selfHeal: true
-            - complianceType: musthave
-              objectDefinition:
-                apiVersion: argoproj.io/v1alpha1
-                kind: Application
-                metadata:
-                  name: cp4a-resources
-                  namespace: openshift-gitops
-                spec:
-                  syncPolicy:
-                    automated:
                       selfHeal: true

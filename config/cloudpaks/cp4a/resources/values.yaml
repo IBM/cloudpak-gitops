@@ -5,7 +5,6 @@ metadata:
   argocd_app_namespace: ibm-cloudpaks
 spec:
   shared_configuration:
-    sc_deployment_hostname_suffix: to-be-set-via-presync-hook
     sc_deployment_platform: ROKS
 storageclass:
   gold: cp4a-file-retain-gold-gid

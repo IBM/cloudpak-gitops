@@ -38,7 +38,7 @@ spec:
                   namespace: openshift-gitops
                 spec:
                   destination:
-                    namespace: ibm-cloudpaks
+                    namespace: {{.Values.metadata.argocd_app_namespace}}
                     server: https://kubernetes.default.svc
                   project: default
                   source:
@@ -59,7 +59,4 @@ spec:
                     targetRevision: '{{ "{{ fromClusterClaim \"gitops-branch\" }}" }}'
                   syncPolicy:
                     automated:
-                      prune: true
                       selfHeal: true
-                    syncOptions:
-                      - CreateNamespace=true
