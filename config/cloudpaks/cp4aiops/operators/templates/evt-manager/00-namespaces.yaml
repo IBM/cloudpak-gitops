@@ -1,0 +1,9 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  creationTimestamp: null
+  labels: {}
+  name: "{{.Values.metadata.argocd_app_namespace}}-evt"
+spec: {}
+status: {}

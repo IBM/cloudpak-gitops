@@ -2,7 +2,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: cp4a-config-map
+  name: pre-cp4a-config-map
   annotations:
     argocd.argoproj.io/hook: PreSync
   namespace: openshift-gitops
@@ -48,11 +48,24 @@ spec:
                  storage_class="{{.Values.storageclass.rwx.fyre}}"
               else
                 if [ "${platform}" == "AWS" ]; then
-                  storage_class="{{.Values.storageclass.rwx.aws}}"
+                  efs=$(oc get StorageClasses | grep openshift.org/aws-efs | cut -d " " -f 1)
+                  if [ -m "${efs}" ]; then
+                    storage_class="${efs}"
+                  else
+                    storage_class="{{.Values.storageclass.rwx.aws}}"
+                  fi
+                elif [ "${platform}" == "Azure" ]; then
+                  if oc get StorageClass azure-file; then
+                    storage_class=azure-file
+                  else
+                    storage_class="{{.Values.storageclass.rwx.azure}}"
+                  fi
                 elif [ "${platform}" == "IBMCloud" ]; then
                   vpc_class=$(oc get StorageClass | grep -c "ibmc-vpc" || result=0)
                   if [ ${vpc_class} -gt 0 ]; then
                       storage_class="{{.Values.storageclass.rwx.roksgen2}}"
+                  else
+                      storage_class_rwo="{{.Values.storageclass.rwx.roks}}"
                   fi
                 fi
               fi

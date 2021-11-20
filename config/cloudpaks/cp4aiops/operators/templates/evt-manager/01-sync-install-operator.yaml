@@ -1,0 +1,88 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: sync-install-evt-mgr-operator
+  annotations:
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/sync-wave: "100"
+  namespace: openshift-gitops
+spec:
+  template:
+    spec:
+      containers:
+        - name: config
+          image: quay.io/openshift/origin-cli:latest
+          imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "300m"
+            limits:
+              memory: "512Mi"
+              cpu: "350m"
+          env:
+            - name: ARGOCD_NAMESPACE
+              value: openshift-gitops
+            - name: IBM_ENTITLEMENT_SECRET
+              value: ibm-entitlement-key
+            - name: TARGET_NAMESPACE
+              value: "{{.Values.metadata.argocd_app_namespace}}-evt"
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -eo pipefail
+              set -x
+
+              # https://www.ibm.com/docs/en/cloud-paks/cloud-pak-watson-aiops/3.2.0?topic=em-starter-installation
+              export HOME=/tmp
+              oc extract secret/"${IBM_ENTITLEMENT_SECRET}" \
+                  --namespace "${ARGOCD_NAMESPACE}" \
+                  --keys=.dockerconfigjson \
+                  --to=/tmp \
+                  --confirm \
+              && if oc get secret noi-registry-secret --namespace "${TARGET_NAMESPACE}" 2>/dev/null ; then
+                    oc patch secret noi-registry-secret \
+                        --namespace "${TARGET_NAMESPACE}" \
+                        --patch "{\"data\": {\".dockerconfigjson\": \"$(cat /tmp/.dockerconfigjson | base64 -w0)\" }}"
+                 else
+                     oc create secret generic noi-registry-secret \
+                        --namespace "${TARGET_NAMESPACE}" \
+                        --from-file=.dockerconfigjson=/tmp/.dockerconfigjson
+                 fi \
+              && rm -rf /tmp/.dockerconfigjson \
+              && if [ $(oc get ingresscontroller default -n openshift-ingress-operator -o jsonpath='{.status.endpointPublishingStrategy.type}') = "HostNetwork" ]; then
+                    oc patch namespace default --type=json -p '[{"op":"add","path":"/metadata/labels","value":{"network.openshift.io/policy-group":"ingress"}}]'
+                 fi \
+              && curl -sL https://github.com/IBM/cloud-pak-cli/releases/download/v3.8.0/cloudctl-linux-amd64.tar.gz | tar xzf - -C "/tmp" \
+              && mv -f /tmp/cloudctl-linux-amd64 /tmp/cloudctl \
+              && chmod 755 /tmp/cloudctl \
+              && export PATH=/tmp:$PATH \
+              && cloudctl case save \
+                  --case ibm-netcool-prod \
+                  --outputdir /tmp/cases \
+                  --repo https://raw.githubusercontent.com/IBM/cloud-pak/master/repo/case \
+              && cd /tmp/cases \
+              && tar -xvf /tmp/cases/ibm-netcool-prod*.tgz \
+              && cloudctl case launch  \
+                --case ibm-netcool-prod  \
+                --namespace "${TARGET_NAMESPACE}" \
+                --inventory noiOperatorSetup  \
+                --action install-catalog \
+              && echo "INFO: Case launch install catalog successful." \
+              && cloudctl case launch  \
+                --case ibm-netcool-prod  \
+                --namespace "${TARGET_NAMESPACE}"  \
+                --inventory noiOperatorSetup  \
+                --action install-operator  \
+                --args "--secret noi-registry-secret" \
+              && echo "INFO: Case launch install operator successful." \
+              || {
+                 echo "ERROR: Event manager install preparation failed."
+                 exit 1
+              }
+
+      restartPolicy: Never
+      serviceAccountName: {{.Values.serviceaccount.argocd_application_controller}}
+  backoffLimit: 1

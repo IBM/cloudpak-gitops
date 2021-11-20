@@ -7,5 +7,5 @@ metadata:
   argocd_app_namespace: ibm-cloudpaks
   argocd_namespace: openshift-gitops
 storageclass:
-  rwo: ibmc-file-block
-  rwx: ibmc-file-gold-gid
+  rwo: ocs-storagecluster-ceph-rbd
+  rwx: ocs-storagecluster-cephfs

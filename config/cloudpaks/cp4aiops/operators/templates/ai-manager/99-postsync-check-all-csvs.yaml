@@ -3,7 +3,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: check-cp4a-csvs
+  name: post-check-aiops-ai-csvs
   annotations:
     argocd.argoproj.io/hook: PostSync
   namespace: openshift-gitops
@@ -23,7 +23,7 @@ spec:
               cpu: "300m"
           env:
             - name: TARGET_NAMESPACE
-              value: "{{.Values.argocd_app_namespace}}"
+              value: "{{.Values.metadata.argocd_app_namespace}}"
           command:
             - /bin/sh
             - -c
@@ -50,9 +50,6 @@ spec:
                 fi
                 current_seconds=$(( $(date +%s) ))
               done
-
-              oc get csv -n "${TARGET_NAMESPACE}"
-              oc get csv -n ibm-common-services
 
               if [ ${csv_installing} -eq 0 ]; then
                 echo "INFO: All CSVs are ready."

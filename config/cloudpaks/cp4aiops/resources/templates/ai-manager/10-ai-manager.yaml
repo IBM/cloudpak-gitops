@@ -1,0 +1,33 @@
+---
+apiVersion: orchestrator.aiops.ibm.com/v1alpha1
+kind: Installation
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: "210"
+  name: ibm-cp-watson-aiops
+  namespace: "{{.Values.metadata.argocd_app_namespace}}"
+spec:
+{{ if or (not ( eq ( default "" .Values.automation_base_instance_name ) "" )) (not ( eq ( default "" .Values.automation_ui_config_instance_name ) "" )) }}
+  automationFoundation:
+    {{ if not ( eq ( default "" .Values.automation_base_instance_name ) "" ) }}
+    automationBase: {{.Values.automation_base_instance_name}}
+    {{ end }}
+    {{ if not ( eq ( default "" .Values.automation_ui_config_instance_name ) "" ) }}
+    automationUIConfig: {{.Values.automation_ui_config_instance_name}}
+    {{ end }}
+{{ end }}
+  imagePullSecret: ibm-entitlement-key
+  license:
+    accept: true
+  pakModules:
+  - name: aiopsFoundation
+    enabled: true
+  - name: applicationManager
+    enabled: true
+  - name: aiManager
+    enabled: true
+  - name: connection
+    enabled: false
+  size: small
+  storageClass: {{.Values.storageclass.rwx}}
+  storageClassLargeBlock: {{.Values.storageclass.rwo}}

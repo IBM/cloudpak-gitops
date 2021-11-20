@@ -9,11 +9,13 @@ metadata:
 storageclass:
   rwo:
     aws: ocs-storagecluster-ceph-rbd
+    azure: ocs-storagecluster-ceph-rbd
     fyre: rook-ceph-block
     roks: ibmc-block-gold
     roksgen2: ocs-storagecluster-ceph-rbd
   rwx:
     aws: ocs-storagecluster-cephfs
+    azure: ocs-storagecluster-cephfs
     fyre: rook-cephfs
     roks: ibmc-file-gold-gid
     roksgen2: ocs-storagecluster-cephfs
