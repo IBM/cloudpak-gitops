@@ -5,7 +5,7 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "11"
     argocd.argoproj.io/hook: PreSync
-  name: cp4aiops-patch-shared-iaf
+  name: pre-cp4aiops-patch-shared-iaf
   namespace: openshift-gitops
 spec:
   template:

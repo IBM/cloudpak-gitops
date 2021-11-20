@@ -4,8 +4,8 @@ serviceaccount:
 metadata:
   argocd_namespace: openshift-gitops
 storageclass:
-  rwo: ibmc-block-gold
-  rwx: ibmc-file-gold-gid
+  rwo: ocs-storagecluster-ceph-rbd
+  rwx: ocs-storagecluster-cephfs
 api_connect:
   license: L-RJON-C2YLGB
   version: 10.0.3

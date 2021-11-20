@@ -1,0 +1,17 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+  creationTimestamp: null
+  name: openshift-gitops-admin-evt
+  namespace: "{{.Values.metadata.argocd_app_namespace}}-evt"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+  - kind: ServiceAccount
+    name: {{.Values.serviceaccount.argocd_application_controller}}
+    namespace: openshift-gitops

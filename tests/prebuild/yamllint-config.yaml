@@ -3,7 +3,7 @@ ignore: |
   config/rhacm/cloudpaks/templates/placement-argocd.yaml
   config/rhacm/cloudpaks/templates/placement-cloudpaks.yaml
   config/rhacm/cloudpaks/templates/placement-cp-shared.yaml
-  config/cloudpaks/cp4aiops/resources/templates/05-installation.yaml
+  config/cloudpaks/cp4aiops/resources/templates/ai-manager/10-ai-manager.yaml
 
 rules:
   yaml-files:

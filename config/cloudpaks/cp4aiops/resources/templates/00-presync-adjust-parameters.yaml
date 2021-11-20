@@ -3,9 +3,8 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   annotations:
-    argocd.argoproj.io/sync-wave: "11"
     argocd.argoproj.io/hook: PreSync
-  name: cp4aiops-adjust-parameters
+  name: pre-cp4aiops-adjust-parameters
   namespace: openshift-gitops
 spec:
   template:
@@ -25,7 +24,7 @@ spec:
             - name: ARGOCD_NAMESPACE
               value: "openshift-gitops"
             - name: TARGET_NAMESPACE
-              value: "{{.Values.metadata.argocd_app_namespace}}"
+              value: "{{.Values.metadata.argocd_app_namespace}}-evt"
           command:
             - /bin/sh
             - -c
@@ -42,6 +41,9 @@ spec:
                 echo "ERROR: Did not find storage classes for target platform."
                 exit 1
               fi
+
+               cluster_domain=$(oc get configmap argocd-cp4aiops-config \
+                  --namespace "${ARGOCD_NAMESPACE}" -o jsonpath='{.data.cluster_domain}')
 
               automation_base_instance_name="$(oc get AutomationBase.base.automation.ibm.com --namespace "${TARGET_NAMESPACE}" -o jsonpath='{.items[].metadata.name}' 2> /dev/null)" \
               && reuse_iaf_ab=1 \
@@ -76,6 +78,7 @@ spec:
                       if [ -n "${storage_class_rwo}" ] && [ -n "${storage_class_rwx}" ]; then
                           echo "INFO: Patching storage for ${app_name}." \
                           && "${argo_cmd}" app set "${app_name}" \
+                              --helm-set-string cluster_domain="${cluster_domain}" \
                               --helm-set-string storageclass.rwo="${storage_class_rwo}" \
                               --helm-set-string storageclass.rwx="${storage_class_rwx}" \
                           && echo "INFO: ${app_name} successfully updated storage classes." \

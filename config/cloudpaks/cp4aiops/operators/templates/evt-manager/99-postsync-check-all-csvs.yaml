@@ -3,7 +3,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: check-aiops-csvs
+  name: post-check-aiops-evt-csvs
   annotations:
     argocd.argoproj.io/hook: PostSync
   namespace: openshift-gitops
@@ -23,9 +23,7 @@ spec:
               cpu: "300m"
           env:
             - name: TARGET_NAMESPACE
-              value: "{{.Values.metadata.argocd_app_namespace}}"
-            - name: WAIT_TIME
-              value: "{{.Values.metadata.post_install_wait}}"
+              value: "{{.Values.metadata.argocd_app_namespace}}-evt"
           command:
             - /bin/sh
             - -c

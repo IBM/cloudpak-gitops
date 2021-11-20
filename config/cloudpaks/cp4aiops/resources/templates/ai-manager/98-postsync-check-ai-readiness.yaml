@@ -3,8 +3,9 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: check-evt-group
+  name: post-check-ai-ready
   annotations:
+    argocd.argoproj.io/sync-wave: "98"
     argocd.argoproj.io/hook: PostSync
   namespace: openshift-gitops
 spec:
@@ -39,52 +40,40 @@ spec:
               operation_limit_seconds=$(( $(date +%s) + 7200 ))
               pods_found=0
               while [ ${current_seconds} -lt ${operation_limit_seconds} ]; do
-                if [ $(oc get pods \
+                if oc get pods \
                     -l app.kubernetes.io/managed-by=ibm-elastic-operator \
-                    -n "${TARGET_NAMESPACE}" | wc -l) -gt 1 ] && \
-                    [ $(oc get pods \
-                    -l app.kubernetes.io/component=event-grouping \
-                    -n "${TARGET_NAMESPACE}" | wc -l) -gt 1 ]; then
+                    -n "${TARGET_NAMESPACE}" &&
+                   oc get route -n "${TARGET_NAMESPACE}" cpd; then
                    pods_found=1
                 else
                    pods_found=0
                 fi
                 if [ ${pods_found} -eq 0 ]; then
-                  echo "INFO: Pods not found, waiting some more."
+                  echo "INFO: AI Manager resources not ready, waiting some more."
                   sleep 60
                 else
-                  echo "INFO: Pods found."
+                  echo "INFO: AI Manager resources found."
                   break;
                 fi
                 current_seconds=$(( $(date +%s) ))
               done
 
-              echo "INFO: Checking event grouping pod."
+              echo "INFO: Checking AI Manager resources."
               oc wait pods \
                 -l app.kubernetes.io/managed-by=ibm-elastic-operator \
-                -n "${TARGET_NAMESPACE}" \
-                --for=condition=Ready=true \
-                --timeout="${WAIT_TIME}" \
-              && oc wait pod \
-                -l app.kubernetes.io/component=event-grouping \
                 -n "${TARGET_NAMESPACE}" \
                 --for=condition=Ready=true \
                 --timeout="${WAIT_TIME}" \
               || result=1
 
               if [ ${result} -eq 0 ]; then
-                echo "INFO: All event pods are ready."
+                echo "INFO: All AI Manager resources are ready."
               else
-                echo "ERROR: Event pods are not ready."
-                oc get pod -n "${TARGET_NAMESPACE}"
-              fi
-
-              cemphase=$(oc get cemformation evtmanager -n "${TARGET_NAMESPACE}" -o jsonpath='{.status.phase}')
-              if [ "${cemphase}" == "Error" ]; then
-                echo "INFO: CEM Formation phase is not OK: ${cemphase}"
-                result=1
-              else
-                echo "INFO: CEM Formation is OK."
+                echo "ERROR: AI Manager resources not ready after specified period."
+                oc get pods \
+                    -l app.kubernetes.io/managed-by=ibm-elastic-operator \
+                    -n "${TARGET_NAMESPACE}" || result=1
+                oc describe route -n "${TARGET_NAMESPACE}" cpd || result=1
               fi
 
               exit "${result}"
