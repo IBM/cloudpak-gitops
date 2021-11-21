@@ -85,6 +85,22 @@ Updating the OCP global pull secret triggers the staggered restart of each node 
 You can perform the reloading or replacement of workers directly from the cluster page in the IBM Cloud console or use a terminal, following the instructions listed [here](https://cloud.ibm.com/docs/openshift?topic=openshift-registry&_ga=2.262606922.775805413.1629911830-822975074.1629149367#cluster_global_pull_secret).
 
 
+## Update the pull secret in the openshift-gitops namespace
+
+Global pull secrets require granting too much priviledge to the OpenShift GitOps service account, so we have started to transition to the definition of pull secrets at a namespace level.
+
+The Application resources are transitioning to use `PreSync` hooks to copy the entitlement key from a `Secret` named `ibm-entitlement-key` in the `openshift-gitops` namespace, so issue the following command to create that secret:
+
+```
+ oc create secret docker-registry ibm-entitlement-key \
+        --docker-server=cp.icr.io \
+        --docker-username=cp \
+        --docker-password="${IBM_ENTITLEMENT_KEY:?}" \
+        --docker-email="non-existent-replace-with0-yours@email.com" \
+        --namespace=openshift-gitops
+```
+
+
 ## Adding Cloud Pak GitOps Application objects to your GitOps server
 
 The instructions in this section assume you have administrative privileges to the cluster.
