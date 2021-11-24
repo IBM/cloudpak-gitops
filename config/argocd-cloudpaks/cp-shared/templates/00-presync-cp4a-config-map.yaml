@@ -48,7 +48,7 @@ spec:
                  storage_class="{{.Values.storageclass.rwx.fyre}}"
               else
                 if [ "${platform}" == "AWS" ]; then
-                  efs=$(oc get StorageClasses | grep openshift.org/aws-efs | cut -d " " -f 1)
+                  efs=$(oc get StorageClasses | grep openshift.org/aws-efs | cut -d " " -f 1) || true
                   if [ -m "${efs}" ]; then
                     storage_class="${efs}"
                   else
