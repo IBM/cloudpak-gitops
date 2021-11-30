@@ -18,6 +18,10 @@ spec:
         - /spec/source/targetRevision
         - /status
       kind: Application
+    - group: noi.ibm.com
+      jsonPointers:
+        - /spec/clusterDomain
+      kind: NOI
   project: default
   source:
     helm:
