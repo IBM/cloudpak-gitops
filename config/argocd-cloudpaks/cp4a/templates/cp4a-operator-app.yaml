@@ -26,6 +26,8 @@ spec:
           value: ${ARGOCD_APP_NAME}
         - name: argocd_app_namespace
           value: ${ARGOCD_APP_NAMESPACE}
+        - name: metadata.argocd_app_namespace
+          value: {{.Values.metadata.argocd_app_namespace}}
         - name: repoURL
           value: ${ARGOCD_APP_SOURCE_REPO_URL}
         - name: serviceaccount.argocd_application_controller

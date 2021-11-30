@@ -1,6 +1,5 @@
 ---
 metadata:
   argocd_app_namespace: ibm-cloudpaks
-  individual_namespace: cp4aiops
 serviceaccount:
   argocd_application_controller: openshift-gitops-argocd-application-controller

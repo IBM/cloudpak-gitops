@@ -320,14 +320,20 @@ After completing the list of activities listed in the previous sections, you hav
    # config/argocd-cloudpaks/cp4i/cp4a, config/argocd-cloudpaks/cp4i, 
    # etc
    app_path=config/argocd-cloudpaks/${cp}
+   cp_namespace=ibm-cloudpaks
+   gitops_branch=main
 
    argocd app create "${app_name}" \
          --project default \
          --dest-namespace openshift-gitops \
          --dest-server https://kubernetes.default.svc \
-         --repo https://github.com/IBM/cloudpak-gitops \
-         --path "${app_path}" \
+         --helm-set-string metadata.argocd_app_namespace="${cp_namespace}" \
+         --helm-set-string repoURL=https://github.com/IBM/cloudpak-gitops \
          --helm-set-string serviceaccount.argocd_application_controller=${sa_account} \
+         --helm-set-string targetRevision="${gitops_branch}" \
+         --path "${app_path}" \
+         --repo https://github.com/IBM/cloudpak-gitops \
+         --revision "${gitops_branch}" \
          --sync-policy automated \
          --upsert 
    argocd app wait "${app_name}"
