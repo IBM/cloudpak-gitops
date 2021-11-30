@@ -54,8 +54,6 @@ spec:
                           value: ${ARGOCD_APP_SOURCE_REPO_URL}
                         - name: serviceaccount.argocd_application_controller
                           value: '{{ "{{ fromConfigMap \"openshift-gitops\" \"argocd-cp4a-config\" \"serviceaccount.argocd_application_controller\" }}" }}'
-                        - name: spec.shared_configuration.sc_deployment_hostname_suffix
-                          value: '{{ "{{ fromConfigMap \"openshift-gitops\" \"argocd-cp4a-config\" \"shared_configuration.sc_deployment_hostname_suffix\" }}" }}'
                         - name: spec.shared_configuration.sc_deployment_platform
                           value: '{{ "{{ fromConfigMap \"openshift-gitops\" \"argocd-cp4a-config\" \"shared_configuration.sc_deployment_platform\" }}" }}'
                         - name: storageclass.bronze

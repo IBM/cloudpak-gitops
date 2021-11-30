@@ -18,10 +18,6 @@ spec:
         - /spec/source/targetRevision
         - /status
       kind: Application
-    - group: icp4a.ibm.com
-      jsonPointers:
-        - /spec.shared_configuration.sc_deployment_hostname_suffix
-      kind: ICP4ACluster
   project: default
   source:
     helm:
@@ -36,8 +32,6 @@ spec:
           value: ${ARGOCD_APP_SOURCE_REPO_URL}
         - name: serviceaccount.argocd_application_controller
           value: {{.Values.serviceaccount.argocd_application_controller}}
-        - name: spec.shared_configuration.sc_deployment_hostname_suffix
-          value: {{.Values.spec.shared_configuration.sc_deployment_hostname_suffix}}
         - name: spec.shared_configuration.sc_deployment_platform
           value: {{.Values.spec.shared_configuration.sc_deployment_platform}}
         - name: storageclass.bronze
