@@ -5,7 +5,6 @@ ignore: |
   config/cloudpaks/cp4aiops/operators/templates/ai-manager/00-namespaces.yaml
   config/cloudpaks/cp4aiops/operators/templates/ai-manager/05-operator-group.yaml
   config/cloudpaks/cp4aiops/resources/templates/ai-manager/10-ai-manager.yaml
-  config/cloudpaks/cp4aiops/operators/templates/evt-manager/00-namespaces.yaml
   config/cloudpaks/cp4i/operators/templates/01-namespaces/individual.yaml
   config/cloudpaks/cp4i/operators/templates/04-operators/operator-group.yaml
   config/rhacm/cloudpaks/templates/placement-argocd.yaml
