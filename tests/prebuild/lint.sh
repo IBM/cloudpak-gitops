@@ -17,11 +17,15 @@ yamllint -v > /dev/null 2>&1 \
 || 
 {
     log "INFO: Installing yamllint"
-    apt-get update && \
-    {
-        apt-get install yamllint -y \
-            || log "ERROR: yamllint installation failed."
-    }
+    if [ "$(uname)" == "Darwin" ]; then
+        brew install yamllint
+    else
+        apt-get update && \
+        {
+            apt-get install yamllint -y \
+                || log "ERROR: yamllint installation failed."
+        }
+    fi
 }
 
 install_helm_3=0

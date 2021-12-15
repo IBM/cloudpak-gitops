@@ -1,0 +1,69 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+  name: "pre-cp4d-set-kernel-override"
+  namespace: openshift-gitops
+spec:
+  template:
+    spec:
+      containers:
+        - name: config
+          image: quay.io/openshift/origin-cli:latest
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "250m"
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
+          env:
+            - name: ARGOCD_APP_NAME
+              value: "cp4d-wkc"
+            - name: ARGOCD_NAMESPACE
+              value: "openshift-gitops"
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -eo pipefail
+              set -x
+              platform=$(oc get Infrastructure cluster  -o jsonpath={.status.platform})
+              if [ "${platform}" != "IBMCloud" ]; then
+                echo "INFO: No need to patch kernel parameters if not ROKS."
+                exit 0
+              fi
+
+              echo "INFO: Install Argo CLI."
+              # Install it from cluster, not from Internet, so airgap scenarios still work
+              argo_route=openshift-gitops-server
+              argo_secret=openshift-gitops-cluster
+              if [ {{.Values.serviceaccount.argocd_application_controller}} == argocd-cluster-argocd-application-controller ]; then
+                  argo_route=argocd-cluster-server
+                  argo_secret=argocd-cluster-cluster
+              fi
+
+              export HOME=/tmp
+              argo_cmd="${HOME}/argocd"
+              result=0
+
+              argo_url=$(oc get route ${argo_route} -n ${ARGOCD_NAMESPACE} -ojsonpath='{.spec.host}') \
+              && curl -skL "${argo_url}/download/argocd-linux-amd64" -o "${argo_cmd}" \
+              && chmod 755 "${argo_cmd}" \
+              && argo_pwd=$(oc get secret ${argo_secret} -n ${ARGOCD_NAMESPACE} -ojsonpath='{.data.admin\.password}' | base64 -d ; echo ) \
+              && "${argo_cmd}" login "${argo_url}" --username admin --password "${argo_pwd}" --insecure \
+              && "${argo_cmd}" app set "${ARGOCD_APP_NAME}" \
+                  --helm-set-string spec.set_kernel_params="true" \
+              && echo "INFO: ${ARGOCD_APP_NAME} successfully updated storage classes." \
+              || result=1
+
+              echo "INFO: Application ${ARGOCD_APP_NAME} current parameters:"
+              "${argo_cmd}" app get "${ARGOCD_APP_NAME}" --show-params
+
+              exit ${result}
+
+      restartPolicy: Never
+      serviceAccountName: {{.Values.serviceaccount.argocd_application_controller}}
+  backoffLimit: 2

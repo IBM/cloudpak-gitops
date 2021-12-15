@@ -1,0 +1,60 @@
+---
+# https://www.ibm.com/docs/en/cloud-paks/cp-data/4.0?topic=installing
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cp4d-app
+  namespace: openshift-gitops
+spec:
+  destination:
+    server: 'https://kubernetes.default.svc'
+  ignoreDifferences:
+    - group: argoproj.io
+      jsonPointers:
+        - /spec/source/repoURL
+        - /spec/source/targetRevision
+        - /status
+      kind: Application
+  project: default
+  source:
+    helm:
+      parameters:
+        - name: argocd_app_name
+          value: ${ARGOCD_APP_NAME}
+        - name: argocd_app_namespace
+          value: ${ARGOCD_APP_NAMESPACE}
+        - name: metadata.argocd_app_namespace
+          value: {{.Values.metadata.argocd_app_namespace}}
+        - name: metadata.operators_namespace
+          value: {{.Values.metadata.operators_namespace}}
+        - name: modules.cognos
+          value: "{{.Values.modules.cognos}}"
+        - name: modules.dv
+          value: "{{.Values.modules.dv}}"
+        - name: modules.rstudio
+          value: "{{.Values.modules.rstudio}}"
+        - name: modules.wkc
+          value: "{{.Values.modules.wkc}}"
+        - name: modules.wml
+          value: "{{.Values.modules.wml}}"
+        - name: modules.wos
+          value: "{{.Values.modules.wos}}"
+        - name: modules.wsl
+          value: "{{.Values.modules.wsl}}"
+        - name: repoURL
+          value: ${ARGOCD_APP_SOURCE_REPO_URL}
+        - name: serviceaccount.argocd_application_controller
+          value: {{.Values.serviceaccount.argocd_application_controller}}
+        - name: storageclass.rwo
+          value: {{.Values.storageclass.rwo}}
+        - name: storageclass.rwx
+          value: {{.Values.storageclass.rwx}}
+        - name: targetRevision
+          value: ${ARGOCD_APP_SOURCE_TARGET_REVISION}
+    path: config/argocd-cloudpaks/cp4d
+    repoURL: {{.Values.repoURL}}
+    targetRevision: {{.Values.targetRevision}}
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

@@ -1,0 +1,16 @@
+---
+apiVersion: ca.cpd.ibm.com/v1
+kind: CAService
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: "200"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+  name: ca-addon-cr
+  namespace: {{.Values.metadata.argocd_app_namespace}}
+spec:
+  license:
+    accept: true
+  namespace: {{.Values.metadata.argocd_app_namespace}}
+  storage_class: "{{.Values.storageclass.rwo}}"
+  # https://www.ibm.com/docs/en/cloud-paks/cp-data/4.0?topic=planning-operator-operand-versions
+  version: 4.0.3

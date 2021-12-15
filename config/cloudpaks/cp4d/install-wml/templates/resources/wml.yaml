@@ -1,0 +1,20 @@
+---
+apiVersion: wml.cpd.ibm.com/v1beta1
+kind: WmlBase
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: "200"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+  name: wml-cr
+  namespace: {{.Values.metadata.argocd_app_namespace}}
+  labels:
+    app.kubernetes.io/instance: wml-cr
+    app.kubernetes.io/managed-by: ibm-cpd-wml-operator
+    app.kubernetes.io/name: ibm-cpd-wml-operator
+spec:
+  ignoreForMaintenance: false
+  license:
+    accept: true
+    license: Enterprise
+  scaleConfig: small
+  storageClass: {{.Values.storageclass.rwx}}

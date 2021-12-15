@@ -1,0 +1,80 @@
+---
+# https://www.ibm.com/docs/en/cloud-paks/cp-data/4.0?topic=client-using-custom-tls-certificate-connect-platform
+# Section "12. Configure signed certificates for NGINX"
+apiVersion: batch/v1
+kind: Job
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: "401"
+    argocd.argoproj.io/hook: PostSync
+  name: post-cp4d-adjust-certs
+  namespace: openshift-gitops
+spec:
+  template:
+    spec:
+      containers:
+        - name: config
+          image: quay.io/openshift/origin-cli:latest
+          imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              memory: "384Mi"
+              cpu: "200m"
+            limits:
+              memory: "384Mi"
+              cpu: "200m"
+          env:
+            - name: ARGOCD_NAMESPACE
+              value: "openshift-gitops"
+            - name: TARGET_NAMESPACE
+              value: "{{.Values.metadata.argocd_app_namespace}}"
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -eo pipefail
+              set -x
+
+              secret_found=0
+              oc project "${TARGET_NAMESPACE}" \
+              && secret_set=$(oc get secret external-tls-secret 2> /dev/null) \
+              && secret_found=1 \
+              || secret_found=0
+
+              if [ "${secret_found}" -eq 1 ]; then
+                  echo "INFO: External secret already set."
+                  exit 0
+              fi
+
+              result=0
+              ingress_secret_name=$(oc get ingresscontroller.operator default \
+                  --namespace openshift-ingress-operator \
+                  -o jsonpath='{.spec.defaultCertificate.name}') || result=1
+
+              if [ -n "${ingress_secret_name}" ] && [ "${result}" -eq 0 ]; then
+                  oc extract secret/${ingress_secret_name} \
+                      -n openshift-ingress \
+                      --keys=tls.crt,tls.key \
+                      --confirm \
+                  && oc delete secret external-tls-secret \
+                        --ignore-not-found=true \
+                  && oc create secret generic external-tls-secret \
+                        --from-file=cert.crt=tls.crt \
+                        --from-file=cert.key=tls.key \
+                        --dry-run=client -o yaml \
+                      | oc apply -f - \
+                  && oc rollout restart Deployment/ibm-nginx \
+                  && sleep 3 \
+                  && oc rollout status Deployment/ibm-nginx \
+                  && echo "INFO: External secret set." \
+                  || {
+                      echo "ERROR: External secret not set."
+                      result=1
+                  }
+              fi
+
+              exit ${result}
+
+      restartPolicy: Never
+      serviceAccountName: {{.Values.serviceaccount.argocd_application_controller}}
+  backoffLimit: 1

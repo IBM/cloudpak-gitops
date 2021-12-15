@@ -9,7 +9,7 @@ metadata:
     argocd.argoproj.io/sync-wave: "100"
 spec:
   destination:
-    namespace: {{.Values.metadata.argocd_app_namespace}}
+    namespace: "{{.Values.metadata.argocd_app_namespace}}"
     server: https://kubernetes.default.svc
   ignoreDifferences:
     - group: argoproj.io

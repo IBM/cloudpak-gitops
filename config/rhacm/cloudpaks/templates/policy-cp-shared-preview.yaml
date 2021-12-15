@@ -39,7 +39,7 @@ spec:
                   namespace: openshift-gitops
                 spec:
                   destination:
-                    namespace: {{.Values.metadata.argocd_app_namespace}}
+                    namespace: "{{.Values.metadata.argocd_app_namespace}}"
                     server: https://kubernetes.default.svc
                   project: default
                   source:
@@ -52,7 +52,7 @@ spec:
                         - name: repoURL
                           value: ${ARGOCD_APP_SOURCE_REPO_URL}
                         - name: serviceaccount.argocd_application_controller
-                          value: argocd-cluster-argocd-application-controller
+                          value: openshift-gitops-argocd-application-controller
                         - name: targetRevision
                           value: ${ARGOCD_APP_SOURCE_TARGET_REVISION}
                     path: config/argocd-cloudpaks/cp-shared

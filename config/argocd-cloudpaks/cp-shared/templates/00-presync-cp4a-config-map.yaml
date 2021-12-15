@@ -36,9 +36,9 @@ spec:
               platform=$(oc get Infrastructure cluster  -o jsonpath={.status.platform})
               cp4a_platform="${platform}"
               if [ "${cp4a_platform}" == "IBMCloud" ]; then
-                cp4a_platform=OCP
-              else
                 cp4a_platform=ROKS
+              else
+                cp4a_platform=OCP
               fi
 
               api_url=$(oc get Infrastructure cluster  -o jsonpath={.status.apiServerURL})
