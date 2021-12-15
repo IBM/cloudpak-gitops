@@ -1,0 +1,12 @@
+---
+# This operator group may or may no be created by a Cloud Pak, so ensuring its creation here.
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
+metadata:
+  name: ibm-common-services-operators
+  namespace: ibm-common-services
+  annotations:
+    argocd.argoproj.io/sync-wave: "100"
+spec:
+  targetNamespaces:
+    - ibm-common-services

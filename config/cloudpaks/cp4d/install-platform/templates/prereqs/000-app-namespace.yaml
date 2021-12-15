@@ -1,0 +1,10 @@
+{{ if not ( eq ( default "" .Values.metadata.argocd_app_namespace ) "ibm-cloudpaks" ) }}
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  creationTimestamp: null
+  name: {{.Values.metadata.argocd_app_namespace}}
+spec: {}
+status: {}
+{{ end }}

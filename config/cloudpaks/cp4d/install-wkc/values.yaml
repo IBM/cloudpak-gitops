@@ -1,0 +1,15 @@
+---
+repoURL: https://github.com/IBM/cloudpak-gitops
+serviceaccount:
+  argocd_application_controller: openshift-gitops-argocd-application-controller
+metadata:
+  argocd_app_namespace: ibm-cloudpaks
+  argocd_namespace: openshift-gitops
+  operators_namespace: ibm-common-services
+  cp4dservice: wkc
+spec:
+  set_kernel_params: "false"
+storageclass:
+  rwx: "set in presync-hook of parent app"
+  rwo: "set in presync-hook of parent app"
+targetRevision: main

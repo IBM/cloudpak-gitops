@@ -1,0 +1,11 @@
+---
+apiVersion: operator.ibm.com/v1alpha1
+kind: OperandRequest
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: "150"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+  name: empty-request
+  namespace: {{.Values.metadata.argocd_app_namespace}}
+spec:
+  requests: []

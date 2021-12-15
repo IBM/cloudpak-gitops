@@ -1,0 +1,10 @@
+{{ if not ( eq ( default "" .Values.metadata.operators_namespace ) "ibm-common-services" ) }}
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  creationTimestamp: null
+  name: {{.Values.metadata.operators_namespace}}
+spec: {}
+status: {}
+{{ end }}
