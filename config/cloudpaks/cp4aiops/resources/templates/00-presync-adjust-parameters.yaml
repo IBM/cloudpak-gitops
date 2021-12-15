@@ -24,7 +24,7 @@ spec:
             - name: ARGOCD_NAMESPACE
               value: "openshift-gitops"
             - name: TARGET_NAMESPACE
-              value: "{{.Values.metadata.argocd_app_namespace}}-evt"
+              value: {{.Values.metadata.argocd_app_namespace}}
           command:
             - /bin/sh
             - -c
