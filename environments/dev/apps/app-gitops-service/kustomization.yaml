@@ -1,4 +1,0 @@
-bases:
-- overlays
-commonLabels:
-  app.openshift.io/vcs-source: cloudpakbringup/gitops
