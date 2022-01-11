@@ -14,4 +14,3 @@ spec:
   scaleConfig: small
   storageClass: {{.Values.storageclass.rwx}}
   type: service
-  version: 4.0.2
