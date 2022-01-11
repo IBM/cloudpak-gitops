@@ -12,5 +12,3 @@ spec:
     accept: true
   namespace: {{.Values.metadata.argocd_app_namespace}}
   storage_class: "{{.Values.storageclass.rwo}}"
-  # https://www.ibm.com/docs/en/cloud-paks/cp-data/4.0?topic=planning-operator-operand-versions
-  version: 4.0.3

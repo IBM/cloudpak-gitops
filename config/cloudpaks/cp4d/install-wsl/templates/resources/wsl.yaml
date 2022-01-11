@@ -12,4 +12,3 @@ spec:
     accept: true
     license: Enterprise
   storageClass: {{.Values.storageclass.rwx}}
-  version: 4.0.3

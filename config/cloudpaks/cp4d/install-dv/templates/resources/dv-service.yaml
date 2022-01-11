@@ -11,6 +11,4 @@ spec:
   license:
     accept: true
     license: Enterprise
-  # https://www.ibm.com/docs/en/cloud-paks/cp-data/4.0?topic=planning-operator-operand-versions
-  version: 1.7.3
   size: "small"
