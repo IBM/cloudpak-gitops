@@ -13,8 +13,8 @@ storageclass:
 modules:
   cognos: false
   dv: true
-  rstudio: true
-  wkc: true
+  rstudio: false
+  wkc: false
   wml: true
-  wos: true
+  wos: false
   wsl: true
