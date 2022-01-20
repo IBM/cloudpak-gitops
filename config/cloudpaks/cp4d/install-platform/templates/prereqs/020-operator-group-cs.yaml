@@ -1,0 +1,56 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: presync-operator-group-cs
+  annotations:
+    argocd.argoproj.io/sync-wave: "20"
+  namespace: openshift-gitops
+spec:
+  template:
+    spec:
+      containers:
+        - name: config
+          image: quay.io/openshift/origin-cli:latest
+          imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "150m"
+            limits:
+              memory: "64Mi"
+              cpu: "200m"
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -eo pipefail
+              set -x
+
+              og_not_found=0
+
+              cs_namespace=ibm-common-services
+
+              if oc get OperatorGroup -n "${cs_namespace}" 2> /dev/null ; then
+                echo "INFO: Operator group for namespace "${cs_namespace}" already created."
+                exit 0
+              else
+                echo "INFO: Operator group for namespace "${cs_namespace}" not present yet."
+              fi
+
+              # https://www.ibm.com/docs/en/cloud-paks/cp-data/4.0?topic=tasks-setting-up-projects-namespaces
+              # This operator group may or may not be created by another Cloud Pak, so ensuring its creation here.
+              cat << EOF > oc apply -f -
+              apiVersion: operators.coreos.com/v1
+              kind: OperatorGroup
+              metadata:
+                name: "${cs_namespace}"-operators
+                namespace: "${cs_namespace}"
+              spec:
+                targetNamespaces:
+                  - "${cs_namespace}"
+              EOF
+
+      restartPolicy: Never
+      serviceAccountName: {{.Values.serviceaccount.argocd_application_controller}}
+  backoffLimit: 2
