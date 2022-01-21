@@ -4,12 +4,15 @@ kind: Subscription
 metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "110"
+  name: >-
+    ibm-integration-platform-navigator
   creationTimestamp: null
-  name: ibm-mq-ibm-operator
   namespace: {{.Values.argocd_app_namespace}}
+  labels:
+    operators.coreos.com/ibm-integration-platform-navigator.ibm-cloudpaks: ''
 spec:
-  channel: v1.6
+  channel: v5.2
   installPlanApproval: Automatic
-  name: ibm-mq
+  name: ibm-integration-platform-navigator
   source: ibm-operator-catalog
   sourceNamespace: openshift-marketplace
