@@ -11,7 +11,7 @@ ignore: |
   config/cloudpaks/cp4d/install-platform/templates/prereqs/020-app-operator-group.yaml
   config/cloudpaks/cp4d/install-platform/templates/prereqs/020-operators-operator-group.yaml
   config/cloudpaks/cp4i/operators/templates/01-namespaces/individual.yaml
-  config/cloudpaks/cp4i/operators/templates/04-operators/operator-group.yaml
+  config/cloudpaks/cp4i/operators/templates/04-operators/0100-operator-group.yaml
   config/rhacm/cloudpaks/templates/placement-argocd.yaml
   config/rhacm/cloudpaks/templates/placement-cloudpaks.yaml
   config/rhacm/cloudpaks/templates/placement-cp-shared.yaml

@@ -5,11 +5,11 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "110"
   creationTimestamp: null
-  name: ibm-apiconnect
+  name: ibm-mq-ibm-operator
   namespace: {{.Values.argocd_app_namespace}}
 spec:
-  channel: v2.3
+  channel: v1.7
   installPlanApproval: Automatic
-  name: ibm-apiconnect
+  name: ibm-mq
   source: ibm-operator-catalog
   sourceNamespace: openshift-marketplace
