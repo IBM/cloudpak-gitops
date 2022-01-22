@@ -295,12 +295,15 @@ After completing the list of activities listed in the previous sections, you hav
 1. Add the `cp-shared` application. (this step assumes you still have the shell variables assigned from previous steps) :
 
    ```sh
+   cp_namespace=ibm-cloudpaks
    argocd app create cp-shared-app \
          --project default \
          --dest-namespace openshift-gitops \
          --dest-server https://kubernetes.default.svc \
          --repo https://github.com/IBM/cloudpak-gitops \
          --path config/argocd-cloudpaks/cp-shared \
+         --helm-set-string argocd_app_namespace="${cp_namespace}" \
+         --helm-set-string metadata.argocd_app_namespace="${cp_namespace}" \
          --helm-set-string serviceaccount.argocd_application_controller=${sa_account} \
          --sync-policy automated \
          --revision main \
@@ -320,7 +323,6 @@ After completing the list of activities listed in the previous sections, you hav
    # config/argocd-cloudpaks/cp4i/cp4a, config/argocd-cloudpaks/cp4i, 
    # etc
    app_path=config/argocd-cloudpaks/${cp}
-   cp_namespace=ibm-cloudpaks
    gitops_branch=main
 
    argocd app create "${app_name}" \
