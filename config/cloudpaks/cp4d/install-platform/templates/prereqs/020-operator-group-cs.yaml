@@ -40,7 +40,7 @@ spec:
 
               # https://www.ibm.com/docs/en/cloud-paks/cp-data/4.0?topic=tasks-setting-up-projects-namespaces
               # This operator group may or may not be created by another Cloud Pak, so ensuring its creation here.
-              cat << EOF > oc apply -f -
+              cat << EOF | oc apply -f -
               apiVersion: operators.coreos.com/v1
               kind: OperatorGroup
               metadata:
