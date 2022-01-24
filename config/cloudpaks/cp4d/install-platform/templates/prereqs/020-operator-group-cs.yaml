@@ -13,13 +13,6 @@ spec:
         - name: config
           image: quay.io/openshift/origin-cli:latest
           imagePullPolicy: IfNotPresent
-          resources:
-            requests:
-              memory: "128Mi"
-              cpu: "150m"
-            limits:
-              memory: "128Mi"
-              cpu: "200m"
           command:
             - /bin/sh
             - -c
@@ -44,7 +37,7 @@ spec:
               apiVersion: operators.coreos.com/v1
               kind: OperatorGroup
               metadata:
-                name: "${cs_namespace}"-operators
+                name: "${cs_namespace}-operators"
                 namespace: "${cs_namespace}"
               spec:
                 targetNamespaces:
