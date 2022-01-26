@@ -37,42 +37,46 @@ spec:
                   exit 1
               fi
 
-              storage_class_rwo=""
-              storage_class_rwx=""
-              if [[ "${api_url}" == *fyre.ibm.com* ]]; then
-                 storage_class_rwo="{{.Values.storageclass.rwo.fyre}}"
-                 storage_class_rwx="{{.Values.storageclass.rwx.fyre}}"
+              storage_class_rwo=$(oc get StorageClasses ocs-storagecluster-ceph-rbd -o name 2> /dev/null | cut -d "/" -f 2) || true
+              storage_class_rwx=$(oc get StorageClasses ocs-storagecluster-cephfs -o name 2> /dev/null | cut -d "/" -f 2) || true
+              if [ -n "${storage_class_rwo}" ] && [ -n "${storage_class_rwx}" ]; then
+                  echo "INFO: Cluster has ODF installed, using ODF storage classes."
               else
-                  platform=$(oc get Infrastructure cluster  -o jsonpath={.status.platform})
-                  if [ "${platform}" == "AWS" ]; then
-                      ebs=$(oc get StorageClasses | grep kubernetes.io/aws-ebs | cut -d " " -f 1) || true
-                      efs=$(oc get StorageClasses | grep openshift.org/aws-efs | cut -d " " -f 1) || true
-                      if [ -n "${ebs}" ] && [ -n "${efs}" ]; then
-                          storage_class_rwo="${ebs}"
-                          storage_class_rwx="${efs}"
+                if [[ "${api_url}" == *fyre.ibm.com* ]]; then
+                  storage_class_rwo="{{.Values.storageclass.rwo.fyre}}"
+                  storage_class_rwx="{{.Values.storageclass.rwx.fyre}}"
+                else
+                    platform=$(oc get Infrastructure cluster  -o jsonpath={.status.platform})
+                    if [ "${platform}" == "AWS" ]; then
+                        ebs=$(oc get StorageClasses | grep kubernetes.io/aws-ebs | cut -d " " -f 1) || true
+                        efs=$(oc get StorageClasses | grep openshift.org/aws-efs | cut -d " " -f 1) || true
+                        if [ -n "${ebs}" ] && [ -n "${efs}" ]; then
+                            storage_class_rwo="${ebs}"
+                            storage_class_rwx="${efs}"
+                        else
+                            storage_class_rwo="{{.Values.storageclass.rwo.aws}}"
+                            storage_class_rwx="{{.Values.storageclass.rwx.aws}}"
+                        fi
+                    elif [ "${platform}" == "Azure" ]; then
+                        if oc get StorageClass azure-file 2> /dev/null &&
+                          oc get StorageClass managed-premium 2> /dev/null; then
+                            storage_class_rwo=managed-premium
+                            storage_class_rwx=azure-file
+                        else
+                            storage_class_rwo="{{.Values.storageclass.rwo.azure}}"
+                            storage_class_rwx="{{.Values.storageclass.rwx.azure}}"
+                        fi
+                    elif [ "${platform}" == "IBMCloud" ]; then
+                      vpc_class=$(oc get StorageClass | grep -c "ibmc-vpc" || result=0)
+                      if [ ${vpc_class} -gt 0 ]; then
+                          storage_class_rwo="{{.Values.storageclass.rwo.roksgen2}}"
+                          storage_class_rwx="{{.Values.storageclass.rwx.roksgen2}}"
                       else
-                          storage_class_rwo="{{.Values.storageclass.rwo.aws}}"
-                          storage_class_rwx="{{.Values.storageclass.rwx.aws}}"
+                          storage_class_rwo="{{.Values.storageclass.rwo.roks}}"
+                          storage_class_rwx="{{.Values.storageclass.rwx.roks}}"
                       fi
-                  elif [ "${platform}" == "Azure" ]; then
-                      if oc get StorageClass azure-file 2> /dev/null &&
-                         oc get StorageClass managed-premium 2> /dev/null; then
-                          storage_class_rwo=managed-premium
-                          storage_class_rwx=azure-file
-                      else
-                          storage_class_rwo="{{.Values.storageclass.rwo.azure}}"
-                          storage_class_rwx="{{.Values.storageclass.rwx.azure}}"
-                      fi
-                  elif [ "${platform}" == "IBMCloud" ]; then
-                    vpc_class=$(oc get StorageClass | grep -c "ibmc-vpc" || result=0)
-                    if [ ${vpc_class} -gt 0 ]; then
-                        storage_class_rwo="{{.Values.storageclass.rwo.roksgen2}}"
-                        storage_class_rwx="{{.Values.storageclass.rwx.roksgen2}}"
-                    else
-                        storage_class_rwo="{{.Values.storageclass.rwo.roks}}"
-                        storage_class_rwx="{{.Values.storageclass.rwx.roks}}"
                     fi
-                  fi
+                fi
               fi
 
               if [ -z "${storage_class_rwo}" ] || [ -z "${storage_class_rwx}" ] ; then
