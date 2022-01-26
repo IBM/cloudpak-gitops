@@ -43,29 +43,33 @@ spec:
 
               api_url=$(oc get Infrastructure cluster  -o jsonpath={.status.apiServerURL})
 
-              storage_class=""
-              if [[ "${api_url}" == *fyre.ibm.com* ]]; then
-                 storage_class="{{.Values.storageclass.rwx.fyre}}"
+              storage_class=$(oc get StorageClasses ocs-storagecluster-cephfs -o name 2> /dev/null | cut -d "/" -f 2) || true
+              if [ -n "${storage_class}" ]; then
+                  echo "INFO: Cluster has ODF installed, using ODF storage classes."
               else
-                if [ "${platform}" == "AWS" ]; then
-                  efs=$(oc get StorageClasses | grep openshift.org/aws-efs | cut -d " " -f 1) || true
-                  if [ -n "${efs}" ]; then
-                    storage_class="${efs}"
-                  else
-                    storage_class="{{.Values.storageclass.rwx.aws}}"
-                  fi
-                elif [ "${platform}" == "Azure" ]; then
-                  if oc get StorageClass azure-file; then
-                    storage_class=azure-file
-                  else
-                    storage_class="{{.Values.storageclass.rwx.azure}}"
-                  fi
-                elif [ "${platform}" == "IBMCloud" ]; then
-                  vpc_class=$(oc get StorageClass | grep -c "ibmc-vpc" || result=0)
-                  if [ ${vpc_class} -gt 0 ]; then
-                      storage_class="{{.Values.storageclass.rwx.roksgen2}}"
-                  else
-                      storage_class_rwo="{{.Values.storageclass.rwx.roks}}"
+                if [[ "${api_url}" == *fyre.ibm.com* ]]; then
+                  storage_class="{{.Values.storageclass.rwx.fyre}}"
+                else
+                  if [ "${platform}" == "AWS" ]; then
+                    efs=$(oc get StorageClasses | grep openshift.org/aws-efs | cut -d " " -f 1) || true
+                    if [ -n "${efs}" ]; then
+                      storage_class="${efs}"
+                    else
+                      storage_class="{{.Values.storageclass.rwx.aws}}"
+                    fi
+                  elif [ "${platform}" == "Azure" ]; then
+                    if oc get StorageClass azure-file; then
+                      storage_class=azure-file
+                    else
+                      storage_class="{{.Values.storageclass.rwx.azure}}"
+                    fi
+                  elif [ "${platform}" == "IBMCloud" ]; then
+                    vpc_class=$(oc get StorageClass | grep -c "ibmc-vpc" || result=0)
+                    if [ ${vpc_class} -gt 0 ]; then
+                        storage_class="{{.Values.storageclass.rwx.roksgen2}}"
+                    else
+                        storage_class="{{.Values.storageclass.rwx.roks}}"
+                    fi
                   fi
                 fi
               fi
