@@ -47,6 +47,13 @@ spec:
               if [ -n "${storage_class}" ]; then
                   echo "INFO: Cluster has ODF installed, using ODF storage classes."
               else
+                storage_class=$(oc get StorageClasses rook-cephfs -o name 2> /dev/null | cut -d "/" -f 2) || true
+                if [ -n "${storage_class}" ]; then
+                  echo "INFO: Cluster has Ceph installed, using Ceph storage classes."
+                fi
+              fi
+
+              if [ -z "${storage_class}" ]; then
                 if [[ "${api_url}" == *fyre.ibm.com* ]]; then
                   storage_class="{{.Values.storageclass.rwx.fyre}}"
                 else
