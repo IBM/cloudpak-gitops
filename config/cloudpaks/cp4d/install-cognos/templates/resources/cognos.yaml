@@ -11,4 +11,5 @@ spec:
   license:
     accept: true
   namespace: {{.Values.metadata.argocd_app_namespace}}
-  storage_class: "{{.Values.storageclass.rwo}}"
+  storage_class: "{{.Values.storageclass.rwx}}"
+  version: 4.0.5
