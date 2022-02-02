@@ -3,9 +3,10 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: post-check-aiops-ai-csvs
+  name: check-aiops-ai-csvs
   annotations:
-    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/sync-wave: "110"
+    argocd.argoproj.io/hook: Sync
   namespace: openshift-gitops
 spec:
   template:

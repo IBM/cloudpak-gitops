@@ -5,7 +5,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   annotations:
-    argocd.argoproj.io/sync-wave: "99"
+    argocd.argoproj.io/sync-wave: "500"
     argocd.argoproj.io/hook: PostSync
   name: post-cp4aiops-adjust-certs
   namespace: openshift-gitops
