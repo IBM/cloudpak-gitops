@@ -3,10 +3,10 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: post-check-ai-ready
+  name: sync-check-ai-readiness
   annotations:
-    argocd.argoproj.io/sync-wave: "98"
-    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/sync-wave: "220"
+    argocd.argoproj.io/hook: Sync
   namespace: openshift-gitops
 spec:
   template:
