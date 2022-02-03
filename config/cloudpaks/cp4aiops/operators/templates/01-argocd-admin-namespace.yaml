@@ -5,7 +5,7 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "1"
   creationTimestamp: null
-  name: openshift-gitops-admin-emgr
+  name: openshift-gitops-admin
   namespace: "{{.Values.metadata.argocd_app_namespace}}-emgr"
 roleRef:
   apiGroup: rbac.authorization.k8s.io

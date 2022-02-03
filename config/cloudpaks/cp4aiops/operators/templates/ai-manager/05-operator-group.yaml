@@ -6,7 +6,7 @@ metadata:
   name: "{{.Values.metadata.argocd_app_namespace}}-operator-group"
   namespace: "{{.Values.metadata.argocd_app_namespace}}"
   annotations:
-    argocd.argoproj.io/sync-wave: "100"
+    argocd.argoproj.io/sync-wave: "50"
 spec:
   targetNamespaces:
     - {{.Values.metadata.argocd_app_namespace}}

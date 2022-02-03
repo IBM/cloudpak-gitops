@@ -53,4 +53,4 @@ Refer to the [RHACM page](docs/rhacm.md) for an overview and instructions on how
 
 Making changes to this repository requires a working knowledge of Argo CD administration and configuration. This section describes the workflow of submitting a change. A change entails forking the repository, modifying it, installing the changes on a target cluster to validate them, then gathering the output of validation commands using the `argocd` command-line interface.
 
-Navigate to the [contributing](CONTRIBUTING.md) page for details on validating changes and submitting a pull request will all the required information.
+Navigate to the [contributing](CONTRIBUTING.md) page for details on validating changes and submitting a pull request with all the required information.
