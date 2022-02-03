@@ -38,7 +38,8 @@ spec:
               storage_class_bronze="$(oc get configmap argocd-cp4a-config \
                 --namespace "${ARGOCD_NAMESPACE}" -o jsonpath='{.data.storageclass\.bronze}')"
               storage_class_block="$(oc get configmap argocd-cp4a-config \
-                --namespace "${ARGOCD_NAMESPACE}" -o jsonpath='{.data.storageclass\.block}')"              
+                --namespace "${ARGOCD_NAMESPACE}" -o jsonpath='{.data.storageclass\.block}')" 
+              echo "Storage class block: " ${storage_class_block}             
               if [ -z "${storage_class_gold}" ] || [ -z "${storage_class_silver}" ] || [ -z "${storage_class_bronze}" ] || [ -z "${storage_class_block}" ]; then
                 echo "ERROR: Did not find storage classes for target platform."
                 exit 1
@@ -70,7 +71,7 @@ spec:
                       --helm-set-string storageclass.bronze="${storage_class_bronze}" \
                       --helm-set-string storageclass.gold="${storage_class_gold}" \
                       --helm-set-string storageclass.silver="${storage_class_silver}" \
-                      --helm-set-string storageclass.block="${storage_class_block}" \   
+                      --helm-set-string storageclass.block="${storage_class_block}" \
                   && echo "INFO: ${ARGOCD_APP_NAME} successfully updated storage classes." \
                   || result=1
               else
