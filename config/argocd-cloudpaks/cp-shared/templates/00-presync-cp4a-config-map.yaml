@@ -117,8 +117,7 @@ spec:
                   --from-literal=storageclass.gold="${storage_class_gold}" \
                   --from-literal=storageclass.silver="${storage_class_silver}" \
                   --from-literal=storageclass.bronze="${storage_class_bronze}" \
-                  --from-literal=storageclass.block="${storage_class_block}" \       
-                  --namespace "${ARGOCD_NAMESPACE}"
+                  --from-literal=storageclass.block="${storage_class_block}" --namespace "${ARGOCD_NAMESPACE}"
 
       restartPolicy: Never
       serviceAccountName: {{.Values.serviceaccount.argocd_application_controller}}
