@@ -70,7 +70,7 @@ spec:
                       --helm-set-string storageclass.bronze="${storage_class_bronze}" \
                       --helm-set-string storageclass.gold="${storage_class_gold}" \
                       --helm-set-string storageclass.silver="${storage_class_silver}" \
-                      --helm-set-string storageclass.block="${storage_class_block}" \                      
+                      --helm-set-string storageclass.block="${storage_class_block}" \   
                   && echo "INFO: ${ARGOCD_APP_NAME} successfully updated storage classes." \
                   || result=1
               else
