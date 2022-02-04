@@ -93,8 +93,8 @@ spec:
                 fi
               fi
 
-              if [ -z "${storage_class_rwo}" ] || [ -z "${storage_class_rwx}" ] ; then
-                echo "ERROR: Did not find storage classes for target platform."
+              if [ -z "${storage_class_rwo}" ]; then
+                echo "ERROR: Did not find RWO storage classes for target platform."
                 exit
               fi
 
