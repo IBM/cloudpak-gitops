@@ -49,10 +49,6 @@ spec:
               # Install it from cluster, not from Internet, so airgap scenarios still work
               argo_route=openshift-gitops-server
               argo_secret=openshift-gitops-cluster
-              if [ {{.Values.serviceaccount.argocd_application_controller}} == argocd-cluster-argocd-application-controller ]; then
-                  argo_route=argocd-cluster-server
-                  argo_secret=argocd-cluster-cluster
-              fi
 
               export HOME=/tmp
               argo_cmd="${HOME}/argocd"
