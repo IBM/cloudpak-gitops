@@ -4,13 +4,17 @@
 
 - [Prerequisites](#prerequisites)
 - [Install the OpenShift GitOps operator](#install-the-openshift-gitops-operator)
+  * [Using the OCP console](#using-the-ocp-console)
+  * [Using a terminal](#using-a-terminal)
 - [Obtain an entitlement key](#obtain-an-entitlement-key)
 - [Update the OCP global pull secret](#update-the-ocp-global-pull-secret)
   * [Update the global pull secret using the OpenShift console](#update-the-global-pull-secret-using-the-openshift-console)
   * [Special note about global pull secrets on ROKS](#special-note-about-global-pull-secrets-on-roks)
+- [Update the pull secret in the openshift-gitops namespace](#update-the-pull-secret-in-the-openshift-gitops-namespace)
 - [Adding Cloud Pak GitOps Application objects to your GitOps server](#adding-cloud-pak-gitops-application-objects-to-your-gitops-server)
-  * [Using the OCP console](#using-the-ocp-console)
-  * [Using a terminal](#using-a-terminal)
+  * [Using the OCP console](#using-the-ocp-console-1)
+  * [Using a terminal](#using-a-terminal-1)
+
 
 ## Prerequisites
 
@@ -24,19 +28,55 @@
 
 - Cluster storage configured with storage classes supporting both [RWO and RWX storage](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes).
 
-  The applications were tested with [OpenShift Container Storage](https://docs.openshift.com/container-platform/4.7/storage/persistent_storage/persistent-storage-ocs.html), [Rook Ceph](https://github.com/rook/rook), and the built-in file storage in ROKS classic clusters.
+  The applications were tested with [OpenShift Container Storage](https://docs.openshift.com/container-platform/4.8/storage/persistent_storage/persistent-storage-ocs.html), [Rook Ceph](https://github.com/rook/rook), [AWS EFS](https://aws.amazon.com/efs/), and the built-in file storage in ROKS classic clusters.
 
 - [An entitlement key to the IBM Entitled Registry](#obtaining-your-entitlement-key)
 
 ## Install the OpenShift GitOps operator
 
+### Using the OCP console
+
+
 1. From the Administrator's perspective, navigate to the OperatorHub page.
 
-1. Search for "Red Hat OpenShift GitOps". Click on the tile and then click on "Install"
+1. Search for "Red Hat OpenShift GitOps". Click on the tile and then click on "Install".
 
-1. Keep the defaults in the wizard and click on "Install"
+1. Keep the defaults in the wizard and click on "Install".
 
 1. Wait for it to show up in the list of "Installed Operators." If it doesn't install correctly, you can check its status on the "Installed Operators" page in the `openshift-operators` namespace.
+
+
+### Using a terminal
+
+1. Open a terminal and ensure you have the OpenShift CLI installed:
+   ```sh
+   oc version --client
+
+   # Client Version: 4.8.2
+   ```
+   Ideally, the client's minor version should not be more than one iteration behind the version of the server. Most commands here are pretty basic and will work with more significant differences, but keep that in mind if you see errors about unrecognized commands and parameters.
+
+   If you do not have the CLI installed, follow [these instructions](https://docs.openshift.com/container-platform/4.7/cli_reference/openshift_cli/getting-started-cli.html).
+
+1. [Log in to the OpenShift CLI](https://docs.openshift.com/container-platform/4.7/cli_reference/openshift_cli/getting-started-cli.html#cli-logging-in_cli-developer-commands)
+
+1. Create the `Subscription` resource for the operator:
+   ```sh
+   cat << EOF | oc apply -f -
+   ---
+   apiVersion: operators.coreos.com/v1alpha1
+   kind: Subscription
+   metadata:
+      name: openshift-gitops-operator
+      namespace: openshift-operators
+   spec:
+      channel: stable
+      installPlanApproval: Automatic
+      name: openshift-gitops-operator
+      source: redhat-operators
+      sourceNamespace: openshift-marketplace
+   EOF
+   ```
 
 ## Obtain an entitlement key
 
@@ -51,7 +91,8 @@ If you don't already have an entitlement key to the IBM Entitled Registry, obtai
 1. (Optional) Verify the validity of the key by logging in to the IBM Entitled Registry using a container tool:
 
    ```sh
-   docker login cp.icr.io --username cp --password entitlement_key
+   export IBM_ENTITLEMENT_KEY=the key from the previous steps
+   podman login cp.icr.io --username cp --password "${IBM_ENTITLEMENT_KEY:?}"
    ```
 
 ## Update the OCP global pull secret
@@ -109,11 +150,9 @@ After completing the list of activities listed in the previous sections, you hav
 
 ### Using the OCP console
 
-1. Launch the Argo CD console: Click on the grid-like icon in the upper-left section of the screen, where you should click on either "ArgoCD Console" (for OCP 4.6) or "Cluster Argo CD" (for OCP 4.7 and later.)
+1. Launch the Argo CD console: Click on the grid-like icon in the upper-left section of the screen, where you should click on "Cluster Argo CD".
 
-1. The Argo CD login screen will prompt you for an admin user and password. The default user is `admin .` The admin password is located in a secret in the `openshift-gitops` namespace.
-
-   - The secret name is either `argocd-cluster-cluster` (for OCP 4.6) or `openshift-gitops-cluster` (for OCP 4.7 and later.)
+1. The Argo CD login screen will prompt you for an admin user and password. The default user is `admin .` The admin password is located in the secret `openshift-gitops-cluster` in the `openshift-gitops` namespace.
 
    - Switch to the `openshift-gitops` project, locate the secret in the "Workloads -> Secrets" selections in the left-navigation tree of the Administrator view, scroll to the bottom, and click on "Reveal Values" to retrieve the value of the `admin.password` field.
 
@@ -126,8 +165,7 @@ After completing the list of activities listed in the previous sections, you hav
     | Field | Value |
     | ----- | ----- |
     | Application Name | argo-app | 
-    | Path (OCP 4.6) | config/argocd | 
-    | Path (OCP 4.7 and later) | config/argocd-ga | 
+    | Path | config/argocd | 
     | Namespace | openshift-gitops | 
     | Project | default |
     | Sync policy | Automatic |
@@ -152,8 +190,6 @@ After completing the list of activities listed in the previous sections, you hav
     | Revision | HEAD |
     | Cluster URL | https://kubernetes.default.svc |
 
-1. Under "Parameters", if using OCP 4.6, replace the value of the field `serviceaccount.argocd_application_controller` with the value `argocd-cluster-argocd-application-controller`.
-
 1. After filling out the form details, click the "Create" button
 
 1. (add actual Cloud Pak) Click on the "New App+" button again and fill out the form with values matching the Cloud Pak of your choice, according to the table below:
@@ -161,8 +197,9 @@ After completing the list of activities listed in the previous sections, you hav
     | Cloud Pak | Application Name | Path | Namespace |
     | --------- | ---------------- | ---- | --------- |
     | Business Automation | cp4a-app | config/argocd-cloudpaks/cp4a | cp4a |
-    | Integration Automation | cp4i-app | config/argocd-cloudpaks/cp4i | cp4i |
-    | AIOps Automation | cp4aiops-app | config/argocd-cloudpaks/cp4aiops | openshift-operators |
+    | Integration | cp4i-app | config/argocd-cloudpaks/cp4i | cp4i |
+    | AIOps | cp4aiops-app | config/argocd-cloudpaks/cp4aiops | cp4waiops |
+    | Data | cp4d-app | config/argocd-cloudpaks/cp4d | cp4d |
 
     For all other fields, use the following values:
 
@@ -177,27 +214,11 @@ After completing the list of activities listed in the previous sections, you hav
 
 1. After filling out the form details, click the "Create" button
 
-1. Under "Parameters", if using OCP 4.6, replace the value of the field `serviceaccount.argocd_application_controller` with the value `argocd-cluster-argocd-application-controller`.
-
-1. Still under "Parameters", set the values for the fields `storageclass.rwo` and `storageclass.rwx` with the appropriate storage classes. For OpenShift Container Storage, the values will be `ocs-storagecluster-ceph-rbd` and `ocs-storagecluster-cephfs`, respectively.
+1. Under "Parameters", set the values for the fields `storageclass.rwo` and `storageclass.rwx` with the appropriate storage classes. For OpenShift Container Storage, the values will be `ocs-storagecluster-ceph-rbd` and `ocs-storagecluster-cephfs`, respectively.
 
 1. After filling out the form details, click the "Create" button
 
 1. Wait for the synchronization to complete.
-
-1. Enable auto-synchronization for the applications automatically created by the previous steps
-
-   - For instance, if adding the "cp4a-app" application, it will automatically create two new applications, "cp4a-operators" and "cp4a-resources". The only exception is the "cp-shared-app" application, which does not bring in a "resources" application.
-
-   - Click on the first application, such as "cp4a-operators", then select "App Details."
-
-   - Scroll down to "Sync Policy" and select "Enable Auto-Sync."
-
-   - Leave "Prune Resources" disabled
-
-   - Enable "Self Heal" (this is required for some synchronizations where the first pass grants extra permissions to the Argo CD service account and the subsequent passes succeed with the extra permissions)
-
-   - Exit the panel and wait for the synchronization to complete, then repeat the steps for the next application, which in this example would be "cp4a-resources".
 
 
 ### Using a terminal
@@ -218,38 +239,13 @@ After completing the list of activities listed in the previous sections, you hav
 
 1. Log in to the Argo CD server
 
-   Using OCP 4.6:
-
    ```sh
-   # OCP 4.6
-   argo_route=argocd-cluster-server
-   argo_secret=argocd-cluster-cluster
-   sa_account=argocd-cluster-argocd-application-controller
-
-   argo_pwd=$(oc get secret ${argo_secret} \
+   gitops_url=https://github.com/IBM/cloudpak-gitops
+   gitops_branch=main
+   argo_pwd=$(oc get secret openshift-gitops-cluster \
                -n openshift-gitops \
                -o jsonpath='{.data.admin\.password}' | base64 -d ; echo ) \
-   && argo_url=$(oc get route ${argo_route} \
-                  -n openshift-gitops \
-                  -o jsonpath='{.spec.host}') \
-   && argocd login "${argo_url}" \
-         --username admin \
-         --password "${argo_pwd}" \
-         --insecure
-   ```
-
-   Using OCP 4.7 and later (the object names change a little from OCP 4.6:)
-
-   ```sh
-   # OCP 4.7+
-   argo_route=openshift-gitops-server
-   argo_secret=openshift-gitops-cluster
-   sa_account=openshift-gitops-argocd-application-controller
-
-   argo_pwd=$(oc get secret ${argo_secret} \
-               -n openshift-gitops \
-               -o jsonpath='{.data.admin\.password}' | base64 -d ; echo ) \
-   && argo_url=$(oc get route ${argo_route} \
+   && argo_url=$(oc get route openshift-gitops-server \
                   -n openshift-gitops \
                   -o jsonpath='{.spec.host}') \
    && argocd login "${argo_url}" \
@@ -260,34 +256,16 @@ After completing the list of activities listed in the previous sections, you hav
 
 1. Add the `argo` application. (this step assumes you still have the shell variables assigned from previous steps) :
 
-   Using OCP 4.6:
-
    ```sh
-   # OCP 4.6
+   # Note that the path config/argocd-ga was renamed config/argocd in 0.5.0
    argocd app create argo-app \
          --project default \
          --dest-namespace openshift-gitops \
          --dest-server https://kubernetes.default.svc \
-         --repo https://github.com/IBM/cloudpak-gitops \
+         --repo ${gitops_url:?} \
          --path config/argocd \
          --sync-policy automated \
-         --revision main \
-         --upsert 
-    ```
-
-   Using OCP 4.7 and later (the object names change a little from OCP 4.6:)
-
-   ```sh
-   # OCP 4.7+
-   argocd app create argo-app \
-         --project default \
-         --dest-namespace openshift-gitops \
-         --dest-server https://kubernetes.default.svc \
-         --repo https://github.com/IBM/cloudpak-gitops \
-         --path config/argocd-ga \
-         --helm-set-string serviceaccount.argocd_application_controller=${sa_account} \
-         --sync-policy automated \
-         --revision main \
+         --revision ${gitops_branch:?} \
          --upsert 
     ```
 
@@ -300,13 +278,12 @@ After completing the list of activities listed in the previous sections, you hav
          --project default \
          --dest-namespace openshift-gitops \
          --dest-server https://kubernetes.default.svc \
-         --repo https://github.com/IBM/cloudpak-gitops \
+         --repo ${gitops_url:?} \
          --path config/argocd-cloudpaks/cp-shared \
          --helm-set-string argocd_app_namespace="${cp_namespace}" \
          --helm-set-string metadata.argocd_app_namespace="${cp_namespace}" \
-         --helm-set-string serviceaccount.argocd_application_controller=${sa_account} \
          --sync-policy automated \
-         --revision main \
+         --revision ${gitops_branch:?} \
          --upsert 
    ```
 
@@ -315,7 +292,7 @@ After completing the list of activities listed in the previous sections, you hav
    ```sh
    # appname=<< choose a value from the "Application Name" column in the 
    # table of Cloud Paks above, such as cp4a-app, cp4i-app, 
-   # cp4aiops-app, etc >>
+   # cp4aiops-app, cp4d-app, etc >>
    cp=cp4i
    app_name=${cp}-app
    # app_path=<< choose the respective value from the "path Name" 
@@ -323,18 +300,16 @@ After completing the list of activities listed in the previous sections, you hav
    # config/argocd-cloudpaks/cp4i/cp4a, config/argocd-cloudpaks/cp4i, 
    # etc
    app_path=config/argocd-cloudpaks/${cp}
-   gitops_branch=main
 
    argocd app create "${app_name}" \
          --project default \
          --dest-namespace openshift-gitops \
          --dest-server https://kubernetes.default.svc \
          --helm-set-string metadata.argocd_app_namespace="${cp_namespace}" \
-         --helm-set-string repoURL=https://github.com/IBM/cloudpak-gitops \
-         --helm-set-string serviceaccount.argocd_application_controller=${sa_account} \
+         --helm-set-string repoURL=${gitops_url:?} \
          --helm-set-string targetRevision="${gitops_branch}" \
          --path "${app_path}" \
-         --repo https://github.com/IBM/cloudpak-gitops \
+         --repo ${gitops_url:?} \
          --revision "${gitops_branch}" \
          --sync-policy automated \
          --upsert 
