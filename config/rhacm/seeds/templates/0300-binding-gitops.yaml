@@ -5,23 +5,6 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     argocd.argoproj.io/sync-wave: "300"
-  name: binding-openshift-gitops-preview-rhacm
-  namespace: policy
-placementRef:
-  name: all-openshift-gitops-preview-rhacm
-  kind: PlacementRule
-  apiGroup: apps.open-cluster-management.io
-subjects:
-  - name: openshift-gitops-preview-installed
-    kind: Policy
-    apiGroup: policy.open-cluster-management.io
----
-apiVersion: policy.open-cluster-management.io/v1
-kind: PlacementBinding
-metadata:
-  annotations:
-    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-    argocd.argoproj.io/sync-wave: "300"
   name: binding-openshift-gitops-rhacm
   namespace: policy
 placementRef:

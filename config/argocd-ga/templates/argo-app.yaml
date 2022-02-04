@@ -41,7 +41,7 @@ spec:
           value: ${ARGOCD_APP_SOURCE_REPO_URL}
         - name: targetRevision
           value: ${ARGOCD_APP_SOURCE_TARGET_REVISION}
-    path: config/argocd-ga
+    path: config/argocd
     repoURL: {{.Values.repoURL}}
     targetRevision: {{.Values.targetRevision}}
   syncPolicy:
