@@ -98,7 +98,7 @@ spec:
                 exit
               fi
 
-              if [ -z "${storage_class}" ]; then
+              if [ -z "${storage_class_rwx}" ]; then
                 storage_class_gold=cp4a-file-retain-gold-gid
                 storage_class_silver=cp4a-file-retain-silver-gid
                 storage_class_bronze=cp4a-file-retain-bronze-gid
