@@ -181,6 +181,11 @@ spec:
             hs.status = "Failed"
             hs.message = ""
             for i, condition in ipairs(obj.status.conditions) do
+              if condition.type == "Ready" and condition.status == "True" then
+                hs.status = "Healthy"
+                hs.message = condition.message
+                return hs
+              end
               if condition.type == "ReconciliationSuccess" and observedGeneration == generation then
                 if condition.status == "True" then
                   hs.status = "Healthy"
