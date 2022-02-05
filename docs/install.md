@@ -313,25 +313,19 @@ After completing the list of activities listed in the previous sections, you hav
          --revision "${gitops_branch}" \
          --sync-policy automated \
          --upsert 
-   argocd app wait "${app_name}"
     ```
-
-1. Enable auto-synchronization for the apps automatically added by the previous step. The auto-synchronization is disabled by default in the repo if you want to further configure the applications before starting the synchronization. Note that this step assumes you still have shell variables assigned from previous steps:
-   ```sh
-   argocd app set ${cp}-operators \
-            --sync-policy automated \
-            --self-heal
-   argocd app wait ${cp}-operators \
-            --timeout 1200
-   argocd app set ${cp}-resources \
-            --sync-policy automated \
-            --self-heal
-   argocd app wait ${cp}-resources \
-            --timeout 7200
-   ```
 
 1. List all the applications to see their overall status (this step assumes you still have shell variables assigned from previous steps):
 
    ```sh
    argocd app list -l app.kubernetes.io/instance=${app_name}
+   ```
+
+1. You can also use the ArgoCD command-line interface to wait for the application to be synchronized and healthy:
+
+   ```sh
+   argocd app wait "${app_name}" \
+         --sync \
+         --health \
+         --timeout 3600
    ```
