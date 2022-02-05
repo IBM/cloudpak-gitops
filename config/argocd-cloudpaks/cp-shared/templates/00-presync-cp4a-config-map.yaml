@@ -43,52 +43,69 @@ spec:
 
               api_url=$(oc get Infrastructure cluster  -o jsonpath={.status.apiServerURL})
 
-              storage_class=$(oc get StorageClasses ocs-storagecluster-cephfs -o name 2> /dev/null | cut -d "/" -f 2) || true
-              if [ -n "${storage_class}" ]; then
+              storage_class_rwo=$(oc get StorageClasses ocs-storagecluster-ceph-rbd -o name 2> /dev/null | cut -d "/" -f 2) || true
+              storage_class_rwx=$(oc get StorageClasses ocs-storagecluster-cephfs -o name 2> /dev/null | cut -d "/" -f 2) || true
+              if [ -n "${storage_class_rwo}" ] && [ -n "${storage_class_rwx}" ]; then
                   echo "INFO: Cluster has ODF installed, using ODF storage classes."
               else
-                storage_class=$(oc get StorageClasses rook-cephfs -o name 2> /dev/null | cut -d "/" -f 2) || true
-                if [ -n "${storage_class}" ]; then
+                storage_class_rwo=$(oc get StorageClasses rook-ceph-block -o name 2> /dev/null | cut -d "/" -f 2) || true
+                storage_class_rwx=$(oc get StorageClasses rook-cephfs -o name 2> /dev/null | cut -d "/" -f 2) || true
+                if [ -n "${storage_class_rwo}" ] && [ -n "${storage_class_rwx}" ]; then
                   echo "INFO: Cluster has Ceph installed, using Ceph storage classes."
                 fi
               fi
 
-              if [ -z "${storage_class}" ]; then
+              if [ -z "${storage_class_rwo}" ] || [ -z "${storage_class_rwx}" ] ; then
                 if [[ "${api_url}" == *fyre.ibm.com* ]]; then
-                  storage_class="{{.Values.storageclass.rwx.fyre}}"
+                  storage_class_rwo="{{.Values.storageclass.rwo.fyre}}"
+                  storage_class_rwx="{{.Values.storageclass.rwx.fyre}}"
                 else
-                  if [ "${platform}" == "AWS" ]; then
-                    efs=$(oc get StorageClasses | grep openshift.org/aws-efs | cut -d " " -f 1) || true
-                    if [ -n "${efs}" ]; then
-                      storage_class="${efs}"
-                    else
-                      storage_class="{{.Values.storageclass.rwx.aws}}"
+                    platform=$(oc get Infrastructure cluster  -o jsonpath={.status.platform})
+                    if [ "${platform}" == "AWS" ]; then
+                        ebs=$(oc get StorageClasses | grep kubernetes.io/aws-ebs | cut -d " " -f 1) || true
+                        efs=$(oc get StorageClasses | grep openshift.org/aws-efs | cut -d " " -f 1) || true
+                        if [ -n "${ebs}" ] && [ -n "${efs}" ]; then
+                            storage_class_rwo="${ebs}"
+                            storage_class_rwx="${efs}"
+                        else
+                            storage_class_rwo="{{.Values.storageclass.rwo.aws}}"
+                            storage_class_rwx="{{.Values.storageclass.rwx.aws}}"
+                        fi
+                    elif [ "${platform}" == "Azure" ]; then
+                        if oc get StorageClass azure-file 2> /dev/null &&
+                          oc get StorageClass managed-premium 2> /dev/null; then
+                            storage_class_rwo=managed-premium
+                            storage_class_rwx=azure-file
+                        else
+                            storage_class_rwo="{{.Values.storageclass.rwo.azure}}"
+                            storage_class_rwx="{{.Values.storageclass.rwx.azure}}"
+                        fi
+                    elif [ "${platform}" == "IBMCloud" ]; then
+                      vpc_class=$(oc get StorageClass | grep -c "ibmc-vpc" || result=0)
+                      if [ ${vpc_class} -gt 0 ]; then
+                          storage_class_rwo="{{.Values.storageclass.rwo.roksgen2}}"
+                          storage_class_rwx="{{.Values.storageclass.rwx.roksgen2}}"
+                      else
+                          storage_class_rwo="{{.Values.storageclass.rwo.roks}}"
+                          storage_class_rwx="{{.Values.storageclass.rwx.roks}}"
+                      fi
                     fi
-                  elif [ "${platform}" == "Azure" ]; then
-                    if oc get StorageClass azure-file; then
-                      storage_class=azure-file
-                    else
-                      storage_class="{{.Values.storageclass.rwx.azure}}"
-                    fi
-                  elif [ "${platform}" == "IBMCloud" ]; then
-                    vpc_class=$(oc get StorageClass | grep -c "ibmc-vpc" || result=0)
-                    if [ ${vpc_class} -gt 0 ]; then
-                        storage_class="{{.Values.storageclass.rwx.roksgen2}}"
-                    else
-                        storage_class="{{.Values.storageclass.rwx.roks}}"
-                    fi
-                  fi
                 fi
               fi
 
-              if [ -z "${storage_class}" ]; then
+              if [ -z "${storage_class_rwo}" ]; then
+                echo "ERROR: Did not find RWO storage classes for target platform."
+                exit
+              fi
+
+              if [ -z "${storage_class_rwx}" ]; then
                 storage_class_gold=cp4a-file-retain-gold-gid
                 storage_class_silver=cp4a-file-retain-silver-gid
                 storage_class_bronze=cp4a-file-retain-bronze-gid
               else
-                storage_class_gold=${storage_class}
-                storage_class_silver=${storage_class}
-                storage_class_bronze=${storage_class}
+                storage_class_gold=${storage_class_rwx}
+                storage_class_silver=${storage_class_rwx}
+                storage_class_bronze=${storage_class_rwx}
               fi
 
               echo "INFO: Creating or patching the RHACM configmap"
@@ -96,7 +113,7 @@ spec:
               oc get configmap "${config_map_name}" \
                   --namespace "${ARGOCD_NAMESPACE}" > /dev/null 2>&1 \
               && oc patch configmap "${config_map_name}" \
-                  --patch "{\"data\":{\"serviceaccount.argocd_application_controller\":\"{{.Values.serviceaccount.argocd_application_controller}}\", \"shared_configuration.sc_deployment_platform\":\"${cp4a_platform}\", \"storageclass.gold\":\"${storage_class_gold}\", \"storageclass.silver\":\"${storage_class_silver}\", \"storageclass.bronze\":\"${storage_class_bronze}\" }}" \
+                  --patch "{\"data\":{\"serviceaccount.argocd_application_controller\":\"{{.Values.serviceaccount.argocd_application_controller}}\", \"shared_configuration.sc_deployment_platform\":\"${cp4a_platform}\", \"storageclass.gold\":\"${storage_class_gold}\", \"storageclass.silver\":\"${storage_class_silver}\", \"storageclass.bronze\":\"${storage_class_bronze}\", \"storageclass.block\":\"${storage_class_rwo}\" }}" \
                   --namespace "${ARGOCD_NAMESPACE}" \
               || oc create configmap "${config_map_name}" \
                   --from-literal=serviceaccount.argocd_application_controller="{{.Values.serviceaccount.argocd_application_controller}}" \
@@ -104,7 +121,7 @@ spec:
                   --from-literal=storageclass.gold="${storage_class_gold}" \
                   --from-literal=storageclass.silver="${storage_class_silver}" \
                   --from-literal=storageclass.bronze="${storage_class_bronze}" \
-                  --namespace "${ARGOCD_NAMESPACE}"
+                  --from-literal=storageclass.block="${storage_class_rwo}" --namespace "${ARGOCD_NAMESPACE}"
 
       restartPolicy: Never
       serviceAccountName: {{.Values.serviceaccount.argocd_application_controller}}

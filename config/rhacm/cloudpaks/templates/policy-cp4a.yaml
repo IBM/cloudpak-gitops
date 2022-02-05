@@ -62,6 +62,8 @@ spec:
                           value: '{{ "{{ fromConfigMap \"openshift-gitops\" \"argocd-cp4a-config\" \"storageclass.gold\" }}" }}'
                         - name: storageclass.silver
                           value: '{{ "{{ fromConfigMap \"openshift-gitops\" \"argocd-cp4a-config\" \"storageclass.silver\" }}" }}'
+                        - name: storageclass.block
+                          value: '{{ "{{ fromConfigMap \"openshift-gitops\" \"argocd-cp4a-config\" \"storageclass.block\" }}" }}'
                         - name: targetRevision
                           value: ${ARGOCD_APP_SOURCE_TARGET_REVISION}
                     path: config/argocd-cloudpaks/cp4a
