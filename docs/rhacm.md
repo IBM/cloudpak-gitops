@@ -7,8 +7,8 @@
   * [Install OpenShift GitOps and policies in the RHACM server](#install-openshift-gitops-and-policies-in-the-rhacm-server)
   * [Install RHACM on OCP cluster via Argo](#install-rhacm-on-ocp-cluster-via-argo)
 - [Using the policies](#using-the-policies)
-  * [Policies:](#policies-)
-  * [Label your clusters:](#label-your-clusters-)
+  * [Policies](#policies)
+  * [Label your clusters](#label-your-clusters)
   * [Examples](#examples)
 - [Contributing](#contributing)
 - [References](#references)
@@ -99,7 +99,7 @@ These steps assume you  logged in to the OCP server with the `oc` command-line i
 
 Once Argo completes synchronizing the applications, your cluster will have policies, placement rules, and placement bindings to deploy Cloud Paks to matching clusters.
 
-### Policies:
+### Policies
 
 - `openshift-gitops-argo-app`: Configures an Argo server with custom health checks for Cloud Paks.
 - `openshift-gitops-cloudpaks-cp-shared`: Deploys common Cloud Pak prerequisites.
@@ -108,7 +108,7 @@ Once Argo completes synchronizing the applications, your cluster will have polic
 - `openshift-gitops-cloudpaks-cp4i`: Deploys the Argo applications for Cloud Pak for Integration.
 - `openshift-gitops-installed`: Deploys OpenShift GitOps.
 
-### Label your clusters:
+### Label your clusters
 
 Labels:
 

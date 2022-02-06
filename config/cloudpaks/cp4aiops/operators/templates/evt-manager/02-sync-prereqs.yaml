@@ -46,7 +46,7 @@ spec:
                         --namespace "${TARGET_NAMESPACE}" \
                         --patch "{\"data\": {\".dockerconfigjson\": \"$(cat /tmp/.dockerconfigjson | base64 -w0)\" }}"
                  else
-                     oc create secret generic noi-registry-secret \
+                     oc create secret docker-registry noi-registry-secret \
                         --namespace "${TARGET_NAMESPACE}" \
                         --from-file=.dockerconfigjson=/tmp/.dockerconfigjson
                  fi \

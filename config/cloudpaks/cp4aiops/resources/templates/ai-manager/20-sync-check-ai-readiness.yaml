@@ -3,7 +3,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: sync-check-ai-readiness
+  name: sync-check-aimgr-readiness
   annotations:
     argocd.argoproj.io/sync-wave: "220"
     argocd.argoproj.io/hook: Sync

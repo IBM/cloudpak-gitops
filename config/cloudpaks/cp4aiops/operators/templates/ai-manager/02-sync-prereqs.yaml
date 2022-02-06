@@ -2,7 +2,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: sync-ai-manager-prereqs
+  name: sync-aimgr-prereqs
   annotations:
     argocd.argoproj.io/sync-wave: "2"
     argocd.argoproj.io/hook: Sync
@@ -16,10 +16,10 @@ spec:
           imagePullPolicy: IfNotPresent
           resources:
             requests:
-              memory: "64Mi"
+              memory: "256Mi"
               cpu: "200m"
             limits:
-              memory: "64Mi"
+              memory: "256Mi"
               cpu: "250m"
           env:
             - name: ARGOCD_NAMESPACE
@@ -35,7 +35,8 @@ spec:
               set -eo pipefail
               set -x
 
-              # https://www.ibm.com/docs/en/cloud-paks/cloud-pak-watson-aiops/3.2.0?topic=em-starter-installation
+              result=0
+              # https://www.ibm.com/docs/en/cloud-paks/cloud-pak-watson-aiops/3.2.0?topic=manager-starter-installation
               oc extract secret/"${IBM_ENTITLEMENT_SECRET}" \
                   --namespace "${ARGOCD_NAMESPACE}" \
                   --keys=.dockerconfigjson \
@@ -46,7 +47,7 @@ spec:
                         --namespace "${TARGET_NAMESPACE}" \
                         --patch "{\"data\": {\".dockerconfigjson\": \"$(cat /tmp/.dockerconfigjson | base64 -w0)\" }}"
                  else
-                     oc create secret generic ibm-entitlement-key \
+                     oc create secret docker-registry ibm-entitlement-key \
                         --namespace "${TARGET_NAMESPACE}" \
                         --from-file=.dockerconfigjson=/tmp/.dockerconfigjson
                  fi \
@@ -54,11 +55,35 @@ spec:
               && if [ $(oc get ingresscontroller default -n openshift-ingress-operator -o jsonpath='{.status.endpointPublishingStrategy.type}') = "HostNetwork" ]; then
                     oc patch namespace default --type=json -p '[{"op":"add","path":"/metadata/labels","value":{"network.openshift.io/policy-group":"ingress"}}]'
                  fi \
-              && echo "INFO: AI Manager prereq configuration successful." \
+              || result=1
+
+              oc get ServiceAccount aiops-topology-service-account --namespace "{{.Values.metadata.argocd_app_namespace}}" -o yaml 2> /dev/null \
+              && echo "INFO: Topology service account exists." \
               || {
-                 echo "ERROR: AI Manager prereq configuration failed."
-                 exit 1
+                  echo "INFO: Create the topology service account with the entitlement key pull secret."
+                  cat <<EOF > /tmp/sa.yaml
+              apiVersion: v1
+              kind: ServiceAccount
+              metadata:
+                name: aiops-topology-service-account
+                namespace: "{{.Values.metadata.argocd_app_namespace}}"
+                labels:
+                  managedByUser: "true"
+              imagePullSecrets:
+                - name: ibm-entitlement-key
+              EOF
+                  oc apply -n "{{.Values.metadata.argocd_app_namespace}}" -f /tmp/sa.yaml \
+                  && echo "INFO: Create the topology service account with the entitlement key pull secret." \
+                  || result=1
               }
+
+              if [ ${result} -eq 0 ]; then
+                  echo "INFO: AI Manager prereq configuration successful."
+              else
+                  echo "ERROR: AI Manager prereq configuration failed."
+              fi
+
+              exit ${result}
 
       restartPolicy: Never
       serviceAccountName: {{.Values.serviceaccount.argocd_application_controller}}
