@@ -34,6 +34,8 @@ spec:
           value: {{.Values.serviceaccount.argocd_application_controller}}
         - name: spec.shared_configuration.sc_deployment_platform
           value: {{.Values.spec.shared_configuration.sc_deployment_platform}}
+        - name: storageclass.block
+          value: {{.Values.storageclass.block}}
         - name: storageclass.bronze
           value: {{.Values.storageclass.bronze}}
         - name: storageclass.gold

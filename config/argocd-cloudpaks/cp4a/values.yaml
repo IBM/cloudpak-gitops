@@ -10,6 +10,7 @@ spec:
   shared_configuration:
     sc_deployment_platform: ROKS
 storageclass:
+  block: ocs-storagecluster-ceph-rbd
   gold: cp4a-file-retain-gold-gid
   silver: cp4a-file-retain-silver-gid
   bronze: cp4a-file-retain-bronze-gid
