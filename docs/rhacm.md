@@ -30,7 +30,8 @@ These steps require the installation of the [Helm CLI](https://helm.sh/docs/intr
 Log in to the OpenShift cluster using the `oc` CLI, then issue the following commands:
 
    ```sh
-   #  This step assumes you still have the shell variables assigned from previous steps
+   gitops_url=https://github.com/IBM/cloudpak-gitops
+   gitops_branch=main
    git clone ${gitops_url:?} --branch ${gitops_branch:?} cloudpak-gitops
 
    # There will be a few errors in the following output, about 
@@ -61,8 +62,6 @@ These steps assume you  logged in to the OCP server with the `oc` command-line i
 1. Log in to the Argo CD server
 
    ```sh
-   gitops_url=https://github.com/IBM/cloudpak-gitops
-   gitops_branch=main
    argo_pwd=$(oc get secret openshift-gitops-cluster \
                -n openshift-gitops \
                -o jsonpath='{.data.admin\.password}' | base64 -d ; echo ) \
@@ -104,6 +103,7 @@ Once Argo completes synchronizing the applications, your cluster will have polic
 - `openshift-gitops-argo-app`: Configures an Argo server with custom health checks for Cloud Paks.
 - `openshift-gitops-cloudpaks-cp-shared`: Deploys common Cloud Pak prerequisites.
 - `openshift-gitops-cloudpaks-cp4a`: Deploys the Argo applications for Cloud Pak for Business Automation.
+- `openshift-gitops-cloudpaks-cp4d`: Deploys the Argo applications for Cloud Pak for Data.
 - `openshift-gitops-cloudpaks-cp4aiops`: Deploys the Argo applications for Cloud Pak for Watson AIOps.
 - `openshift-gitops-cloudpaks-cp4i`: Deploys the Argo applications for Cloud Pak for Integration.
 - `openshift-gitops-installed`: Deploys OpenShift GitOps.
@@ -114,6 +114,7 @@ Labels:
 
 - `gitops-branch` + `cp4a`: Placement for Cloud Pak for Business Automation.
 - `gitops-branch` + `cp4aiops`: Placement for Cloud Pak  for Cloud Pak for Watson AIOps.
+- `gitops-branch` + `cp4d`: Placement for Cloud Pak for Data.
 - `gitops-branch` + `cp4i`: Placement for Cloud Pak for Integration.
 
 Values for each label:
@@ -121,6 +122,7 @@ Values for each label:
 - `gitops-branch`: Branch of this repo for the Argo applications. Unless you are developing and testing on a new branch, use the default value `main`.
 - cp4a: Namespace for deploying the Cloud Pak. Unless you want multiple Cloud Paks in different namespaces of the cluster, use the default value `ibm-cloudpaks`.
 - `cp4aiops`: Namespace for deploying the Cloud Pak. Unless you want multiple Cloud Paks in different namespaces of the cluster, use the default value `ibm-cloudpaks`.
+- `cp4d`: Namespace for deploying the Cloud Pak. As of release 4.0.6, and as a product limitation, do not use the same namespace as other Cloud Paks if installing  Cloud Pak for Data to the same cluster.
 - `cp4i`: Namespace for deploying the Cloud Pak. Unless you want multiple Cloud Paks in different namespaces of the cluster, use the default value `ibm-cloudpaks`.
 
 ### Examples
