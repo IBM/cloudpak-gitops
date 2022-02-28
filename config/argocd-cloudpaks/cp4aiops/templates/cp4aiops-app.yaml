@@ -33,6 +33,10 @@ spec:
           value: "{{.Values.automation_ui_config_instance_name}}"
         - name: metadata.argocd_app_namespace
           value: {{.Values.metadata.argocd_app_namespace}}
+        - name: modules.aimgr
+          value: "{{.Values.modules.aimgr}}"
+        - name: modules.emgr
+          value: "{{.Values.modules.emgr}}"
         - name: repoURL
           value: ${ARGOCD_APP_SOURCE_REPO_URL}
         - name: serviceaccount.argocd_application_controller

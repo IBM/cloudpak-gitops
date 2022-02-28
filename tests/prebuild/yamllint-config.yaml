@@ -1,11 +1,12 @@
 ---
 ignore: |
+  config/argocd-cloudpaks/cp4aiops/templates/cp4aiops-module-template-app.yaml
   config/argocd-cloudpaks/cp4d/templates/cp4d-module-template-app.yaml
   config/cloudpaks/cp4a/operators/templates/01-namespaces/individual.yaml
   config/cloudpaks/cp4a/operators/templates/07-operators/operator-group.yaml
-  config/cloudpaks/cp4aiops/operators/templates/ai-manager/00-namespaces.yaml
-  config/cloudpaks/cp4aiops/resources/templates/ai-manager/10-ai-manager.yaml
-  config/cloudpaks/cp4aiops/operators/templates/ai-manager/05-operator-group.yaml
+  config/cloudpaks/cp4aiops/install-aimgr/templates/subscriptions/00-namespaces.yaml
+  config/cloudpaks/cp4aiops/install-aimgr/templates/resources/10-ai-manager.yaml
+  config/cloudpaks/cp4aiops/install-aimgr/templates/subscriptions/05-operator-group.yaml
   config/cloudpaks/cp4d/install-platform/templates/prereqs/000-app-namespace.yaml
   config/cloudpaks/cp4d/install-platform/templates/prereqs/000-operators-namespace.yaml
   config/cloudpaks/cp4d/install-platform/templates/prereqs/020-app-operator-group.yaml
