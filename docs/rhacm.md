@@ -42,6 +42,12 @@ Log in to the OpenShift cluster using the `oc` CLI, then issue the following com
       -n open-cluster-management \
       --for=condition=CatalogSourcesUnhealthy=False \
       --timeout 1200s
+   sleep 60
+   oc wait InstallPlan \
+      --all \
+      -n open-cluster-management \
+      --for condition=Installed=true
+
 
    helm template cloudpak-gitops/config/rhacm/seeds/ | oc apply -f -
    oc wait multiclusterhub.operator.open-cluster-management.io multiclusterhub \
