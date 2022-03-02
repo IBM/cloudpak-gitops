@@ -132,8 +132,11 @@ Global pull secrets require granting too much priviledge to the OpenShift GitOps
 
 The Application resources are transitioning to use `PreSync` hooks to copy the entitlement key from a `Secret` named `ibm-entitlement-key` in the `openshift-gitops` namespace, so issue the following command to create that secret:
 
-```
- oc create secret docker-registry ibm-entitlement-key \
+```sh
+# Note that if you just created the OpenShift GitOps operator
+# the namespace may not be ready yet, so you may need to wait 
+# a minute or two
+oc create secret docker-registry ibm-entitlement-key \
         --docker-server=cp.icr.io \
         --docker-username=cp \
         --docker-password="${IBM_ENTITLEMENT_KEY:?}" \
@@ -243,8 +246,8 @@ After completing the list of activities listed in the previous sections, you hav
    gitops_url=https://github.com/IBM/cloudpak-gitops
    gitops_branch=main
    argo_pwd=$(oc get secret openshift-gitops-cluster \
-               -n openshift-gitops \
-               -o jsonpath='{.data.admin\.password}' | base64 -d ; echo ) \
+                  -n openshift-gitops \
+                  -o go-template='{{index .data "admin.password"|base64decode}}') \
    && argo_url=$(oc get route openshift-gitops-server \
                   -n openshift-gitops \
                   -o jsonpath='{.spec.host}') \
@@ -284,7 +287,7 @@ After completing the list of activities listed in the previous sections, you hav
          --helm-set-string metadata.argocd_app_namespace="${cp_namespace}" \
          --sync-policy automated \
          --revision ${gitops_branch:?} \
-         --upsert 
+         --upsert
    ```
 
 1. Add the respective Cloud Pak application (this step assumes you still have shell variables assigned from previous steps) :

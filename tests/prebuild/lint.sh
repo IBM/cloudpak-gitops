@@ -20,11 +20,16 @@ yamllint -v > /dev/null 2>&1 \
     if [ "$(uname)" == "Darwin" ]; then
         brew install yamllint
     else
-        apt-get update && \
-        {
-            apt-get install yamllint -y \
-                || log "ERROR: yamllint installation failed."
-        }
+        if apt-get -h 2>&1 /dev/null; then
+            apt-get update && \
+            {
+                apt-get install yamllint -y \
+                    || log "ERROR: yamllint installation failed."
+            }
+        else
+            log "ERROR: Unrecognized package manager."
+            exit 1
+        fi
     fi
 }
 
@@ -50,7 +55,19 @@ hl_result=0
 find . -name Chart.yaml | sed "s|/Chart.yaml||g" | xargs helm lint || hl_result=1
 log "INFO: Completed helm lint run: ${hl_result}"
 
-result=$((hl_result+yl_result))
+log "INFO: Starting helm template run"
+ht_result=0
+while read -r chart;
+do
+    htl=0
+    helm template "${chart}" 1> /dev/null || htl=1
+    if [ ${htl} -eq 1 ]; then
+        ht_result=1;
+    fi
+done <<< "$(find . -name Chart.yaml | sed "s|/Chart.yaml||g")"
+log "INFO: Completed helm templae run: ${ht_result}"
+
+result=$((yl_result+hl_result+ht_result))
 log "INFO: Global test failures: ${result}"
 
 exit "${result}"

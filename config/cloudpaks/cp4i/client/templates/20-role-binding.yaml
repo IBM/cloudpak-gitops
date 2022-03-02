@@ -1,0 +1,17 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  creationTimestamp: null
+  name: cp4i-client
+  annotations:
+    argocd.argoproj.io/sync-wave: "22"
+  namespace: dev
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: ibm-cp4i-client
+subjects:
+  - kind: ServiceAccount
+    name: openshift-gitops-argocd-application-controller
+    namespace: openshift-gitops

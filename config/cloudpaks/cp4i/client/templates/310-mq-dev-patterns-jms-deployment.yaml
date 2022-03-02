@@ -4,33 +4,33 @@ kind: Deployment
 metadata:
   creationTimestamp: null
   labels:
-    app.kubernetes.io/name: mq-dev-patterns-node
+    app.kubernetes.io/name: mq-dev-patterns-jms
     app.kubernetes.io/part-of: app-mq-dev-patterns
   annotations:
-    argocd.argoproj.io/sync-wave: "300"
-  name: mq-dev-patterns-node
+    argocd.argoproj.io/sync-wave: "310"
+  name: mq-dev-patterns-jms
   namespace: dev
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app.kubernetes.io/name: mq-dev-patterns-node
+      app.kubernetes.io/name: mq-dev-patterns-jms
       app.kubernetes.io/part-of: app-mq-dev-patterns
   strategy: {}
   template:
     metadata:
       creationTimestamp: null
       labels:
-        app.kubernetes.io/name: mq-dev-patterns-node
+        app.kubernetes.io/name: mq-dev-patterns-jms
         app.kubernetes.io/part-of: app-mq-dev-patterns
     spec:
       containers:
         - env:
             - name: SERVICE_BINDING_ROOT
               value: /config
-          image: image-registry.openshift-image-registry.svc:5000/dev/mq-dev-patterns-node:latest
+          image: image-registry.openshift-image-registry.svc:5000/dev/mq-dev-patterns-jms:latest
           imagePullPolicy: Always
-          name: mq-dev-patterns-node
+          name: mq-dev-patterns-jms
           ports:
             - containerPort: 8080
           resources: {}

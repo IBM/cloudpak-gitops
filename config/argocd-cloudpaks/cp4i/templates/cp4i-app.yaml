@@ -32,6 +32,8 @@ spec:
           value: ${ARGOCD_APP_NAMESPACE}
         - name: metadata.argocd_app_namespace
           value: {{.Values.metadata.argocd_app_namespace}}
+        - name: modules.client
+          value: "{{.Values.modules.client}}"
         - name: repoURL
           value: ${ARGOCD_APP_SOURCE_REPO_URL}
         - name: serviceaccount.argocd_application_controller

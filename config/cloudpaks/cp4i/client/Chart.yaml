@@ -1,7 +1,7 @@
 ---
 apiVersion: v2
-name: icp4i
-description: Cloud Pak for Integration
+name: icp4i-client
+description: Client apps for Cloud Pak for Integration
 
 # A chart can be either an 'application' or a 'library' chart.
 #
