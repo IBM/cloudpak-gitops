@@ -9,3 +9,5 @@ metadata:
 storageclass:
   rwo: ocs-storagecluster-ceph-rbd
   rwx: ocs-storagecluster-cephfs
+modules:
+  client: false

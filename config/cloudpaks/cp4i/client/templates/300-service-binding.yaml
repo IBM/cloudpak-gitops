@@ -2,9 +2,10 @@
 apiVersion: binding.operators.coreos.com/v1alpha1
 kind: ServiceBinding
 metadata:
-  creationTimestamp: null
   annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     argocd.argoproj.io/sync-wave: "300"
+  creationTimestamp: null
   name: binding-request
   namespace: dev
 spec:
@@ -34,10 +35,10 @@ spec:
       value: |
         {
           "MQ_ENDPOINTS": [{
-            "HOST": "{{.queueservice.metadata.name}}.{{.queueservice.metadata.namespace}}.svc.cluster.local",
-            "PORT": "{{range .queueservice.spec.ports}}{{if eq .name "qmgr"}}{{.port}}{{end}}{{end}}",
+            "HOST": "{{ "{{.queueservice.metadata.name}}.{{.queueservice.metadata.namespace}}.svc.cluster.local" }}",
+            "PORT": "{{ "{{range .queueservice.spec.ports}}{{if eq .name \"qmgr\"}}{{.port}}{{end}}{{end}}" }}",
             "CHANNEL": "MQ.SVRCONN",
-            "QMGR": "{{.mqqmgr.spec.queueManager.name}}",
+            "QMGR": "{{ "{{.mqqmgr.spec.queueManager.name}}" }}",
             "APP_USER": "someuser",
             "QUEUE_NAME": "DEV.CASE_QUEUE.1",
             "DYNAMIC_QUEUE_PREFIX": "APP.REPLIES.*"

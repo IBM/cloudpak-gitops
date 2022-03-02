@@ -4,8 +4,8 @@ kind: BuildConfig
 metadata:
   creationTimestamp: null
   annotations:
-    argocd.argoproj.io/sync-wave: "300"
-  name: mq-dev-patterns-jms
+    argocd.argoproj.io/sync-wave: "310"
+  name: mq-dev-patterns-node
   namespace: dev
 spec:
   runPolicy: Serial
@@ -18,7 +18,7 @@ spec:
         secret: "secret101"
     - type: "ImageChange"
   source:
-    contextDir: JMS
+    contextDir: Node.js
     git:
       uri: https://github.com/nastacio/mq-dev-patterns.git
     type: Git
@@ -26,12 +26,12 @@ spec:
     dockerStrategy:
       from:
         kind: ImageStreamTag
-        name: openjdk:11-jre-slim-buster
+        name: node:12-slim
     type: Docker
   output:
     to:
       kind: DockerImage
-      name: image-registry.openshift-image-registry.svc:5000/dev/mq-dev-patterns-jms:latest
+      name: image-registry.openshift-image-registry.svc:5000/dev/mq-dev-patterns-node:latest
   postCommit: {}
   failedBuildsHistoryLimit: 5
   successfulBuildsHistoryLimit: 5

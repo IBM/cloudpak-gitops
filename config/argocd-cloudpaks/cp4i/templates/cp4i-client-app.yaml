@@ -1,3 +1,8 @@
+{{- $argocd_app_namespace := .Values.metadata.argocd_app_namespace -}}
+{{- $repoUrl := .Values.repoURL -}}
+{{- $targetRevision := .Values.targetRevision -}}
+{{- $client := .Values.modules.client }}
+{{- if eq ( default false $client ) true  }}
 ---
 apiVersion: argoproj.io/v1alpha1
 kind: Application
@@ -20,9 +25,19 @@ spec:
       kind: Application
   project: default
   source:
-    path: config/cloudpaks/cp4i/client/overlays
-    repoURL: https://github.com/IBM/cloudpak-gitops.git
-  syncPolicy: {}
+    helm:
+      parameters:
+        - name: repoURL
+          value: ${ARGOCD_APP_SOURCE_REPO_URL}
+        - name: targetRevision
+          value: ${ARGOCD_APP_SOURCE_TARGET_REVISION}
+    path: config/cloudpaks/cp4i/client
+    repoURL: {{.Values.repoURL}}
+    targetRevision: {{.Values.targetRevision}}
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
 status:
   health: {}
   summary: {}
@@ -32,3 +47,4 @@ status:
       source:
         repoURL: ""
     status: ""
+{{- end }}
