@@ -12,7 +12,7 @@ metadata:
     app.kubernetes.io/name: ibm-watson-openscale-operator-subscription
   namespace: {{.Values.metadata.operators_namespace}}
 spec:
-  channel: v1
+  channel: v1.5
   installPlanApproval: Automatic
   name: ibm-cpd-wos
   source: ibm-operator-catalog
