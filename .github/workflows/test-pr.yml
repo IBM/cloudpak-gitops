@@ -1,0 +1,33 @@
+name: CD
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    if: ${{ !contains( github.event.pull_request.labels.*.name, 'skip ci' ) }}
+    runs-on: ubuntu-latest
+    container:  icr.io/continuous-delivery/pipeline/pipeline-base-ubi:3.6
+
+    env:
+      HOME: /root
+      PIPELINE_DEBUG: 1
+      CP_ICR_IO_REPO: ${{ secrets.CP_ICR_IO_REPO }}
+      CP_ICR_IO_USERID: ${{ secrets.CP_ICR_IO_USERID }}
+      CP_ICR_IO_PASSWORD: ${{ secrets.CP_ICR_IO_PASSWORD }}
+      IBM_CLOUD_API_KEY: ${{ secrets.IBM_CLOUD_API_KEY }}
+
+    environment: dev
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Determine extent of testing
+        run: tests/postbuild/test.sh "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" "${GITHUB_HEAD_REF}" "${GITHUB_BASE_REF}"
+
+      - name: Ensures target cluster exists
+        run: tests/postbuild/cluster.sh --create --wait -t ibmcloud -n "gitops-${GITHUB_HEAD_REF}" --apikey "${IBM_CLOUD_API_KEY}" 
+
+      - name: Deploy Argo to the cluster
+        run: tests/postbuild/gitops.sh --setup-server -t ibmcloud -n "gitops-${GITHUB_HEAD_REF}" --gitops-repo "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" --gitops-branch "${GITHUB_HEAD_REF}" --apikey "${IBM_CLOUD_API_KEY}" --application-labels "$(cat labels.txt)"
