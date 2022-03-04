@@ -77,9 +77,16 @@ function usage() {
     echo "                      Checks status of cluster."
     echo "        --config"
     echo "                      Configures cluster for Cloud Pak installation."
+    echo "   -e | --ensure"
+    echo "                      Ensures a cluster exists and is configured."
+    echo "                      Equivalent to consecutive invocations of the script with"
+    echo "                      --status, --create, and --config."
     echo "        [--backup-agent]"
     echo "                      Companion to the --config command."
     echo "                      Adds the Velero backup agent to the cluster."
+    echo "   -g | --global-pull-secret <true|false>"
+    echo "                      Companion to the --config command."
+    echo "                      Adds Entitlement Registry key to the cluster's global pull secret."
     echo "        [--custom-pki]"
     echo "                      Companion to the --config command."
     echo "                      Configures the server consoles with a signed certificate."
@@ -1639,6 +1646,7 @@ function config_pki() {
 # arg3 username for the target cloud
 # arg4 apikey for the target cloud
 # arg5 type of storage to be added to the cluster.
+# arg6 configure global pull secret, 0 (no) or 1 (yes)
 #
 function configure_ibm_cloud_cluster() {
     local cluster_type=${1}
@@ -1646,6 +1654,7 @@ function configure_ibm_cloud_cluster() {
     local username=${3}
     local api_key=${4}
     local storage_type=${5}
+    local set_global_pull_secret=${6}
 
     local result=0
 
@@ -1679,10 +1688,12 @@ function configure_ibm_cloud_cluster() {
         if [ "${cluster_type}" == "ibmcloud-gen2" ]; then
             operation=replace
         fi
-        setup_global_pull_secrets \
-            && ibm_cloud_cmd_workers "${cluster_type}" "${cluster_name}" ${operation} \
-            && oc_wait_nodes \
-            || result=1
+        if [ "${set_global_pull_secret}" -eq 1 ]; then
+            setup_global_pull_secrets \
+                && ibm_cloud_cmd_workers "${cluster_type}" "${cluster_name}" ${operation} \
+                && oc_wait_nodes \
+                || result=1
+        fi
 
         if [ "${storage_type}" != "none" ]; then
             setup_ibm_cloud_storage "${cluster_type}" "${cluster_name}" \
@@ -1704,6 +1715,7 @@ function configure_ibm_cloud_cluster() {
 # arg5 OCP key if creating a managed OCP cluster (other than ROKS)
 # arg6 apply custom PKI settings, 0 or 1
 # arg7 type of storage to be added to the cluster.
+# arg8 configure global pull secret, 0 (no) or 1 (yes)
 #
 function configure_aws_cluster() {
     local cluster_type=${1}
@@ -1713,6 +1725,7 @@ function configure_aws_cluster() {
     local managed_ocp_token=${5}
     local custom_pki=${6}
     local storage_type=${7}
+    local set_global_pull_secret=${8}
 
     local result=0
 
@@ -1727,8 +1740,10 @@ function configure_aws_cluster() {
         approve_csrs \
             || result=1
 
-        setup_global_pull_secrets \
-            || result=1
+        if [ "${set_global_pull_secret}" -eq 1 ]; then
+            setup_global_pull_secrets \
+                || result=1
+        fi
 
         oc_wait_nodes \
             || result=1
@@ -1762,6 +1777,7 @@ function configure_aws_cluster() {
 # arg5 apikey for the RHACM server.
 # arg6 apply custom PKI settings, 0 or 1
 # arg7 type of storage to be added to the cluster.
+# arg8 configure global pull secret, 0 (no) or 1 (yes)
 #
 function configure_rhacm_cluster() {
     local rhacm_server=${1}
@@ -1771,6 +1787,7 @@ function configure_rhacm_cluster() {
     local api_key=${5}
     local custom_pki=${6}
     local storage_type=${7}
+    local set_global_pull_secret=${8}
 
     local result=0
 
@@ -1790,8 +1807,10 @@ function configure_rhacm_cluster() {
         approve_csrs \
             || result=1
 
-        setup_global_pull_secrets \
-            || result=1
+        if [ "${set_global_pull_secret}" -eq 1 ]; then
+            setup_global_pull_secrets \
+                || result=1
+        fi
 
         oc_wait_nodes \
             || result=1
@@ -1821,13 +1840,15 @@ function configure_rhacm_cluster() {
 # arg3 apikey for the target cloud
 # arg4 apply custom PKI settings, 0 or 1
 # arg5 type of storage to be added to the cluster.
+# arg6 configure global pull secret, 0 (no) or 1 (yes)
 #
 function configure_fyre_cluster() {
-    local cluster_name=$1
-    local username=$2
-    local api_key=$3
-    local custom_pki=$4
-    local storage_type=$5
+    local cluster_name=${1}
+    local username=${2}
+    local api_key=${3}
+    local custom_pki=${4}
+    local storage_type=${5}
+    local set_global_pull_secret=$6
 
     local result=0
 
@@ -1854,10 +1875,12 @@ function configure_fyre_cluster() {
             approve_csrs \
                 || result=1
 
-            setup_global_pull_secrets \
-                && oc_wait_nodes \
-                && ${oc_cmd} get machineconfigpool \
-                || result=1
+            if [ "${set_global_pull_secret}" -eq 1 ]; then
+                setup_global_pull_secrets \
+                    && oc_wait_nodes \
+                    && ${oc_cmd} get machineconfigpool \
+                    || result=1
+            fi
 
             config_pki "fyre" "${custom_pki}" \
                 || result=1
@@ -1887,6 +1910,7 @@ function configure_fyre_cluster() {
 # arg8 install the velero backup framework, 0 (no) or 1 (yes)
 # arg9 API key for the COS instance
 # arg10 type of storage to be added to the cluster.
+# arg11 configure global pull secret, 0 (no) or 1 (yes)
 #
 function configure_cluster() {
     local cluster_type=${1}
@@ -1899,6 +1923,7 @@ function configure_cluster() {
     local backup_agent=${8}
     local cos_apikey=${9}
     local storage_type=${10}
+    local set_global_pull_secret=${11}
 
     if [ "$(uname)" != "Linux" ]; then
         log "ERROR: This step is only supported from Linux systems. Tested with a docker container using the ibmcom/pipeline-base-image image"
@@ -1908,20 +1933,20 @@ function configure_cluster() {
     local result=0
 
     if [ -n "${rhacm_server}" ]; then
-        configure_rhacm_cluster "${rhacm_server}" "${cluster_type}" "${cluster_name}" "${username}" "${api_key}" "${custom_pki}" "${storage_type}" \
+        configure_rhacm_cluster "${rhacm_server}" "${cluster_type}" "${cluster_name}" "${username}" "${api_key}" "${custom_pki}" "${storage_type}" "${set_global_pull_secret}" \
             || return 1
     else
         case ${cluster_type} in
             aws|rosa)
-                configure_aws_cluster "${cluster_type}" "${cluster_name}" "${username}" "${api_key}" "${managed_ocp_token}" "${custom_pki}"  "${storage_type}" \
+                configure_aws_cluster "${cluster_type}" "${cluster_name}" "${username}" "${api_key}" "${managed_ocp_token}" "${custom_pki}"  "${storage_type}" "${set_global_pull_secret}" \
                     || result=1
             ;;
             fyre|fyre-quick-burn)
-                configure_fyre_cluster "${cluster_name}" "${username}" "${api_key}" "${custom_pki}" "${storage_type}" \
+                configure_fyre_cluster "${cluster_name}" "${username}" "${api_key}" "${custom_pki}" "${storage_type}" "${set_global_pull_secret}" \
                     || result=1
             ;;
             ibmcloud|ibmcloud-gen2)
-                configure_ibm_cloud_cluster "${cluster_type}" "${cluster_name}" "${username}" "${api_key}" "${storage_type}" \
+                configure_ibm_cloud_cluster "${cluster_type}" "${cluster_name}" "${username}" "${api_key}" "${storage_type}" "${set_global_pull_secret}" \
                     || result=1
             ;;
             *)
@@ -1962,6 +1987,7 @@ cluster_workers="${CLUSTER_WORKERS}"
 worker_flavor="${WORKER_FLAVOR}"
 autoscale_cluster_workers=""
 autoscale_worker_flavor="${WORKER_FLAVOR}"
+set_global_pull_secret=0
 create=0
 ensure=0
 delete=0
@@ -1991,6 +2017,8 @@ case ${key} in
     ;;
     -c|--create)
     create=1
+    ;;
+    -e|--ensure)
     ensure=1
     ;;
     -d|--delete)
@@ -2018,6 +2046,12 @@ case ${key} in
     ;;
     --custom-pki)
     custom_pki=1
+    ;;
+    -g|--global-pull-secret)
+    if [ "${1}" == "true" ]; then
+        set_global_pull_secret=1
+    fi
+    shift
     ;;
     --backup-agent)
     backup_agent=1
@@ -2076,14 +2110,14 @@ case ${key} in
 esac
 done
 
-cmd_count=$((create+delete+check+config))
+cmd_count=$((create+delete+check+ensure+config))
 
 if [ ${cmd_count} -eq 0 ]; then
-    log "ERROR: No command was specified [create, delete, check, or config]."
+    log "ERROR: No command was specified [create, delete, check, ensure, or config]."
     exit 1
 fi
 if [ ${cmd_count} -gt 1 ]; then
-    log "ERROR: Only one command can be specified [create, delete, check, or config]."
+    log "ERROR: Only one command can be specified [create, delete, check, ensure, or config]."
     exit 1
 fi
 
@@ -2235,7 +2269,7 @@ if [ ${ensure} -eq 1 ]; then
     login_cluster "${cluster_type}" "${cluster_name}" "${username}" "${apikey}" "" \
     || {
         create_cluster "${cluster_type}"  "${cluster_name}" "${cluster_workers}" "${worker_flavor}" "${autoscale_cluster_workers}" "${autoscale_worker_flavor}" "${storage_type}" "${username}" "${apikey}" "${managed_ocp_token}" "${rhacm_server}" "${managed_cluster_labels}" "${wait_cluster}" \
-        &&  configure_ibm_cloud_cluster "${cluster_type}" "${cluster_name}" "${username}" "${apikey}" "${storage_type}" \
+        && configure_cluster "${cluster_type}" "${cluster_name}" "${username}" "${apikey}" "${managed_ocp_token}" "${rhacm_server}" "${custom_pki}" "${backup_agent}" "${cos_apikey}" "${storage_type}" "${set_global_pull_secret}" \
         || result=1
     }
 elif [ ${create} -eq 1 ]; then
@@ -2248,7 +2282,7 @@ elif [ ${check} -eq 1 ]; then
     check_cluster "${cluster_type}" "${cluster_name}" "${username}" "${apikey}" "${managed_ocp_token}" "${wait_cluster}"
     result=$?
 elif [ ${config} -eq 1 ]; then
-    configure_cluster "${cluster_type}" "${cluster_name}" "${username}" "${apikey}" "${managed_ocp_token}" "${rhacm_server}" "${custom_pki}" "${backup_agent}" "${cos_apikey}" "${storage_type}"
+    configure_cluster "${cluster_type}" "${cluster_name}" "${username}" "${apikey}" "${managed_ocp_token}" "${rhacm_server}" "${custom_pki}" "${backup_agent}" "${cos_apikey}" "${storage_type}" "${set_global_pull_secret}" 
     result=$?
 fi
 

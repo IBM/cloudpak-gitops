@@ -13,6 +13,17 @@ function log() {
     echo "$(date +%Y-%m-%dT%H:%M:%S%z): ${msg}"
 }
 
+shellcheck --version > /dev/null 2>&1 \
+|| 
+(
+    log "INFO: Installing ShellCheck"
+    apt-get update && \
+    (
+        apt-get install shellcheck -y \
+        || log "ERROR: ShellCheck installation failed"
+    )
+)
+
 yamllint -v > /dev/null 2>&1 \
 || 
 {
@@ -38,12 +49,22 @@ helm version --short --client > /dev/null 2>&1 || install_helm_3=1
 helm version --short --client | grep "v2" > /dev/null 2>&1 && install_helm_3=1
 
 if [ ${install_helm_3} -eq 1 ]; then
+    install_helm_result=0
     log "INFO: Installing helm 3"
     WORKDIR=/tmp
     curl -sL https://get.helm.sh/helm-v3.5.2-linux-amd64.tar.gz | tar xzf - -C "${WORKDIR}" \
         && install "${WORKDIR}/linux-amd64/helm" /usr/local/bin/helm \
-        || log "ERROR: helm 3 installation failed."
+        || install_helm_result=1
+        
+    if [ ${install_helm_result} -eq 1 ]; then
+        log "ERROR: helm 3 installation failed."
+    fi
 fi
+
+sc_result=0
+log "INFO: Starting ShellCheck run"
+shellcheck tests/prebuild/*.sh || sc_result=1
+log "INFO: Completed ShellCheck run: ${sc_result}"
 
 log "INFO: Starting yamllint run"
 yl_result=0
@@ -67,7 +88,7 @@ do
 done <<< "$(find . -name Chart.yaml | sed "s|/Chart.yaml||g")"
 log "INFO: Completed helm templae run: ${ht_result}"
 
-result=$((yl_result+hl_result+ht_result))
+result=$((sc_result+yl_result+hl_result+ht_result))
 log "INFO: Global test failures: ${result}"
 
 exit "${result}"

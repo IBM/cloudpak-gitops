@@ -810,27 +810,45 @@ function login_cluster() {
     local api_key=${4}
     local managed_ocp_token=${5}
 
-    case ${cluster_type} in
-        aws|ocp)
-            login_ocp_cluster "${cluster_name}" "${username}" "${api_key}" \
-                || return 1
-        ;;
-        fyre|fyre-quick-burn)
-            login_fyre "${cluster_name}" "${username}" "${api_key}" \
-                || return 1
-        ;;
-        ibmcloud|ibmcloud-gen2)
-            login_ibm_cloud "${cluster_name}" "${username}" "${api_key}" \
-                || return 1
-        ;;
-        rosa)
-            login_rosa "${cluster_name}" "${username}" "${api_key}" "${managed_ocp_token}" \
-                || return 1
-        ;;
-        *)
-        echo "Unrecognized cluster type: ${cluster_type}"
-        return 1
-    esac
+    local result=0
+
+    for attempt in {1..5}
+    do
+        case ${cluster_type} in
+            aws|ocp)
+                login_ocp_cluster "${cluster_name}" "${username}" "${api_key}" \
+                    || result=1
+            ;;
+            fyre|fyre-quick-burn)
+                login_fyre "${cluster_name}" "${username}" "${api_key}" \
+                    || result=1
+            ;;
+            ibmcloud|ibmcloud-gen2)
+                login_ibm_cloud "${cluster_name}" "${username}" "${api_key}" \
+                    || result=1
+            ;;
+            rosa)
+                login_rosa "${cluster_name}" "${username}" "${api_key}" "${managed_ocp_token}" \
+                    || result=1
+            ;;
+            *)
+            echo "Unrecognized cluster type: ${cluster_type}"
+            return 1
+        esac
+
+        if [ ${result} -eq 0 ]; then
+            break;
+        else
+            log "WARNING: Login failed on attempt ${attempt}"
+            sleep 60
+        fi
+    done
+
+    if [ ${result} -eq 1 ]; then
+        log "ERROR: Successive login attempts failed."
+    fi
+
+    return ${result}
 }
 
 

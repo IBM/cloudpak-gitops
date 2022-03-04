@@ -1,4 +1,4 @@
-name: CI
+name: Lint
 
 # Controls when the workflow will run
 on: [push]
