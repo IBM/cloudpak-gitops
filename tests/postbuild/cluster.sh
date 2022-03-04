@@ -317,7 +317,7 @@ function setup_global_pull_secrets() {
         "${CP_STG_ICR_IO_USERID}" \
         "${CP_STG_ICR_IO_PASSWORD}"  \
         "${registry_email}" \
-        ${registry_required} || result=1
+        ${registry_optional} || result=1
 
     add_pull_secret "${gps_file}" \
         "${DOCKER_REPO}" \
@@ -2266,12 +2266,18 @@ check_install_oc || exit 1
 result=0
 
 if [ ${ensure} -eq 1 ]; then
-    login_cluster "${cluster_type}" "${cluster_name}" "${username}" "${apikey}" "" \
+    login_cluster "${cluster_type}" "${cluster_name}" "${username}" "${apikey}" "" 1 \
     || {
         create_cluster "${cluster_type}"  "${cluster_name}" "${cluster_workers}" "${worker_flavor}" "${autoscale_cluster_workers}" "${autoscale_worker_flavor}" "${storage_type}" "${username}" "${apikey}" "${managed_ocp_token}" "${rhacm_server}" "${managed_cluster_labels}" "${wait_cluster}" \
-        && configure_cluster "${cluster_type}" "${cluster_name}" "${username}" "${apikey}" "${managed_ocp_token}" "${rhacm_server}" "${custom_pki}" "${backup_agent}" "${cos_apikey}" "${storage_type}" "${set_global_pull_secret}" \
-        || result=1
+        || {
+            check_cluster "${cluster_type}" "${cluster_name}" "${username}" "${apikey}" "${managed_ocp_token}" "${wait_cluster}" 1 \
+            || result=1
+        }
     }
+    if [ ${result} -eq 0 ]; then
+        configure_cluster "${cluster_type}" "${cluster_name}" "${username}" "${apikey}" "${managed_ocp_token}" "${rhacm_server}" "${custom_pki}" "${backup_agent}" "${cos_apikey}" "${storage_type}" "${set_global_pull_secret}" \
+        || result=1
+    fi
 elif [ ${create} -eq 1 ]; then
     create_cluster "${cluster_type}"  "${cluster_name}" "${cluster_workers}" "${worker_flavor}" "${autoscale_cluster_workers}" "${autoscale_worker_flavor}" "${storage_type}" "${username}" "${apikey}" "${managed_ocp_token}" "${rhacm_server}" "${managed_cluster_labels}" "${wait_cluster}"
     result=$?

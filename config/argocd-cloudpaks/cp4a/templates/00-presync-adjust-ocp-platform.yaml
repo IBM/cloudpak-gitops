@@ -35,10 +35,6 @@ spec:
               platform=$(oc get configmap argocd-cp4a-config \
                   --namespace "${ARGOCD_NAMESPACE}" -o jsonpath='{.data.shared_configuration\.sc_deployment_platform}')
 
-              if [ "${platform}" == "IBMCloud" ]; then
-                  exit
-              fi
-
               echo "INFO: Install Argo CLI."
               # Install it from cluster, not from Internet, so airgap scenarios still work
               argo_route=openshift-gitops-server
@@ -55,7 +51,7 @@ spec:
               && "${argo_cmd}" login "${argo_url}" --username admin --password "${argo_pwd}" --insecure \
               && "${argo_cmd}" app set "${ARGOCD_APP_NAME}" \
                   --helm-set-string spec.shared_configuration.sc_deployment_platform="${platform}" \
-              && echo "INFO: ${ARGOCD_APP_NAME} successfully updated storage classes." \
+              && echo "INFO: ${ARGOCD_APP_NAME} successfully updated OCP platform." \
               || result=1
 
               echo "INFO: Application ${ARGOCD_APP_NAME} current parameters:"

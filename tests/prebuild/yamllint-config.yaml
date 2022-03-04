@@ -4,7 +4,7 @@ ignore: |
   config/argocd-cloudpaks/cp4d/templates/cp4d-module-template-app.yaml
   config/argocd-cloudpaks/cp4i/templates/cp4i-client-app.yaml
   config/cloudpaks/cp4a/operators/templates/01-namespaces/individual.yaml
-  config/cloudpaks/cp4a/operators/templates/07-operators/operator-group.yaml
+  config/cloudpaks/cp4a/operators/templates/07-operators/100-operator-group.yaml
   config/cloudpaks/cp4aiops/install-aimgr/templates/subscriptions/00-namespaces.yaml
   config/cloudpaks/cp4aiops/install-aimgr/templates/resources/10-ai-manager.yaml
   config/cloudpaks/cp4aiops/install-aimgr/templates/subscriptions/05-operator-group.yaml
