@@ -20,11 +20,15 @@ labels=cp-shared:ibm-cloudpaks
 workers=3
 setup_gps=false
 
+rc_major=0
+rc_minor=0
+rc_patch=1
+
 # Output files
 labels_output_file="${original_dir}/test-sh-labels.txt"
 workers_output_file="${original_dir}/test-sh-workers.txt"
 gps_output_file="${original_dir}/test-sh-gps.txt"
-
+semver_output_file="${original_dir}/test-sh-semver.txt"
 
 #
 # Extracts only the file names containing differences between the source
@@ -51,6 +55,58 @@ function extract_branch_delta() {
     return ${result}
 }
 
+
+#
+#
+#
+function infer_rc_release() {
+    while read -r chart
+    do
+        echo "${chart}"
+
+        chart_yaml="${WORKDIR}/chart.yaml"
+        git diff "${git_target_branch}" "${chart}" > "${chart_yaml}"
+
+        is_minor=0
+        grep "new file" "${chart_yaml}" 1> /dev/null \
+        && is_minor=1 \
+        || is_minor=0
+
+        if [ ${is_minor} -eq 1 ]; then
+           echo "minor"
+        else
+           new_version=$(grep "^+version" "${chart_yaml}" | cut -d " " -f 2)
+           old_version=$(grep "^-version" "${chart_yaml}" | cut -d " " -f 2)
+           new_major_version=${new_version//.*/}
+           old_major_version=${old_version//.*/}
+           if [ "${new_major_version}" -gt "${old_major_version}" ]; then 
+               rc_major=1
+               rc_minor=0
+               rc_patch=0
+               echo "major"
+               break
+           else
+               new_minor_version=$(echo "${new_version}" | cut -d "." -f 2)
+               old_minor_version=$(echo "${old_version}" | cut -d "." -f 2)
+               if [ "${new_minor_version}" -gt "${old_minor_version}" ]; then 
+                   rc_minor=1
+                   rc_patch=0
+                   echo "minor"
+               elif [ "${rc_minor}" -eq 0 ]; then
+                   new_patch_version=${new_version//*./}
+                   old_patch_version=${old_version//*./}
+                   if [ "${new_patch_version}" -gt "${old_patch_version}" ]; then 
+                       rc_patch=1
+                       echo "patch"
+                   fi
+               fi
+           fi           
+        fi
+    done <<< "$(git diff "${git_target_branch}" --name-only | grep Chart.yaml)"
+
+    echo "Delta: ${rc_major}.${rc_minor}.${rc_patch}"
+}
+
 WORKDIR=$(mktemp -d) || exit 1
 
 branch_delta_output_file="${WORKDIR}/diff.txt"
@@ -70,8 +126,11 @@ do
     # fi
 done
 
+infer_rc_release
+
 echo ${labels}
 
 echo "${labels}" > "${labels_output_file}"
 echo "${workers}" > "${workers_output_file}"
 echo "${setup_gps}" > "${gps_output_file}"
+echo "${rc_major}.${rc_minor}.${rc_patch}" > "${semver_output_file}"
