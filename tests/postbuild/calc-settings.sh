@@ -143,6 +143,5 @@ echo ${labels}
 echo "${labels}" > "${labels_output_file}"
 echo "${workers}" > "${workers_output_file}"
 echo "${setup_gps}" > "${gps_output_file}"
-echo "${rc_major}.${rc_minor}.${rc_patch}" > "${semver_output_file}"
 
-    cd "${original_dir}"
+echo "::set-output name=delta:: ${rc_major}.${rc_minor}.${rc_patch}"

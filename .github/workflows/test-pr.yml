@@ -5,7 +5,7 @@ on:
     branches: [ main ]
 
 jobs:
-  build:
+  test:
     if: ${{ !contains( github.event.pull_request.labels.*.name, 'skip ci' ) }}
     runs-on: ubuntu-latest
     container:  icr.io/continuous-delivery/pipeline/pipeline-base-ubi:3.6
@@ -20,17 +20,26 @@ jobs:
 
     environment: dev
 
+    outputs:
+      delta: ${{ steps.calc.outputs.delta }}
+
     steps:
       - uses: actions/checkout@v2
 
-      - name: Determine extent of testing
+      - id: calc
+        name: Determine extent of testing
         run: tests/postbuild/calc-settings.sh "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" "${GITHUB_HEAD_REF}" "${GITHUB_BASE_REF}"
 
-      - name: Ensures target cluster exists
-        run: tests/postbuild/cluster.sh --ensure --wait -t ibmcloud -n "gitops-${GITHUB_HEAD_REF}" --apikey "${IBM_CLOUD_API_KEY}" --workers "$(cat test-sh-workers.txt)" --global-pull-secret "$(cat test-sh-gps.txt)"
+      # - name: Ensures target cluster exists
+      #   run: tests/postbuild/cluster.sh --ensure --wait -t ibmcloud -n "gitops-${GITHUB_HEAD_REF}" --apikey "${IBM_CLOUD_API_KEY}" --workers "$(cat test-sh-workers.txt)" --global-pull-secret "$(cat test-sh-gps.txt)"
 
-      - name: Deploy Argo to the cluster
-        run: tests/postbuild/gitops.sh --setup-server -t ibmcloud -n "gitops-${GITHUB_HEAD_REF}" --gitops-repo "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" --gitops-branch "${GITHUB_HEAD_REF}" --apikey "${IBM_CLOUD_API_KEY}" --application-labels "$(cat test-sh-labels.txt)"
+      # - name: Deploy Argo to the cluster
+      #   run: tests/postbuild/gitops.sh --setup-server -t ibmcloud -n "gitops-${GITHUB_HEAD_REF}" --gitops-repo "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" --gitops-branch "${GITHUB_HEAD_REF}" --apikey "${IBM_CLOUD_API_KEY}" --application-labels "$(cat test-sh-labels.txt)"
 
+  promote:
+
+    runs-on: ubuntu-latest
+
+    steps:
       - name: Promote release if test passes
-        run: tests/postbuild/promote.sh "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" "${GITHUB_HEAD_REF}" "${GITHUB_BASE_REF}"
+        run: tests/postbuild/promote.sh "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" "${GITHUB_HEAD_REF}" "${GITHUB_BASE_REF}" ${{needs.test.outputs.delta}}
