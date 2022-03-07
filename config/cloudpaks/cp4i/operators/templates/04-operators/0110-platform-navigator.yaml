@@ -4,12 +4,9 @@ kind: Subscription
 metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "110"
-  name: >-
-    ibm-integration-platform-navigator
   creationTimestamp: null
+  name: ibm-integration-platform-navigator
   namespace: {{.Values.argocd_app_namespace}}
-  labels:
-    operators.coreos.com/ibm-integration-platform-navigator.ibm-cloudpaks: ''
 spec:
   channel: v5.2
   installPlanApproval: Automatic
