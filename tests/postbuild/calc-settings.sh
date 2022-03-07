@@ -30,6 +30,19 @@ workers_output_file="${original_dir}/test-sh-workers.txt"
 gps_output_file="${original_dir}/test-sh-gps.txt"
 semver_output_file="${original_dir}/test-sh-semver.txt"
 
+
+#
+# Clean up at end of task
+#
+cleanRun() {
+    cd "${original_dir}"
+    if [ -n "${WORKDIR}" ]; then
+        rm -rf "${WORKDIR}"
+    fi
+}
+trap cleanRun EXIT
+
+
 #
 # Extracts only the file names containing differences between the source
 # and target branches.
@@ -42,7 +55,6 @@ function extract_branch_delta() {
     #
     # Analyze the differences between branches
     # to determine which Cloud Paks to test
-    cd "${WORKDIR}"
     git clone "${git_repo}" cloudpak-gitops
     cd cloudpak-gitops
     git config pull.rebase false
@@ -50,7 +62,6 @@ function extract_branch_delta() {
     git pull origin "${git_source_branch}"
     git diff "${git_target_branch}" --name-only | tee "${output_file}" \
         && result=0
-    cd "${original_dir}"
 
     return ${result}
 }
@@ -109,6 +120,8 @@ function infer_rc_release() {
 
 WORKDIR=$(mktemp -d) || exit 1
 
+cd "${WORKDIR}"
+
 branch_delta_output_file="${WORKDIR}/diff.txt"
 extract_branch_delta "${branch_delta_output_file}"
 # As of CP4D 4.0.6, cp4d has to be last
@@ -131,3 +144,5 @@ echo "${labels}" > "${labels_output_file}"
 echo "${workers}" > "${workers_output_file}"
 echo "${setup_gps}" > "${gps_output_file}"
 echo "${rc_major}.${rc_minor}.${rc_patch}" > "${semver_output_file}"
+
+    cd "${original_dir}"
