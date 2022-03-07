@@ -5,9 +5,9 @@ metadata:
   argocd_app_namespace: ibm-cloudpaks
 spec:
   shared_configuration:
-    sc_deployment_platform: ROKS
+    sc_deployment_platform: OCP
 storageclass:
   block: ocs-storagecluster-ceph-rbd
-  gold: cp4a-file-retain-gold-gid
-  silver: cp4a-file-retain-silver-gid
-  bronze: cp4a-file-retain-bronze-gid
+  gold: ocs-storagecluster-cephfs
+  silver: ocs-storagecluster-cephfs
+  bronze: ocs-storagecluster-cephfs

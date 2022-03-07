@@ -5,7 +5,8 @@ kind: Job
 metadata:
   name: check-cp4a-csvs
   annotations:
-    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/sync-wave: "120"
+    argocd.argoproj.io/hook: Sync
   namespace: openshift-gitops
 spec:
   template:
