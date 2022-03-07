@@ -117,13 +117,10 @@ do
     if grep "/${cloudpak}/" "${branch_delta_output_file}"; then
         labels="${labels},${cloudpak}:${cloudpak}"
         workers=$((workers+3))
+        if [ "${cloudpak}" == "cp4d" ] || [ "${cloudpak}" == "cp4i" ] || [ "${cloudpak}" == "cp4s" ]; then
+            setup_gps=true
+        fi
     fi
-    # if [ "${cloudpak}" == "cp4d" ]; then
-    # Always requesting the setting of global pull secrets
-    # until we can validate that the repo directories 
-    # for CP4A, CP4D, and CP4AIOps work correctly without it.
-        setup_gps=true
-    # fi
 done
 
 infer_rc_release

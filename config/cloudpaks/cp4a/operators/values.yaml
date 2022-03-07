@@ -4,6 +4,7 @@ metadata:
 serviceaccount:
   argocd_application_controller: openshift-gitops-argocd-application-controller
 storageclass:
-  gold: cp4a-file-retain-gold-gid
-  silver: cp4a-file-retain-silver-gid
-  bronze: cp4a-file-retain-bronze-gid
+  block: ocs-storagecluster-ceph-rbd
+  gold: ocs-storagecluster-cephfs
+  silver: ocs-storagecluster-cephfs
+  bronze: ocs-storagecluster-cephfs

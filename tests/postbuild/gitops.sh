@@ -500,7 +500,7 @@ function setup_gitops_server() {
             --managed-cluster "${cluster_name}" \
         || result=1
     else
-        login_cluster "${cluster_type}" "${cluster_name}" "${username}" "${api_key}" "${managed_ocp_token}" \
+        login_cluster "${cluster_type}" "${cluster_name}" "${username}" "${api_key}" "${managed_ocp_token}" 5 \
         || return 1
     fi
 

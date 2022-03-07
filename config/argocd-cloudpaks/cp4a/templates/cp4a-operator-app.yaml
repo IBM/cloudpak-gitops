@@ -18,6 +18,10 @@ spec:
         - /spec/source/targetRevision
         - /status
       kind: Application
+    - group: ""
+      jsonPointers:
+        - /imagePullSecrets
+      kind: ServiceAccount
   project: default
   source:
     helm:
