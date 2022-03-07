@@ -38,5 +38,6 @@ jobs:
 
       - name: Promote release if test passes
         run: tests/postbuild/promote-release.sh "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" "${GITHUB_HEAD_REF}" "${GITHUB_BASE_REF}" "$(cat test-sh-semver.txt)"
+        if: github.event.pull_request.merged
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
