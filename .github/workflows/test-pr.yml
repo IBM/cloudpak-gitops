@@ -14,7 +14,7 @@ jobs:
       HOME: /root
       PIPELINE_DEBUG: 1
       CP_ICR_IO_REPO: ${{ secrets.CP_ICR_IO_REPO }}
-      CP_ICR_IO_USERID: ${{ secrets.CP_ICR_IO_USERID }}
+      CP_ICR_IO_USERID: cp
       CP_ICR_IO_PASSWORD: ${{ secrets.CP_ICR_IO_PASSWORD }}
       IBM_CLOUD_API_KEY: ${{ secrets.IBM_CLOUD_API_KEY }}
 
@@ -38,6 +38,5 @@ jobs:
 
       - name: Promote release if test passes
         run: tests/postbuild/promote-release.sh "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" "${GITHUB_HEAD_REF}" "${GITHUB_BASE_REF}" "$(cat test-sh-semver.txt)"
-        if: github.event.pull_request.merged
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

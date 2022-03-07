@@ -51,10 +51,12 @@ function extract_branch() {
 
 
 #
+# Determines the new release number and creates a draft release with it. 
 #
+# arg1 - Bump in semver version relative to last tag
 #
 function merge_and_promote() {
-    release_delta=$1
+    local release_delta=${1}
 
     latest_version=$(git tag -l --sort=version:refname "v*" | tail -n 1)
     latest_major_version=$(echo "${latest_version//.*/}" | cut -d "v" -f 2)
@@ -71,12 +73,49 @@ function merge_and_promote() {
 
     new_version="v${new_major_version}.${new_minor_version}.${new_patch_version}"
 
-    echo "${new_version}"
+    squash_title=$(gh pr view "${git_source_branch}" \
+        --repo "${git_repo}" \
+        --json title \
+        -t '{{.title}}') \
+    && squash_body=$(gh pr view "${git_source_branch}" \
+        --repo "${git_repo}" \
+        --json body \
+        -t '{{.body}}') \
+    && gh pr merge "${git_source_branch}" \
+        --repo "${git_repo}" \
+        -b "${squash_body}" \
+        -t "${squash_title}" \
+        --squash \
+        --auto \
+    && merge_id=$(gh pr view "${git_source_branch}" \
+        --repo "${git_repo}" \
+        --json mergeCommit \
+        -t '{{.mergeCommit.oid}}') \
+    && git tag \
+        -m "${squash_title}" \
+        "${new_version}" \
+        "${merge_id}" \
+    && git push origin "${new_version}" \
+    && gh release create "${new_version}" \
+        --repo "${git_repo}" \
+        --prerelease \
+        --draft \
+        --generate-notes \
+        --target "${merge_id}" \
+        --title "Release ${new_version}"
 
+    echo "${new_version}"
 }
 
 WORKDIR=$(mktemp -d) || exit 1
 cd "${WORKDIR}"
 
 extract_branch
-merge_and_promote "${release_delta}"
+
+is_draft=$(gh pr view "${git_source_branch}" --repo "${git_repo}" --json isDraft -t '{{.isDraft}}')
+# if [ "${is_draft}" == "true" ]; then
+#     echo "Pull request is still a draft. Skipping"
+#     gh pr view "${git_source_branch}"
+# else
+    merge_and_promote "${release_delta}"
+# fi
