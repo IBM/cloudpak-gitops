@@ -61,7 +61,7 @@ do
     if grep "/${cloudpak}/" "${branch_delta_output_file}"; then
         labels="${labels},${cloudpak}:${cloudpak}"
         workers=$((workers+3))
-        if [ "${cloudpak}" == "cp4d" ] || [ "${cloudpak}" == "cp4i" ] || [ "${cloudpak}" == "cp4s" ]; then
+        if [ "${cloudpak}" == "cp4d" ]; then
             setup_gps=true
         fi
     fi

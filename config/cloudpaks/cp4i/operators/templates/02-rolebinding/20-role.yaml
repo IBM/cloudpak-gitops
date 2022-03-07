@@ -1,0 +1,13 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: "21"
+  creationTimestamp: null
+  name: gitops-cp4i-operator
+  namespace: {{.Values.metadata.argocd_app_namespace}}
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["*"]

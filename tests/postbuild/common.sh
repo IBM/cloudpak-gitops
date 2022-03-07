@@ -811,10 +811,11 @@ function login_cluster() {
     local managed_ocp_token=${5}
     local retries=${6:-1}
 
-    local result=0
+    local result
 
     for attempt in $(seq 1 "${retries}")
     do
+        result=0
         case ${cluster_type} in
             aws|ocp)
                 login_ocp_cluster "${cluster_name}" "${username}" "${api_key}" \
