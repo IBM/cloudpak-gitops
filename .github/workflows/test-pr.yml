@@ -39,6 +39,7 @@ jobs:
   promote:
 
     runs-on: ubuntu-latest
+    container:  icr.io/continuous-delivery/pipeline/pipeline-base-ubi:3.6
 
     steps:
       - name: Promote release if test passes
