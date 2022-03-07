@@ -42,4 +42,6 @@ jobs:
 
     steps:
       - name: Promote release if test passes
-        run: tests/postbuild/promote.sh "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" "${GITHUB_HEAD_REF}" "${GITHUB_BASE_REF}" ${{needs.test.outputs.delta}}
+        run: tests/postbuild/promote-release.sh "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" "${GITHUB_HEAD_REF}" "${GITHUB_BASE_REF}" ${{needs.test.outputs.delta}}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
