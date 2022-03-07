@@ -34,16 +34,17 @@ trap cleanRun EXIT
 # and target branches.
 #
 function extract_branch() {
-    result=1
+    local result=0
 
     #
     # Analyze the differences between branches
     # to determine which Cloud Paks to test
-    git clone "${git_repo}" cloudpak-gitops -b "${git_target_branch}"
-    cd cloudpak-gitops
-    git config pull.rebase false
-    git checkout "${git_source_branch}"
-    git pull origin "${git_source_branch}"
+    git clone "${git_repo}" cloudpak-gitops \
+    && cd cloudpak-gitops \
+    && git config pull.rebase false \
+    && git checkout "${git_source_branch}" \
+    && git pull origin "${git_source_branch}" \
+    || result=1
 
     return ${result}
 }
