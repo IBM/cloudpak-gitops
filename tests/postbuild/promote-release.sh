@@ -63,9 +63,15 @@ function merge_and_promote() {
     latest_minor_version=$(echo "${latest_version}" | cut -d "." -f 2)
     latest_patch_version="${latest_version//v*./}"
 
-    delta_major_version="${release_delta//.*/}"
-    delta_minor_version=$(echo "${release_delta}" | cut -d "." -f 2)
-    delta_patch_version="${release_delta//*./}"
+    if [ -n "${release_delta}" ]; then
+        delta_major_version="${release_delta//.*/}"
+        delta_minor_version=$(echo "${release_delta}" | cut -d "." -f 2)
+        delta_patch_version="${release_delta//*./}"
+    else
+        delta_major_version=0
+        delta_minor_version=0
+        delta_patch_version=1
+    fi
 
     new_major_version=$((latest_major_version+delta_major_version))
     new_minor_version=$((latest_minor_version+delta_minor_version))

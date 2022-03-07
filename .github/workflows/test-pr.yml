@@ -31,7 +31,7 @@ jobs:
         run: tests/postbuild/calc-settings.sh "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" "${GITHUB_HEAD_REF}" "${GITHUB_BASE_REF}"
 
       # - name: Ensures target cluster exists
-      #   run: tests/postbuild/cluster.sh --ensure --wait -t ibmcloud -n "gitops-${GITHUB_HEAD_REF}" --apikey "${IBM_CLOUD_API_KEY}" --workers "$(cat test-sh-workers.txt)" --global-pull-secret "$(cat test-sh-gps.txt)"
+      #   run: tests/postbuild/cluster.sh --ensure --wait -t ibmcloud -n "gitops-${GITHUB_HEAD_REF}" --apikey "${IBM_CLOUD_API_KEY}" --workers "$(cat test-sh-workers.txt)" --worker-flavor "c3c.32x64" --global-pull-secret "$(cat test-sh-gps.txt)"
 
       # - name: Deploy Argo to the cluster
       #   run: tests/postbuild/gitops.sh --setup-server -t ibmcloud -n "gitops-${GITHUB_HEAD_REF}" --gitops-repo "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" --gitops-branch "${GITHUB_HEAD_REF}" --apikey "${IBM_CLOUD_API_KEY}" --application-labels "$(cat test-sh-labels.txt)"

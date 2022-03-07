@@ -17,7 +17,7 @@ git_target_branch=${3}
 
 # Output variables
 labels=cp-shared:ibm-cloudpaks
-workers=3
+workers=0
 setup_gps=false
 
 rc_major=0
@@ -73,6 +73,9 @@ function extract_branch_delta() {
 function infer_rc_release() {
     while read -r chart
     do
+        if [ -z "${chart}" ]; then
+            continue
+        fi
         echo "${chart}"
 
         chart_yaml="${WORKDIR}/chart.yaml"
@@ -124,8 +127,8 @@ cd "${WORKDIR}"
 
 branch_delta_output_file="${WORKDIR}/diff.txt"
 extract_branch_delta "${branch_delta_output_file}"
-# As of CP4D 4.0.6, cp4d has to be last
-for cloudpak in cp4i cp4a cp4aiops cp4s cp4d
+# As of CP4D 4.0.6, cp4d has to be last in the "labels" field
+for cloudpak in cp-shared cp4i cp4a cp4aiops cp4s cp4d
 do
     if grep "/${cloudpak}/" "${branch_delta_output_file}"; then
         labels="${labels},${cloudpak}:${cloudpak}"
