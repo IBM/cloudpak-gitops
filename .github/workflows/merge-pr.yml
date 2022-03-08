@@ -24,10 +24,12 @@ jobs:
       - uses: actions/checkout@v2
 
       - id: calc
+        if: github.event.pull_request.merged
         name: Determine extent of testing
         run: tests/postbuild/calc-settings.sh "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" "${GITHUB_HEAD_REF}" "${GITHUB_BASE_REF}"
 
       - name: Promote release if test passes
+        if: github.event.pull_request.merged
         run: tests/postbuild/promote-release.sh "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" "${GITHUB_HEAD_REF}" "$(cat test-sh-semver.txt)"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
