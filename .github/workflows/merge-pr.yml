@@ -15,18 +15,13 @@ jobs:
     env:
       PIPELINE_DEBUG: 1
 
-    environment: dev
-
-    outputs:
-      delta: ${{ steps.calc.outputs.delta }}
-
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - id: calc
         if: github.event.pull_request.merged
         name: Determine extent of testing
-        run: tests/postbuild/calc-settings.sh "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" "${GITHUB_HEAD_REF}" "${GITHUB_BASE_REF}"
+        run: tests/postbuild/calc-settings.sh "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" "${GITHUB_SHA}" "${GITHUB_BASE_REF}"
 
       - name: Promote release if test passes
         if: github.event.pull_request.merged

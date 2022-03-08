@@ -50,18 +50,22 @@ trap cleanRun EXIT
 function extract_branch_delta() {
     local output_file=${1}
 
-    local result=1
+    local result=0
 
     #
     # Analyze the differences between branches
     # to determine which Cloud Paks to test
-    git clone "${git_repo}" cloudpak-gitops
-    cd cloudpak-gitops
-    git config pull.rebase false
-    git checkout "${git_source_branch}"
-    git pull origin "${git_source_branch}"
-    git diff "${git_target_branch}" --name-only | tee "${output_file}" \
-        && result=0
+    git clone "${git_repo}" cloudpak-gitops \
+    && cd cloudpak-gitops \
+    && git config pull.rebase false \
+    result=1
+
+    if [ ${result} -eq 0 ]; then
+        git pull origin "${git_source_branch}" || result=1
+        git diff "${git_target_branch}" --name-only | tee "${output_file}" \
+        && result=0 \
+        || result=1
+    fi
 
     return ${result}
 }

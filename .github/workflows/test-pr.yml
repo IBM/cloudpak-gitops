@@ -5,6 +5,37 @@ on:
     branches: [main]
 
 jobs:
+  calc:
+    runs-on: ubuntu-latest
+
+    env:
+      HOME: /root
+      PIPELINE_DEBUG: 1
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Determine extent of testing
+        run: tests/postbuild/calc-settings.sh "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" "${GITHUB_SHA}" "${GITHUB_BASE_REF}"
+
+      - name: Upload global pull secret result
+        uses: actions/upload-artifact@v1
+        with:
+          name: calc
+          path: test-sh-gps.txt
+
+      - name: Upload semver result
+        uses: actions/upload-artifact@v1
+        with:
+          name: calc
+          path: test-sh-labels.txt
+
+      - name: Upload workers result
+        uses: actions/upload-artifact@v1
+        with:
+          name: calc
+          path: test-sh-workers.txt
+
   test:
     if: ${{ !contains( github.event.pull_request.labels.*.name, 'skip ci' ) }}
     runs-on: ubuntu-latest
@@ -20,42 +51,16 @@ jobs:
 
     environment: dev
 
-    outputs:
-      delta: ${{ steps.calc.outputs.delta }}
-
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
-      - id: calc
-        name: Determine extent of testing
-        run: tests/postbuild/calc-settings.sh "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" "${GITHUB_HEAD_REF}" "${GITHUB_BASE_REF}"
+      - name: Download all workflow run artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: calc
 
       - name: Ensures target cluster exists
-        run: tests/postbuild/cluster.sh --ensure --wait -t ibmcloud -n "gitops-${GITHUB_HEAD_REF}" --apikey "${IBM_CLOUD_API_KEY}" --workers "$(cat test-sh-workers.txt)" --worker-flavor "c3c.32x64" --global-pull-secret "$(cat test-sh-gps.txt)"
+        run: tests/postbuild/cluster.sh --ensure --wait -t ibmcloud -n "gitops-${GITHUB_HEAD_REF}" --apikey "${IBM_CLOUD_API_KEY}" --workers "$(cat calc/test-sh-workers.txt)" --worker-flavor "c3c.32x64" --global-pull-secret "$(cat calc/test-sh-gps.txt)"
 
-      - name: Deploy Argo to the cluster
-        run: tests/postbuild/gitops.sh --setup-server -t ibmcloud -n "gitops-${GITHUB_HEAD_REF}" --gitops-repo "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" --gitops-branch "${GITHUB_HEAD_REF}" --apikey "${IBM_CLOUD_API_KEY}" --application-labels "$(cat test-sh-labels.txt)"
-
-      - name: Upload semver result
-        uses: actions/upload-artifact@v1
-        with:
-          name: semver
-          path: test-sh-semver.txt
-
-  promote:
-    if: ${{ !contains( github.event.pull_request.labels.*.name, 'skip ci' ) }}
-    runs-on: ubuntu-latest
-    needs: test
-
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Download semver result
-        uses: actions/download-artifact@v1
-        with:
-          name: semver
-
-      - name: Promote release if test passes
-        run: tests/postbuild/promote-release.sh "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" "${GITHUB_HEAD_REF}" "$(cat semver/test-sh-semver.txt)"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Deploy Argo and Cloud Paks to the cluster
+        run: tests/postbuild/gitops.sh --setup-server -t ibmcloud -n "gitops-${GITHUB_HEAD_REF}" --gitops-repo "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" --gitops-branch "${GITHUB_HEAD_REF}" --apikey "${IBM_CLOUD_API_KEY}" --application-labels "$(cat calc/test-sh-labels.txt)"
