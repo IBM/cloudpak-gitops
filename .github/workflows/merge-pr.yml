@@ -3,25 +3,31 @@ name: Merge
 on:
   pull_request:
     types:
-    - closed
+      - closed
     branches:
-    - main
+      - main
 
 jobs:
-  destroy:
-    if: ${{ !contains( github.event.pull_request.labels.*.name, 'skip ci' ) }}
+  promote:
+    if: github.event.pull_request.merged
     runs-on: ubuntu-latest
-    container:  icr.io/continuous-delivery/pipeline/pipeline-base-ubi:3.6
 
     env:
-      HOME: /root
       PIPELINE_DEBUG: 1
-      IBM_CLOUD_API_KEY: ${{ secrets.IBM_CLOUD_API_KEY }}
 
     environment: dev
+
+    outputs:
+      delta: ${{ steps.calc.outputs.delta }}
 
     steps:
       - uses: actions/checkout@v2
 
-      - name: Verify destroy
-        run: tests/postbuild/cluster.sh --delete -t ibmcloud -n "gitops-$GITHUB_HEAD_REF" --apikey "$IBM_CLOUD_API_KEY" 
+      - id: calc
+        name: Determine extent of testing
+        run: tests/postbuild/calc-settings.sh "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" "${GITHUB_HEAD_REF}" "${GITHUB_BASE_REF}"
+
+      - name: Promote release if test passes
+        run: tests/postbuild/promote-release.sh "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" "${GITHUB_HEAD_REF}" "$(cat test-sh-semver.txt)"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
