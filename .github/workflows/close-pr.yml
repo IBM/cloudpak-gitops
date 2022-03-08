@@ -21,7 +21,7 @@ jobs:
     environment: dev
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Verify destroy
         run: tests/postbuild/cluster.sh --delete -t ibmcloud -n "gitops-${GITHUB_HEAD_REF}" --apikey "${IBM_CLOUD_API_KEY}"
