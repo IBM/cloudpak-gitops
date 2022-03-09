@@ -385,13 +385,6 @@ EOF
             && argocd app wait "${app_name}" \
                 --sync \
                 --health \
-            && argocd app wait "${cp}-operators" \
-                --sync \
-                --health \
-                --timeout 1800 \
-            && argocd app wait "${cp}-resources" \
-                --sync \
-                --health \
                 --timeout 10800 \
             && log "INFO: Synchronization of ${app_name} complete." \
             || cp_result=1

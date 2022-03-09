@@ -40,7 +40,6 @@ cleanRun() {
         rm -rf "${WORKDIR}"
     fi
 }
-trap cleanRun EXIT
 
 
 #
@@ -58,13 +57,15 @@ function extract_branch_delta() {
     git clone "${git_repo}" cloudpak-gitops \
     && cd cloudpak-gitops \
     && git config pull.rebase false \
-    result=1
+    || result=1
 
     if [ ${result} -eq 0 ]; then
         git pull origin "${git_source_branch}" || result=1
-        git diff "${git_target_branch}" --name-only | tee "${output_file}" \
+        git diff "${git_target_branch}" origin/main --name-only | tee "${output_file}" \
         && result=0 \
         || result=1
+
+        cat "${branch_delta_output_file}"
     fi
 
     return ${result}
