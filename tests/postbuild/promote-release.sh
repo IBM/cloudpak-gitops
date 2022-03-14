@@ -102,7 +102,7 @@ function merge_and_promote() {
         --draft \
         --generate-notes \
         --target "${merge_id}" \
-        --title "Release ${new_version}" \
+        --title "Release ${new_version}-alpha" \
     || result=1
 
     echo "${new_version}"
