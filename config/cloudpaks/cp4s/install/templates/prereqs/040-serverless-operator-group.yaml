@@ -1,0 +1,11 @@
+---
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: "20"
+    olm.providedAPIs: >-
+      KnativeEventing.v1alpha1.operator.knative.dev,KnativeKafka.v1alpha1.operator.serverless.openshift.io,KnativeServing.v1alpha1.operator.knative.dev
+  name: openshift-serverless-operator-group
+  namespace: openshift-serverless
+spec: {}

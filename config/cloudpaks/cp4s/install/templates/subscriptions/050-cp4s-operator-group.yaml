@@ -1,0 +1,13 @@
+{{ if not ( eq ( default "" .Values.metadata.argocd_app_namespace ) "ibm-cloudpaks" ) }}
+---
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
+metadata:
+  name: "{{.Values.metadata.argocd_app_namespace}}-operator-group"
+  namespace: "{{.Values.metadata.argocd_app_namespace}}"
+  annotations:
+    argocd.argoproj.io/sync-wave: "50"
+spec:
+  targetNamespaces:
+    - {{.Values.metadata.argocd_app_namespace}}
+{{ end }}

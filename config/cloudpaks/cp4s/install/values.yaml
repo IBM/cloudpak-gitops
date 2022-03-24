@@ -1,0 +1,11 @@
+---
+cluster_domain: "to_be_set_by_presync_job"
+metadata:
+  argocd_app_namespace: ibm-cloudpaks
+  argocd_namespace: openshift-gitops
+  operators_namespace: ibm-cloudpaks
+serviceaccount:
+  argocd_application_controller: openshift-gitops-argocd-application-controller
+roks_authentication: false
+storageclass:
+  rwo: "to_be_set_by_presync_job"

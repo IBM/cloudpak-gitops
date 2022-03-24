@@ -45,6 +45,8 @@ EOF
        [ "${ocp_version}" == "4.7" ] || 
        [ "${ocp_version}" == "4.8" ]; then
         odf=0
+    elif [ "${ocp_version}" == "4.10" ]; then
+        ocp_version=4.9
     fi
 
     local operator_name=odf-operator

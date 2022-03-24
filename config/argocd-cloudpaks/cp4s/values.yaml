@@ -1,0 +1,12 @@
+---
+repoURL: https://github.com/IBM/cloudpak-gitops
+targetRevision: main
+cluster_domain: ""
+serviceaccount:
+  argocd_application_controller: openshift-gitops-argocd-application-controller
+metadata:
+  argocd_app_namespace: ibm-cloudpaks
+  argocd_namespace: openshift-gitops
+  operators_namespace: ibm-common-services
+storageclass:
+  rwo: ocs-storagecluster-ceph-rbd
