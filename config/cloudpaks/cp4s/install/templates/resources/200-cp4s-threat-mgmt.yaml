@@ -1,0 +1,27 @@
+---
+apiVersion: isc.ibm.com/v1
+kind: CP4SThreatManagement
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "200"
+  name: threatmgmt
+  namespace: "{{.Values.metadata.argocd_app_namespace}}"
+spec:
+  acceptLicense: true
+  basicDeploymentConfiguration:
+    adminUser: admin
+    domain: cp4s.{{.Values.cluster_domain}}
+    storageClass: {{.Values.storageclass.rwo}}
+  extendedDeploymentConfiguration:
+    airgapInstall: false
+    backupStorageClass: {{.Values.storageclass.rwo}}
+    backupStorageSize: ""
+    imagePullPolicy: IfNotPresent
+    repository: cp.icr.io/cp/cp4s
+    repositoryType: entitled
+    roksAuthentication: {{.Values.roks_authentication}}
+  threatManagementCapabilities:
+    deployDRC: true
+    deployRiskManager: true
+    deployThreatInvestigator: true

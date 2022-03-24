@@ -177,8 +177,7 @@ function add_ibm_operator_catalog() {
     log "INFO: Adding the IBM Operator Catalog to the cluster." 
     local use_helm_enablement=0
     if [ ${use_helm_enablement} -eq 1 ]; then
-        # Avoiding Red Hat helm enablement due to instability in past two weeks
-        # Pending answer and resolution from their side
+        # Avoiding Red Hat helm enablement due to general instability.
         result=1
         curl -sL https://get.helm.sh/helm-v3.5.2-linux-amd64.tar.gz | tar xzf - -C "${WORKDIR}" \
             && mv "${WORKDIR}/linux-amd64/helm" /usr/local/bin/helm \
@@ -192,15 +191,13 @@ function add_ibm_operator_catalog() {
 apiVersion: operators.coreos.com/v1alpha1
 kind: CatalogSource
 metadata:
-  annotations:
-    olm.catalogImageTemplate: "icr.io/cpopen/ibm-operator-catalog:v{kube_major_version}.{kube_minor_version}"
   name: ibm-operator-catalog
   namespace: openshift-marketplace
 spec:
   displayName: IBM Operator Catalog
   publisher: IBM
   sourceType: grpc
-  image: docker.io/ibmcom/ibm-operator-catalog
+  image: docker.io/ibmcom/ibm-operator-catalog:latest
   updateStrategy:
     registryPoll:
       interval: 45m

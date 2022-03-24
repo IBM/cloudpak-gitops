@@ -1,0 +1,84 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  annotations:
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/sync-wave: "220"
+  name: cp4s-openldap
+  namespace: openshift-gitops
+spec:
+  template:
+    spec:
+      containers:
+        - name: config
+          image: quay.io/openshift/origin-cli:latest
+          imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "150m"
+            limits:
+              memory: "128Mi"
+              cpu: "200m"
+          env:
+            - name: TARGET_NAMESPACE
+              value: {{.Values.metadata.argocd_app_namespace}}
+            - name: IS_ROKS
+              value: "{{.Values.roks_authentication}}"
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -eo pipefail
+              set -x
+
+              if [ "${IS_ROKS}" == "true" ]; then
+                  echo "WARNING: Waiting for problem resolution in Cloud Pak for Security. The download of the cpctl tool is timing out."
+                  exit 0
+              fi
+
+              export HOME=/tmp
+
+              result=0
+
+              # https://www.ibm.com/docs/en/cloud-paks/cp-security/1.9?topic=support-installing-cpctl-utility-access-actions
+
+              cd $HOME \
+              && oc project "${TARGET_NAMESPACE}" \
+              && admin_user=ldap_admin \
+              && admin_pwd=$(echo $RANDOM | md5sum | head -c 32) \
+              && if oc get secret cp4s-openldap-creds 2> /dev/null; then
+                    echo "INFO: Credentials already created."
+                    exit 0
+                else
+                    oc create secret generic cp4s-openldap-creds \
+                        --from-literal=username="${admin_user}" \
+                        --from-literal=password="${admin_pwd}"
+                fi \
+              && pod_name=$(oc get pod --no-headers -lrun=cp-serviceability | cut -d' ' -f1) \
+              && oc cp ${pod_name}:/opt/bin/linux/cpctl cpctl && chmod +x ./cpctl \
+              || result=1
+
+              if [ ${result} -eq 0 ]; then
+                  ./cpctl load \
+                  && echo "INFO: Deploying OpenLDAP." \
+                  && admin_token=$(oc whoami -t) \
+                  && ./cpctl tools deploy_openldap \
+                        --token "${admin_token}" \
+                        --operation install \
+                        --ldap_usernames ${admin_user} \
+                        --ldap_password ${admin_pwd} \
+                  && echo "INFO: OpenLDAP deployed." \
+                  || result=1
+              fi
+
+              if [ ${result} -eq 1 ]; then
+                  oc delete secret cp4s-openldap-creds
+              fi
+
+              exit ${result}
+
+      restartPolicy: Never
+      serviceAccountName: {{.Values.serviceaccount.argocd_application_controller}}
+  backoffLimit: 2

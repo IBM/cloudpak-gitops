@@ -1,0 +1,13 @@
+---
+apiVersion: operator.knative.dev/v1alpha1
+kind: KnativeServing
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "60"
+  name: knative-serving
+  namespace: knative-serving
+spec:
+  high-availability:
+    # Causes problem with pod disruption budget
+    replicas: 1
