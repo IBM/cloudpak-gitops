@@ -145,6 +145,9 @@ do
         fi
     fi
 done
+if grep "rhacm" "${branch_delta_output_file}"; then
+    labels="${labels},rhacm"
+fi
 
 infer_rc_release
 
