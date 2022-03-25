@@ -362,6 +362,10 @@ EOF
         fi
         local app_name="${cp}-app"
         local cp_result=0
+        local app_path="config/argocd-cloudpaks/${cp}"
+        if [ "${cp}" == "rhacm" ]; then
+            app_path="config/argocd-rhacm"
+        fi
         argocd app create "${app_name}" \
             --project default \
             --dest-namespace "${GITOPS_NAMESPACE}" \
@@ -370,7 +374,7 @@ EOF
             --helm-set-string repoURL="${gitops_repo}" \
             --helm-set-string serviceaccount.argocd_application_controller="${sa_account}" \
             --helm-set-string targetRevision="${gitops_branch}" \
-            --path "config/argocd-cloudpaks/${cp}" \
+            --path "${app_path}" \
             --repo "${gitops_repo}" \
             --revision "${gitops_branch}" \
             --sync-policy automated \
