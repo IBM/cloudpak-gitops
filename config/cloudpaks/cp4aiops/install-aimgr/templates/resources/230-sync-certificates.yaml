@@ -35,7 +35,10 @@ spec:
               set -eo pipefail
               set -x
 
-              oc project "${TARGET_NAMESPACE}" \
+              export HOME=/tmp
+
+              cd $HOME \
+              && oc project "${TARGET_NAMESPACE}" \
               && instance_name=$(oc get AutomationUIConfig --no-headers -o custom-columns=":metadata.name") \
               || {
                   echo "ERROR: Unable to retrieve AutomationUIConfig instance name."

@@ -31,6 +31,8 @@ spec:
           value: "{{.Values.automation_base_instance_name}}"
         - name: automation_ui_config_instance_name
           value: "{{.Values.automation_ui_config_instance_name}}"
+        - name: cluster_domain
+          value: "{{.Values.cluster_domain}}"
         - name: metadata.argocd_app_namespace
           value: {{.Values.metadata.argocd_app_namespace}}
         - name: modules.aimgr
