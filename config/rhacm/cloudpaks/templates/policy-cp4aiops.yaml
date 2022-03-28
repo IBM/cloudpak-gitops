@@ -48,6 +48,8 @@ spec:
                           value: ${ARGOCD_APP_NAME}
                         - name: argocd_app_namespace
                           value: ${ARGOCD_APP_NAMESPACE}
+                        - name: cluster_domain
+                          value: '{{ "{{ fromConfigMap \"openshift-gitops\" \"argocd-cp4aiops-config\" \"cluster_domain\" }}" }}'
                         - name: metadata.argocd_app_namespace
                           value: '{{ "{{ fromClusterClaim \"cp4aiops\" }}" }}'
                         - name: repoURL

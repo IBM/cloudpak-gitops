@@ -1,5 +1,6 @@
 {{- $argocd_app_namespace := .Values.metadata.argocd_app_namespace -}}
 {{- $argocd_serviceaccount := .Values.serviceaccount.argocd_application_controller -}}
+{{- $cluster_domain := .Values.cluster_domain -}}
 {{- $operators_namespace := .Values.metadata.operators_namespace -}}
 {{- $automation_base_instance_name := .Values.automation_base_instance_name -}}
 {{- $automation_ui_config_instance_name := .Values.metadata.automation_ui_config_instance_name -}}
@@ -53,6 +54,8 @@ spec:
           value: {{ $automation_base_instance_name }}
         - name: automation_ui_config_instance_name
           value: {{ $automation_ui_config_instance_name }}
+        - name: cluster_domain
+          value: {{ $cluster_domain }}
         - name: metadata.argocd_app_namespace
           value: {{ $argocd_app_namespace }}
         - name: repoURL
