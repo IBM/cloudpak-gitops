@@ -1,14 +1,15 @@
 ---
 apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
+kind: RoleBinding
 metadata:
   annotations:
-    argocd.argoproj.io/sync-wave: "10"
+    argocd.argoproj.io/sync-wave: "30"
   creationTimestamp: null
-  name: ibm-cp4s-cluster-role
+  name: ibm-cp4s-role
+  namespace: "{{.Values.metadata.argocd_app_namespace}}"
 roleRef:
   apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
+  kind: Role
   name: ibm-cp4s
 subjects:
   - kind: ServiceAccount

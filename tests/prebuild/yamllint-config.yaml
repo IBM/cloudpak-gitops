@@ -14,8 +14,8 @@ ignore: |
   config/cloudpaks/cp4d/install-platform/templates/prereqs/020-operators-operator-group.yaml
   config/cloudpaks/cp4i/operators/templates/01-namespaces/individual.yaml
   config/cloudpaks/cp4i/operators/templates/04-operators/0100-operator-group.yaml
-  config/cloudpaks/cp4s/install/templates/prereqs/001-cp4s-namespace.yaml
-  config/cloudpaks/cp4s/install/templates/subscriptions/050-cp4s-operator-group.yaml
+  config/cloudpaks/cp4s/templates/prereqs/001-cp4s-namespace.yaml
+  config/cloudpaks/cp4s/templates/subscriptions/050-cp4s-operator-group.yaml
   config/rhacm/cloudpaks/templates/placement-argocd.yaml
   config/rhacm/cloudpaks/templates/placement-cloudpaks.yaml
   config/rhacm/cloudpaks/templates/placement-cp-shared.yaml
