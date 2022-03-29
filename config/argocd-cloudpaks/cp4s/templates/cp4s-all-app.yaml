@@ -32,7 +32,7 @@ spec:
           value: {{.Values.storageclass.rwo}}
         - name: targetRevision
           value: ${ARGOCD_APP_SOURCE_TARGET_REVISION}
-    path: config/cloudpaks/cp4s/install
+    path: config/cloudpaks/cp4s
     repoURL: {{.Values.repoURL}}
     targetRevision: {{.Values.targetRevision}}
   syncPolicy:
