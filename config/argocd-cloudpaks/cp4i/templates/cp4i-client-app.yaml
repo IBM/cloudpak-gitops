@@ -1,6 +1,3 @@
-{{- $argocd_app_namespace := .Values.metadata.argocd_app_namespace -}}
-{{- $repoUrl := .Values.repoURL -}}
-{{- $targetRevision := .Values.targetRevision -}}
 {{- $client := .Values.modules.client }}
 {{- if eq ( default false $client ) true  }}
 ---
@@ -27,6 +24,8 @@ spec:
   source:
     helm:
       parameters:
+        - name: metadata.argocd_app_namespace
+          value: {{.Values.metadata.argocd_app_namespace}}
         - name: repoURL
           value: ${ARGOCD_APP_SOURCE_REPO_URL}
         - name: targetRevision

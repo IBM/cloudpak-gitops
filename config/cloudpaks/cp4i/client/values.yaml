@@ -1,1 +1,4 @@
 ---
+metadata:
+  argocd_namespace: openshift-gitops
+  argocd_app_namespace: ibm-cloudpaks

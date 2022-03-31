@@ -8,27 +8,21 @@ metadata:
   name: ibm-cp4i-client
   namespace: dev
 rules:
-  - apiGroups:
-      - apps
-    resources:
-      - '*'
-    verbs:
-      - '*'
-  - apiGroups:
-      - binding.operators.coreos.com
-    resources:
-      - '*'
-    verbs:
-      - '*'
-  - apiGroups:
-      - build.openshift.io
-    resources:
-      - '*'
-    verbs:
-      - '*'
-  - apiGroups:
-      - image.openshift.io
-    resources:
-      - '*'
-    verbs:
-      - '*'
+  - apiGroups: [""]
+    resources: ["services"]
+    verbs: ["get", "list", "create", "update", "patch", "delete"]
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["get", "list", "create", "update", "patch", "delete"]
+  - apiGroups: ["binding.operators.coreos.com"]
+    resources: ["servicebindings"]
+    verbs: ["get", "list", "create", "update", "patch", "delete"]
+  - apiGroups: ["build.openshift.io"]
+    resources: ["buildconfigs"]
+    verbs: ["get", "list", "create", "update", "patch", "delete"]
+  - apiGroups: ["image.openshift.io"]
+    resources: ["imagestreams"]
+    verbs: ["get", "list", "create", "update", "patch", "delete"]
+  - apiGroups: ["mq.ibm.com"]
+    resources: ["queuemanagers"]
+    verbs: ["get"]

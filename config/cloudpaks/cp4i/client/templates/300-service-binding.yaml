@@ -23,13 +23,13 @@ spec:
       kind: QueueManager
       name: case-queues-1-qmgr
       id: mqqmgr
-      namespace: ibm-cloudpaks
+      namespace: "{{.Values.metadata.argocd_app_namespace}}"
     - group: ''
       version: v1
       kind: Service
       name: case-queues-1-qmgr-ibm-mq
       id: queueservice
-      namespace: ibm-cloudpaks
+      namespace: "{{.Values.metadata.argocd_app_namespace}}"
   mappings:
     - name: env.json
       value: |
