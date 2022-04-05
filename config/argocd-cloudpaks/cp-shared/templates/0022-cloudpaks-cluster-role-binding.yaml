@@ -1,0 +1,16 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: "22"
+  creationTimestamp: null
+  name: ibm-cloudpaks-cr-binding
+roleRef:
+  name: ibm-cloudpaks-cr-role
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+subjects:
+  - kind: ServiceAccount
+    name: "{{.Values.serviceaccount.ibm_cloudpaks_installer}}"
+    namespace: "{{.Values.metadata.argocd_namespace}}"

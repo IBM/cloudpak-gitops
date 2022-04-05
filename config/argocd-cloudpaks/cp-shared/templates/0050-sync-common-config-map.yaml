@@ -2,9 +2,10 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: pre-common-config-map
+  name: sync-common-config-map
   annotations:
-    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/sync-wave: "50"
   namespace: openshift-gitops
 spec:
   template:
@@ -110,5 +111,5 @@ spec:
               done
 
       restartPolicy: Never
-      serviceAccountName: {{.Values.serviceaccount.argocd_application_controller}}
+      serviceAccountName: {{.Values.serviceaccount.ibm_cloudpaks_installer}}
   backoffLimit: 2

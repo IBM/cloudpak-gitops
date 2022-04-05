@@ -323,7 +323,6 @@ EOF
         return 1
     }
 
-    local sa_account=openshift-gitops-argocd-application-controller
     local app_path=config/argocd
 
     argocd app create argo-app \
@@ -331,7 +330,6 @@ EOF
         --dest-namespace "${GITOPS_NAMESPACE}" \
         --dest-server https://kubernetes.default.svc \
         --helm-set-string repoURL="${gitops_repo}" \
-        --helm-set-string serviceaccount.argocd_application_controller="${sa_account}" \
         --helm-set-string targetRevision="${gitops_branch}" \
         --repo "${gitops_repo}" \
         --path "${app_path}" \
@@ -372,7 +370,6 @@ EOF
             --dest-server https://kubernetes.default.svc \
             --helm-set-string metadata.argocd_app_namespace="${cp_namespace}" \
             --helm-set-string repoURL="${gitops_repo}" \
-            --helm-set-string serviceaccount.argocd_application_controller="${sa_account}" \
             --helm-set-string targetRevision="${gitops_branch}" \
             --path "${app_path}" \
             --repo "${gitops_repo}" \
