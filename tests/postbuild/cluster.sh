@@ -1755,7 +1755,7 @@ function configure_aws_cluster() {
             odf_isolated="true"
         fi
         if [ "${storage_type}" != "none" ]; then
-            setup_ocs_aws_storage "${cluster_type}" "${cluster_name}" "${odf_isolated}" \
+            setup_ocs_storage "${cluster_type}" "${cluster_name}" "gp2" "${odf_isolated}" \
             || result=1
         fi
     fi
@@ -1820,7 +1820,7 @@ function configure_rhacm_cluster() {
             if [ "${storage_type}" == "odf-isolated" ]; then
                 odf_isolated="true"
             fi
-            setup_ocs_aws_storage "${cluster_type}" "${cluster_name}" "${odf_isolated}" \
+            setup_ocs_storage "${cluster_type}" "${cluster_name}" "gp2" "${odf_isolated}" \
             || result=1
         fi
     fi

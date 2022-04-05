@@ -63,5 +63,5 @@ spec:
               exit ${result}
 
       restartPolicy: Never
-      serviceAccountName: {{.Values.serviceaccount.argocd_application_controller}}
+      serviceAccountName: {{.Values.serviceaccount.ibm_cloudpaks_installer}}
   backoffLimit: 1
