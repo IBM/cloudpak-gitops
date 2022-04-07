@@ -33,19 +33,33 @@ spec:
               set -eo pipefail
               set -x
 
-              automation_base_instance_name="$(oc get AutomationBase --namespace "${TARGET_NAMESPACE}" -o jsonpath='{.items[].metadata.name}')" \
-              && reuse_iaf_ab=1 \
-              || reuse_iaf_ab=0
+              result=0
+
+              automation_base_instance_name=""
+              automation_base_class=$(oc api-resources --api-group=base.automation.ibm.com -o name | wc -l) \
+              || result=1
+
+              if [ ${result} -eq 0 ] && [ ! "${automation_base_class}" == "0" ]; then
+                  automation_base_instance_name="$(oc get AutomationBase.base.automation.ibm.com \
+                      --namespace "${TARGET_NAMESPACE}" \
+                      -o jsonpath='{.items[].metadata.name}' \
+                      --ignore-not-found=false)" \
+                  || result=1
+              fi
 
               storage_class_rwx="$(oc get configmap argocd-cp4aiops-config \
-                --namespace "${ARGOCD_NAMESPACE}" -o jsonpath='{.data.storageclass\.rwx}')"
+                  --namespace "${ARGOCD_NAMESPACE}" \
+                  -o jsonpath='{.data.storageclass\.rwx}' \
+                  --ignore-not-found=false)" \
+              || result=1
 
-              result=0
-              if [ "${reuse_iaf_ab}" -eq 0 ]; then
+              if [ -z "${automation_base_instance_name}" ]; then
                   echo "INFO: Did not find an existing instance of AutomationBase in the namespace."
               else
                   echo "INFO: Found an existing instance of AutomationBase in the namespace."
-                  abase_params=$(oc get AutomationBase "${automation_base_instance_name}" --namespace ${TARGET_NAMESPACE} -o jsonpath='{.spec}')
+                  abase_params=$(oc get AutomationBase.base.automation.ibm.com "${automation_base_instance_name}" --namespace ${TARGET_NAMESPACE} -o jsonpath='{.spec}' --ignore-not-found=false) \
+                  || result=1
+
                   if [[ ! ${abase_params} == *aiops* ]]; then
                       echo "INFO: Patching it with AIOps requirements."
                       app_patch=/tmp/patch.json
@@ -80,7 +94,7 @@ spec:
               ]
               EOF
 
-                      oc patch AutomationBase "${automation_base_instance_name}" \
+                      oc patch AutomationBase.base.automation.ibm.com "${automation_base_instance_name}" \
                         --namespace "${TARGET_NAMESPACE}" \
                         --output yaml \
                         --patch-file "${app_patch}" \
@@ -92,5 +106,5 @@ spec:
               exit ${result}
 
       restartPolicy: Never
-      serviceAccountName: {{.Values.serviceaccount.argocd_application_controller}}
+      serviceAccountName: {{.Values.serviceaccount.ibm_cloudpaks_installer}}
   backoffLimit: 2

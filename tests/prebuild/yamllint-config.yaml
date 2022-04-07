@@ -1,12 +1,17 @@
 ---
 ignore: |
-  config/argocd-cloudpaks/cp4aiops/templates/cp4aiops-module-template-app.yaml
+  config/argocd-cloudpaks/cp4aiops/templates/000-aimgr-namespace.yaml
+  config/argocd-cloudpaks/cp4aiops/templates/020-cloudpaks-aimgr-role.yaml
+  config/argocd-cloudpaks/cp4aiops/templates/020-cloudpaks-emgr-role.yaml
+  config/argocd-cloudpaks/cp4aiops/templates/021-cloudpaks-aimgr-binding.yaml
+  config/argocd-cloudpaks/cp4aiops/templates/021-cloudpaks-emgr-binding.yaml
+  config/argocd-cloudpaks/cp4aiops/templates/110-cp4aiops-aimgr-app.yaml
+  config/argocd-cloudpaks/cp4aiops/templates/120-cp4aiops-emgr-app.yaml
   config/argocd-cloudpaks/cp4d/templates/cp4d-module-template-app.yaml
   config/argocd-cloudpaks/cp4i/templates/cp4i-client-app.yaml
   config/cloudpaks/cp4a/operators/templates/01-namespaces/individual.yaml
   config/cloudpaks/cp4a/operators/templates/07-operators/100-operator-group.yaml
   config/cloudpaks/cp4aiops/install-aimgr/templates/resources/200-ai-manager.yaml
-  config/cloudpaks/cp4aiops/install-aimgr/templates/subscriptions/000-namespaces.yaml
   config/cloudpaks/cp4aiops/install-aimgr/templates/subscriptions/050-operator-group.yaml
   config/cloudpaks/cp4d/install-platform/templates/prereqs/000-app-namespace.yaml
   config/cloudpaks/cp4d/install-platform/templates/prereqs/000-operators-namespace.yaml

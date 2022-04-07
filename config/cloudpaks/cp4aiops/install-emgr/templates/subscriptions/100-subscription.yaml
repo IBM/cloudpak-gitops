@@ -5,9 +5,9 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "100"
   labels:
-    operators.coreos.com/noi.{{.Values.metadata.argocd_app_namespace}}-emgr: ''
+    operators.coreos.com/noi.{{.Values.metadata.argocd_app_namespace}}: ''
   name: noi
-  namespace: "{{.Values.metadata.argocd_app_namespace}}-emgr"
+  namespace: "{{.Values.metadata.argocd_app_namespace}}"
 spec:
   channel: v1.5
   installPlanApproval: Automatic
