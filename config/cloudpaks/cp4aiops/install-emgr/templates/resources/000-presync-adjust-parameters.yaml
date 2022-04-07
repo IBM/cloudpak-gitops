@@ -24,7 +24,7 @@ spec:
             - name: ARGOCD_NAMESPACE
               value: "openshift-gitops"
             - name: TARGET_NAMESPACE
-              value: "{{.Values.metadata.argocd_app_namespace}}-emgr"
+              value: "{{.Values.metadata.argocd_app_namespace}}"
           command:
             - /bin/sh
             - -c
@@ -83,5 +83,5 @@ spec:
               exit ${result}
 
       restartPolicy: Never
-      serviceAccountName: {{.Values.serviceaccount.argocd_application_controller}}
+      serviceAccountName: {{.Values.serviceaccount.ibm_cloudpaks_installer}}
   backoffLimit: 2

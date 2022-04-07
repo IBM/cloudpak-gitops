@@ -80,6 +80,7 @@ spec:
                       && echo "INFO: AutomationUIConfig patched." \
                       || {
                           echo "ERROR: AutomationUIConfig could not be patched." \"
+                          result=1
                       }
                   fi
               fi
@@ -87,5 +88,5 @@ spec:
               exit ${result}
 
       restartPolicy: Never
-      serviceAccountName: {{.Values.serviceaccount.argocd_application_controller}}
+      serviceAccountName: {{.Values.serviceaccount.ibm_cloudpaks_installer}}
   backoffLimit: 2

@@ -1,0 +1,20 @@
+{{- $emgr := .Values.modules.emgr }}
+{{- if eq ( default false $emgr ) true  }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: "21"
+  creationTimestamp: null
+  name: ibm-aiops-emgr-binding
+  namespace: "{{.Values.metadata.argocd_app_namespace}}-emgr"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: ibm-aiops-emgr-role
+subjects:
+  - kind: ServiceAccount
+    name: "{{.Values.serviceaccount.ibm_cloudpaks_installer}}"
+    namespace: "{{.Values.metadata.argocd_namespace}}"
+{{- end }}

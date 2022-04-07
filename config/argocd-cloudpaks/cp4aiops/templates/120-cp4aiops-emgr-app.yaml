@@ -1,24 +1,33 @@
+{{- $emgr := .Values.modules.emgr }}
+{{- if eq ( default false $emgr ) true  }}
 ---
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   creationTimestamp: null
-  name: cp-shared-app
+  name: cp4aiops-emgr
   namespace: openshift-gitops
   annotations:
-    argocd.argoproj.io/sync-wave: "100"
+    argocd.argoproj.io/sync-wave: "120"
 spec:
   destination:
-    namespace: "{{.Values.metadata.argocd_app_namespace}}"
+    namespace: "{{.Values.metadata.argocd_app_namespace}}-emgr"
     server: https://kubernetes.default.svc
   ignoreDifferences:
     - group: argoproj.io
       jsonPointers:
-        - /spec/project
         - /spec/source/repoURL
         - /spec/source/targetRevision
         - /status
       kind: Application
+    - group: noi.ibm.com
+      jsonPointers:
+        - /spec/clusterDomain
+      kind: noi
+    - group: v1
+      jsonPointers:
+        - /metadata/labels
+      kind: Namespace
   project: default
   source:
     helm:
@@ -27,21 +36,27 @@ spec:
           value: ${ARGOCD_APP_NAME}
         - name: argocd_app_namespace
           value: ${ARGOCD_APP_NAMESPACE}
+        - name: cluster_domain
+          value: {{.Values.cluster_domain}}
+        - name: metadata.argocd_app_namespace
+          value: "{{.Values.metadata.argocd_app_namespace}}-emgr"
         - name: repoURL
           value: ${ARGOCD_APP_SOURCE_REPO_URL}
         - name: serviceaccount.argocd_application_controller
           value: {{.Values.serviceaccount.argocd_application_controller}}
+        - name: storageclass.rwo
+          value: {{.Values.storageclass.rwo}}
+        - name: storageclass.rwx
+          value: {{.Values.storageclass.rwx}}
         - name: targetRevision
           value: ${ARGOCD_APP_SOURCE_TARGET_REVISION}
-    path: config/argocd-cloudpaks/cp-shared
+    path: config/cloudpaks/cp4aiops/install-emgr
     repoURL: {{.Values.repoURL}}
     targetRevision: {{.Values.targetRevision}}
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
-    syncOptions:
-      - CreateNamespace=true
 status:
   health: {}
   summary: {}
@@ -51,3 +66,4 @@ status:
       source:
         repoURL: ""
     status: ""
+{{- end }}

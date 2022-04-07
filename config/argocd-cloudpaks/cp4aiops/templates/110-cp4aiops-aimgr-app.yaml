@@ -1,24 +1,33 @@
+{{- $aimgr := .Values.modules.aimgr }}
+{{- if eq ( default false $aimgr ) true  }}
 ---
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   creationTimestamp: null
-  name: cp-shared-app
+  name: cp4aiops-aimgr
   namespace: openshift-gitops
   annotations:
-    argocd.argoproj.io/sync-wave: "100"
+    argocd.argoproj.io/sync-wave: "110"
 spec:
   destination:
-    namespace: "{{.Values.metadata.argocd_app_namespace}}"
+    namespace: {{.Values.metadata.argocd_app_namespace}}
     server: https://kubernetes.default.svc
   ignoreDifferences:
     - group: argoproj.io
       jsonPointers:
-        - /spec/project
         - /spec/source/repoURL
         - /spec/source/targetRevision
         - /status
       kind: Application
+    - group: noi.ibm.com
+      jsonPointers:
+        - /spec/clusterDomain
+      kind: noi
+    - group: v1
+      jsonPointers:
+        - /metadata/labels
+      kind: Namespace
   project: default
   source:
     helm:
@@ -27,21 +36,29 @@ spec:
           value: ${ARGOCD_APP_NAME}
         - name: argocd_app_namespace
           value: ${ARGOCD_APP_NAMESPACE}
+        - name: automation_base_instance_name
+          value: {{.Values.automation_base_instance_name}}
+        - name: automation_ui_config_instance_name
+          value: {{.Values.metadata.automation_ui_config_instance_name}}
+        - name: metadata.argocd_app_namespace
+          value: {{.Values.metadata.argocd_app_namespace}}
         - name: repoURL
           value: ${ARGOCD_APP_SOURCE_REPO_URL}
         - name: serviceaccount.argocd_application_controller
           value: {{.Values.serviceaccount.argocd_application_controller}}
+        - name: storageclass.rwo
+          value: {{.Values.storageclass.rwo}}
+        - name: storageclass.rwx
+          value: {{.Values.storageclass.rwx}}
         - name: targetRevision
           value: ${ARGOCD_APP_SOURCE_TARGET_REVISION}
-    path: config/argocd-cloudpaks/cp-shared
+    path: config/cloudpaks/cp4aiops/install-aimgr
     repoURL: {{.Values.repoURL}}
     targetRevision: {{.Values.targetRevision}}
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
-    syncOptions:
-      - CreateNamespace=true
 status:
   health: {}
   summary: {}
@@ -51,3 +68,4 @@ status:
       source:
         repoURL: ""
     status: ""
+{{- end }}

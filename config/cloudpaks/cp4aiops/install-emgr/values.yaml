@@ -1,11 +1,11 @@
 ---
-automation_base_instance_name: ""
-automation_ui_config_instance_name: ""
 cluster_domain: "to_be_set_by_presync_job"
 serviceaccount:
   argocd_application_controller: openshift-gitops-argocd-application-controller
+  ibm_cloudpaks_installer: ibm-cloudpaks-installer
 metadata:
   argocd_app_namespace: ibm-cloudpaks
+  argocd_namespace: openshift-gitops
   post_install_wait: 2h
 storageclass:
   rwo: ocs-storagecluster-ceph-rbd

@@ -5,12 +5,12 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "20"
   creationTimestamp: null
-  name: ibm-cp4aiops-emgr
-  namespace: "{{.Values.metadata.argocd_app_namespace}}-emgr"
+  name: argocd-cp4aiops-emgr-role
+  namespace: "{{.Values.metadata.argocd_app_namespace}}"
 rules:
   - apiGroups: [""]
     resources: ["secrets"]
-    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+    verbs: ["get", "create", "update", "patch", "delete"]
   - apiGroups: ["noi.ibm.com"]
     resources: ["nois"]
-    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+    verbs: ["get", "create", "update", "patch", "delete"]

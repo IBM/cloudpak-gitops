@@ -6,6 +6,7 @@ automation_ui_config_instance_name: ""
 cluster_domain: ""
 serviceaccount:
   argocd_application_controller: openshift-gitops-argocd-application-controller
+  ibm_cloudpaks_installer: ibm-cloudpaks-installer
 metadata:
   argocd_app_namespace: ibm-cloudpaks
   argocd_namespace: openshift-gitops
