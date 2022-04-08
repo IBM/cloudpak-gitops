@@ -3,6 +3,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: ArgoCD
 metadata:
   annotations:
+    argocd.argoproj.io/sync-options: "Replace=true"
     argocd.argoproj.io/sync-wave: "200"
   creationTimestamp: null
   finalizers:
@@ -328,9 +329,8 @@ spec:
             hs.message = obj.status.phase
             if obj.status.phase == "OK" then
               hs.status = "Healthy"
-            elseif obj.status.phase == "Failed" then
+            elseif obj.status.phase == "Error" then
               hs.status = "Degraded"
-              hs.message = obj.status.failureMessage
             else
               hs.status = "Progressing"
             end

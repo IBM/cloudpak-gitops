@@ -35,6 +35,7 @@ spec:
               set -eo pipefail
               set -x
 
+              result=0
               # https://www.ibm.com/docs/en/cloud-paks/cloud-pak-watson-aiops/3.2.0?topic=em-starter-installation
               oc extract secret/"${IBM_ENTITLEMENT_SECRET}" \
                   --namespace "${ARGOCD_NAMESPACE}" \
@@ -55,10 +56,31 @@ spec:
                      oc patch namespace default --type=json -p '[{"op":"add","path":"/metadata/labels","value":{"network.openshift.io/policy-group":"ingress"}}]'
                  fi \
               && echo "INFO: Event Manager prereq configuration successful." \
+              || result=1
+
+              # https://www.ibm.com/docs/en/noi/1.6.4?topic=preparing-your-cluster
+              oc get ServiceAccount noi-service-account --namespace "${TARGET_NAMESPACE}" -o yaml 2> /dev/null \
+              && echo "INFO: NOI service account exists." \
               || {
-                 echo "ERROR: Event Manager prereq configuration failed."
-                 exit 1
+                  echo "INFO: Create the NOI service account with the entitlement key pull secret."
+                  oc create serviceaccount noi-service-account -n "${TARGET_NAMESPACE}" \
+                  && oc adm policy add-scc-to-user privileged system:serviceaccount:${TARGET_NAMESPACE}:noi-service-account \
+                  && oc patch serviceaccount noi-service-account -p '{"imagePullSecrets": [{"name": "noi-registry-secret"}]}' -n "${TARGET_NAMESPACE}" \
+                  && oc get sa noi-service-account -n "${TARGET_NAMESPACE}" \
+                  || result=1
+
+                  if [ ! ${result} -eq 0 ]; then
+                    oc delete ServiceAccount noi-service-account --namespace "${TARGET_NAMESPACE}"
+                  fi
               }
+
+              if [ ${result} -eq 0 ]; then
+                  echo "INFO: Event Manager prereq configuration successful."
+              else
+                  echo "ERROR: Event Manager prereq configuration failed."
+              fi
+
+              exit ${result}
 
       restartPolicy: Never
       serviceAccountName: {{.Values.serviceaccount.ibm_cloudpaks_installer}}

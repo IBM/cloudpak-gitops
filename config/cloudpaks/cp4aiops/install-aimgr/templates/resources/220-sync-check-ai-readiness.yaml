@@ -40,9 +40,9 @@ spec:
               operation_limit_seconds=$(( $(date +%s) + 7200 ))
               pods_found=0
               while [ ${current_seconds} -lt ${operation_limit_seconds} ]; do
-                if oc get pods \
-                    -l app.kubernetes.io/managed-by=ibm-elastic-operator \
-                    -n "${TARGET_NAMESPACE}" &&
+                if oc get AIOpsAnalyticsOrchestrator \
+                      -l app.kubernetes.io/instance=aiops \
+                      -n "${TARGET_NAMESPACE}" &&
                    oc get route -n "${TARGET_NAMESPACE}" cpd; then
                    pods_found=1
                 else
@@ -59,10 +59,10 @@ spec:
               done
 
               echo "INFO: Checking AI Manager resources."
-              oc wait pods \
-                -l app.kubernetes.io/managed-by=ibm-elastic-operator \
+              oc wait AIOpsAnalyticsOrchestrator \
+                -l app.kubernetes.io/instance=aiops \
                 -n "${TARGET_NAMESPACE}" \
-                --for=condition=Ready=true \
+                --for condition=Ready=true \
                 --timeout="${WAIT_TIME}" \
               || result=1
 
@@ -70,11 +70,22 @@ spec:
                 echo "INFO: All AI Manager resources are ready."
               else
                 echo "ERROR: AI Manager resources not ready after specified period."
-                oc get pods \
-                    -l app.kubernetes.io/managed-by=ibm-elastic-operator \
-                    -n "${TARGET_NAMESPACE}" || result=1
-                oc describe route -n "${TARGET_NAMESPACE}" cpd || result=1
+                oc get AIOpsAnalyticsOrchestrator \
+                      -l app.kubernetes.io/instance=aiops \
+                      -n "${TARGET_NAMESPACE}" || result=1
+                oc get route -n "${TARGET_NAMESPACE}" cpd || result=1
               fi
+
+              echo "INFO: Verification steps from the guide: https://www.ibm.com/docs/en/cloud-paks/cloud-pak-watson-aiops/3.3.0?topic=installation-online-cli#verify"
+              oc get installations.orchestrator.aiops.ibm.com -n "${TARGET_NAMESPACE}" \
+              && echo "" \
+              &&  oc get ircore,AIOpsAnalyticsOrchestrator -n "${TARGET_NAMESPACE}" -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,STATUS:status.conditions[?(@.type==\"Ready\")].reason" \
+              && echo "" \
+              && oc get lifecycleservice -n "${TARGET_NAMESPACE}" -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,STATUS:status.conditions[?(@.type==\"Lifecycle Service Ready\")].reason" \
+              && echo "" \
+              && oc get BaseUI -n "${TARGET_NAMESPACE}" -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,STATUS:status.conditions[?(@.type==\"Ready\")].reason" \
+              && echo "" \
+              && oc get AIManager,aiopsedge,asm -n "${TARGET_NAMESPACE}" -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,STATUS:status.phase"
 
               exit "${result}"
 
