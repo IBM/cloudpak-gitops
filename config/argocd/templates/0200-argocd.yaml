@@ -545,6 +545,8 @@ spec:
         memory: 128Mi
     route:
       enabled: true
+      tls:
+        termination: reencypt
     service:
       type: ""
   tls:

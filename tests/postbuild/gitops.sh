@@ -205,45 +205,6 @@ EOF
 
 
 #
-# Replaces the TLS for Argo servers with the default ingress cert
-#
-# https://argoproj.github.io/argo-cd/operator-manual/tls/
-#
-function set_argo_tls() {
-    local result=0
-
-    local argo_secret_name=openshift-gitops-tls
-
-    local cert
-    local cert_key
-
-    local ingress_secret_name
-    ingress_secret_name=$(oc get ingresscontroller.operator default \
-        --namespace openshift-ingress-operator \
-        -o jsonpath='{.spec.defaultCertificate.name}') || result=1
-
-    if [ -n "${ingress_secret_name}" ] && [ "${result}" -eq 0 ]; then
-        cert=$(oc get secret "${ingress_secret_name}" \
-            --namespace openshift-ingress \
-            -o jsonpath='{.data.tls\.crt}') \
-        && cert_key=$(oc get secret "${ingress_secret_name}" \
-            --namespace openshift-ingress \
-            -o jsonpath='{.data.tls\.key}') \
-        && oc patch secret "${argo_secret_name}" \
-            --namespace openshift-gitops \
-            --type=merge -p \
-            "{\"data\": { \"tls.crt\": \"${cert}\", \"tls.key\": \"${cert_key}\"}}" \
-        && log "INFO: Successfully set ArgoCD TLS certificate on secret ${argo_secret_name}." \
-        || result=1
-    else
-        log "INFO: Not setting ArgoCD TLS certificate: no default certificate name for the ingress."
-    fi
-
-    return ${result}
-}
-
-
-#
 # Adds the bootstrap argocd repository to the server.
 #
 # arg1 Git URL for the default gitops repository.
@@ -542,12 +503,6 @@ function setup_gitops_server() {
 
     set_argo_branch "${gitops_branch}" || \
         log "WARNING: Unable to set target branch."
-
-    set_argo_tls || \
-    {
-        result=1
-        log "ERROR: Failed to set Argo TLS."
-    }
 
     # Patch ArgoCD admin password
     set_argo_admin_pwd "${cluster_type}" "${cluster_name}" "${username}" "${api_key}" \
