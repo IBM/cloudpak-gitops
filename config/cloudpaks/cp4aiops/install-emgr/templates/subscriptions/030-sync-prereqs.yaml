@@ -14,13 +14,6 @@ spec:
         - name: config
           image: quay.io/openshift/origin-cli:latest
           imagePullPolicy: IfNotPresent
-          resources:
-            requests:
-              memory: "64Mi"
-              cpu: "200m"
-            limits:
-              memory: "64Mi"
-              cpu: "250m"
           env:
             - name: ARGOCD_NAMESPACE
               value: openshift-gitops
