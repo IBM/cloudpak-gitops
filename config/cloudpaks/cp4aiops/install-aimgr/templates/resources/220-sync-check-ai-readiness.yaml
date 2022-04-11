@@ -15,13 +15,6 @@ spec:
         - name: config
           image: quay.io/openshift/origin-cli:latest
           imagePullPolicy: IfNotPresent
-          resources:
-            requests:
-              memory: "64Mi"
-              cpu: "250m"
-            limits:
-              memory: "96Mi"
-              cpu: "300m"
           env:
             - name: TARGET_NAMESPACE
               value: "{{.Values.metadata.argocd_app_namespace}}"
