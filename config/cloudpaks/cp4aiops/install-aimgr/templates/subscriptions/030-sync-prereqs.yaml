@@ -14,13 +14,6 @@ spec:
         - name: config
           image: quay.io/openshift/origin-cli:latest
           imagePullPolicy: IfNotPresent
-          resources:
-            requests:
-              memory: "256Mi"
-              cpu: "200m"
-            limits:
-              memory: "256Mi"
-              cpu: "250m"
           env:
             - name: ARGOCD_NAMESPACE
               value: openshift-gitops
@@ -57,7 +50,7 @@ spec:
                  fi \
               || result=1
 
-              oc get ServiceAccount aiops-topology-service-account --namespace "{{.Values.metadata.argocd_app_namespace}}" -o yaml 2> /dev/null \
+              oc get ServiceAccount aiops-topology-service-account --namespace "${TARGET_NAMESPACE}" -o yaml 2> /dev/null \
               && echo "INFO: Topology service account exists." \
               || {
                   echo "INFO: Create the topology service account with the entitlement key pull secret."
@@ -66,13 +59,13 @@ spec:
               kind: ServiceAccount
               metadata:
                 name: aiops-topology-service-account
-                namespace: "{{.Values.metadata.argocd_app_namespace}}"
+                namespace: "${TARGET_NAMESPACE}"
                 labels:
                   managedByUser: "true"
               imagePullSecrets:
                 - name: ibm-entitlement-key
               EOF
-                  oc apply -n "{{.Values.metadata.argocd_app_namespace}}" -f /tmp/sa.yaml \
+                  oc apply -n "${TARGET_NAMESPACE}" -f /tmp/sa.yaml \
                   && echo "INFO: Create the topology service account with the entitlement key pull secret." \
                   || result=1
               }

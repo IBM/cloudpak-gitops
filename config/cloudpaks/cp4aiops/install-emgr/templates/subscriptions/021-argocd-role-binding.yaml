@@ -4,6 +4,7 @@ kind: RoleBinding
 metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "21"
+    argocd.argoproj.io/sync-options: "Replace=true"
   creationTimestamp: null
   name: argocd-cp4aiops-emgr-binding
   namespace: "{{.Values.metadata.argocd_app_namespace}}"

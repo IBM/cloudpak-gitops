@@ -87,7 +87,7 @@ spec:
       openstack: false
       vmwarensx: false
     netDisco: false
-  version: 1.6.3.2
+  version: {{.Values.spec.version}}
   entitlementSecret: noi-registry-secret
   clusterDomain: {{.Values.cluster_domain}}
   integrations:
@@ -116,4 +116,6 @@ spec:
     storageSizeImpactGUI: 5Gi
     storageSizeElastic: 75Gi
     storageClassNCOBackup: {{.Values.storageclass.rwo}}
-  deploymentType: trial
+  helmValuesNOI:
+    "global.rbac.createSCC": false
+  deploymentType: {{.Values.spec.deployment_type}}
