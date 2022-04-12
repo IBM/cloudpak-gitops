@@ -9,7 +9,7 @@ metadata:
   namespace: "{{.Values.metadata.argocd_app_namespace}}"
 rules:
   - apiGroups: [""]
-    resources: ["pods/exec", "secrets", "serviceaccounts", "services"]
+    resources: ["namespaces", "pods", "pods/exec", "secrets", "serviceaccounts", "services"]
     verbs: ["get", "list", "create", "update", "patch", "delete"]
   - apiGroups: ["apps"]
     resources: ["deployments"]
