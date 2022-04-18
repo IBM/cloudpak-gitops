@@ -14,26 +14,12 @@ spec:
   ignoreDifferences:
     - group: argoproj.io
       jsonPointers:
-        - /status
         - /spec/source/repoURL
+        - /spec/source/targetRevision
+        - /spec/syncPolicy
+        - /status
       kind: Application
-    - group: triggers.tekton.dev
-      jsonPointers:
-        - /status
-      kind: EventListener
-    - group: triggers.tekton.dev
-      jsonPointers:
-        - /status
-      kind: TriggerTemplate
-    - group: triggers.tekton.dev
-      jsonPointers:
-        - /status
-      kind: TriggerBinding
-    - group: route.openshift.io
-      jsonPointers:
-        - /spec/host
-      kind: Route
-  project: default
+  project: argocd-control-plane
   source:
     helm:
       parameters:

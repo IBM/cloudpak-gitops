@@ -17,22 +17,3 @@ spec:
         operator: In
         values:
           - OpenShift
----
-apiVersion: apps.open-cluster-management.io/v1
-kind: PlacementRule
-metadata:
-  annotations:
-    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-    argocd.argoproj.io/sync-wave: "200"
-  name: all-openshift
-  namespace: openshift-config
-spec:
-  clusterConditions:
-    - status: 'True'
-      type: ManagedClusterConditionAvailable
-  clusterSelector:
-    matchExpressions:
-      - key: vendor
-        operator: In
-        values:
-          - OpenShift

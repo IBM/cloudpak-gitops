@@ -1,0 +1,40 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: "300"
+  creationTimestamp: null
+  labels:
+    control-plane: rhacm
+  name: rhacm-control-plane
+  namespace: openshift-gitops
+spec:
+  clusterResourceWhitelist:
+    - group: ''
+      kind: Namespace
+  description: Configurations for the cluster hosting RHACM
+  destinations:
+    - name: in-cluster
+      namespace: 'openshift-gitops'
+      server: https://kubernetes.default.svc
+    - namespace: 'policy'
+      server: '*'
+    - namespace: 'open-cluster-management'
+      server: '*'
+  namespaceResourceWhitelist:
+    - group: argoproj.io
+      kind: Application
+    - group: apps.open-cluster-management.io
+      kind: '*'
+    - group: policy.open-cluster-management.io
+      kind: '*'
+    - group: operator.open-cluster-management.io
+      kind: '*'
+    - group: operators.coreos.com
+      kind: '*'
+    - group: rbac.authorization.k8s.io
+      kind: '*'
+  sourceRepos:
+    - {{.Values.repoURL}}
+status: {}

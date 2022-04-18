@@ -1,0 +1,36 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: "21"
+  creationTimestamp: null
+  name: argocd-rhacm-role
+  namespace: "{{.Values.metadata.argocd_app_namespace}}"
+rules:
+  - apiGroups:
+      - apps.open-cluster-management.io
+      - operator.open-cluster-management.io
+      - policy.open-cluster-management.io
+    resources:
+      - "*"
+    verbs:
+      - "*"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: "21"
+  creationTimestamp: null
+  name: argocd-rhacm-role
+  namespace: "{{.Values.metadata.policy_namespace}}"
+rules:
+  - apiGroups:
+      - apps.open-cluster-management.io
+      - operator.open-cluster-management.io
+      - policy.open-cluster-management.io
+    resources:
+      - "*"
+    verbs:
+      - "*"

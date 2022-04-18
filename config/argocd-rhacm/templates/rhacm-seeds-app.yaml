@@ -6,10 +6,10 @@ metadata:
     argocd.argoproj.io/sync-wave: "100"
   creationTimestamp: null
   name: rhacm-seeds
-  namespace: openshift-gitops
+  namespace: {{.Values.metadata.argocd_namespace}}
 spec:
   destination:
-    namespace: openshift-gitops
+    namespace: open-cluster-management
     server: https://kubernetes.default.svc
   ignoreDifferences:
     - group: argoproj.io
@@ -19,7 +19,7 @@ spec:
         - /spec/syncPolicy
         - /status
       kind: Application
-  project: default
+  project: {{.Values.project}}
   source:
     helm:
       parameters:
