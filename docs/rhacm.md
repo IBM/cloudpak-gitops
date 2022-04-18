@@ -46,12 +46,13 @@ These steps assume you  logged in to the OCP server with the `oc` command-line i
 1. Add the Argo application:
 
    ```sh
-   #  This step assumes you still have the shell variables assigned from previous steps
+   gitops_url=https://github.com/IBM/cloudpak-gitops
+   gitops_branch=main
    argocd proj create rhacm-control-plane \
          --dest "https://kubernetes.default.svc,open-cluster-management" \
          --src ${gitops_url:?} \
          --upsert \
-   argocd app create rhacm-app \
+   && argocd app create rhacm-app \
          --project rhacm-control-plane \
          --dest-namespace open-cluster-management \
          --dest-server https://kubernetes.default.svc \
@@ -62,7 +63,7 @@ These steps assume you  logged in to the OCP server with the `oc` command-line i
          --sync-policy automated \
          --revision ${gitops_branch:?}  \
          --upsert \
-   && argocd app wait rhacm-app \
+   && argocd app wait -l app.kubernetes.io/instance=rhacm-app \
          --sync \
          --health
    ```
