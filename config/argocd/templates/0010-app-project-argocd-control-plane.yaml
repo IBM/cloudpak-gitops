@@ -1,0 +1,20 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: "10"
+  creationTimestamp: null
+  labels:
+    control-plane: rhacm
+  name: argocd-control-plane
+  namespace: openshift-gitops
+spec:
+  description: Configurations for the cluster hosting RHACM
+  destinations:
+    - name: 'in-cluster'
+      namespace: 'openshift-gitops'
+      server: 'https://kubernetes.default.svc'
+  sourceRepos:
+    - {{.Values.repoURL}}
+status: {}

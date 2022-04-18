@@ -6,10 +6,10 @@ metadata:
     argocd.argoproj.io/sync-wave: "200"
   creationTimestamp: null
   name: rhacm-cloudpaks
-  namespace: openshift-gitops
+  namespace: {{.Values.metadata.argocd_namespace}}
 spec:
   destination:
-    namespace: openshift-gitops
+    namespace: open-cluster-management
     server: https://kubernetes.default.svc
   ignoreDifferences:
     - group: argoproj.io
@@ -24,7 +24,7 @@ spec:
       jsonPointers:
         - /metadata/annotations
       kind: Namespace
-  project: default
+  project: {{.Values.project}}
   source:
     helm:
       parameters:

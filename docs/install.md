@@ -147,7 +147,9 @@ oc create secret docker-registry ibm-entitlement-key \
 
 ## Adding Cloud Pak GitOps Application objects to your GitOps server
 
-The instructions in this section assume you have administrative privileges to the cluster.
+**Important**: The instructions for installing and configuring the OpenShift GitOps operator are meant **exclusively for demonstration purposes**. For users who already manage their own OpenShift GitOps installation, read the contents of the `config/argocd/templates` folder carefully and assess whether the settings are compatible with your installation, especially when it comes to the `.spec.resourceCustomizations` field of the `ArgoCD` custom resource.
+
+The instructions in this section assume you have administrative privileges to the Argo CD instance.
 
 After completing the list of activities listed in the previous sections, you have the option of adding the Argo CD `Application` objects for a Cloud Pak using either the OpenShift Container Platform console or using commands in a terminal.
 
@@ -201,8 +203,9 @@ After completing the list of activities listed in the previous sections, you hav
     | --------- | ---------------- | ---- | --------- |
     | Business Automation | cp4a-app | config/argocd-cloudpaks/cp4a | cp4a |
     | Integration | cp4i-app | config/argocd-cloudpaks/cp4i | cp4i |
-    | AIOps | cp4aiops-app | config/argocd-cloudpaks/cp4aiops | cp4waiops |
+    | Watson AIOps | cp4aiops-app | config/argocd-cloudpaks/cp4aiops | cp4waiops |
     | Data | cp4d-app | config/argocd-cloudpaks/cp4d | cp4d |
+    | Security | cp4s-app | config/argocd-cloudpaks/cp4s | cp4s |
 
     For all other fields, use the following values:
 
@@ -260,15 +263,19 @@ After completing the list of activities listed in the previous sections, you hav
 1. Add the `argo` application. (this step assumes you still have the shell variables assigned from previous steps) :
 
    ```sh
-   # Note that the path config/argocd-ga was renamed config/argocd in 0.5.0
-   argocd app create argo-app \
-         --project default \
+   argocd proj create argocd-control-plane \
+         --dest "https://kubernetes.default.svc,openshift-gitops" \
+         --src ${gitops_url:?} \
+         --upsert \
+   && argocd app create argo-app \
+         --project argocd-control-plane \
          --dest-namespace openshift-gitops \
          --dest-server https://kubernetes.default.svc \
          --repo ${gitops_url:?} \
          --path config/argocd \
-         --sync-policy automated \
+         --helm-set-string targetRevision="${gitops_branch}" \
          --revision ${gitops_branch:?} \
+         --sync-policy automated \
          --upsert 
     ```
 

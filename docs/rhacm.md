@@ -4,7 +4,6 @@
 
 - [Overview](#overview)
 - [Installation](#installation)
-  * [Install OpenShift GitOps and policies in the RHACM server](#install-openshift-gitops-and-policies-in-the-rhacm-server)
   * [Install RHACM on OCP cluster via Argo](#install-rhacm-on-ocp-cluster-via-argo)
 - [Using the policies](#using-the-policies)
   * [Policies](#policies)
@@ -23,41 +22,6 @@ This repository contains governance policies and placement rules for Argo CD its
 
 ## Installation
 
-### Install OpenShift GitOps and policies in the RHACM server
-
-These steps require the installation of the [Helm CLI](https://helm.sh/docs/intro/install/), version 3 or above, and assume you still have the shell variables assigned from previous actions) 
-
-Log in to the OpenShift cluster using the `oc` CLI, then issue the following commands:
-
-   ```sh
-   gitops_url=https://github.com/IBM/cloudpak-gitops
-   gitops_branch=main
-   git clone ${gitops_url:?} --branch ${gitops_branch:?} cloudpak-gitops
-
-   # There will be a few errors in the following output, about 
-   # "no matches for kind ...". That is expected as the various
-   # components come up.
-   helm template cloudpak-gitops/config/rhacm/seeds/ | oc apply -f -
-   oc wait Subscription.operators.coreos.com advanced-cluster-management \
-      -n open-cluster-management \
-      --for=condition=CatalogSourcesUnhealthy=False \
-      --timeout 1200s
-   sleep 60
-   oc wait InstallPlan \
-      --all \
-      -n open-cluster-management \
-      --for condition=Installed=true
-
-
-   helm template cloudpak-gitops/config/rhacm/seeds/ | oc apply -f -
-   oc wait multiclusterhub.operator.open-cluster-management.io multiclusterhub \
-      -n open-cluster-management \
-      --for=condition=Complete=True \
-      --timeout 1200s
-
-   helm template cloudpak-gitops/config/rhacm/seeds/ | oc apply -f - 
-   helm template cloudpak-gitops/config/rhacm/cloudpaks/ | oc apply -f -
-   ```
 
 ### Install RHACM on OCP cluster via Argo
 
@@ -83,18 +47,22 @@ These steps assume you  logged in to the OCP server with the `oc` command-line i
 
    ```sh
    #  This step assumes you still have the shell variables assigned from previous steps
+   argocd proj create rhacm-control-plane \
+         --dest "https://kubernetes.default.svc,open-cluster-management" \
+         --src ${gitops_url:?} \
+         --upsert \
    argocd app create rhacm-app \
-         --project default \
-         --dest-namespace openshift-gitops \
+         --project rhacm-control-plane \
+         --dest-namespace open-cluster-management \
          --dest-server https://kubernetes.default.svc \
          --repo ${gitops_url:?} \
          --path config/argocd-rhacm/ \
-         --sync-policy automated \
-         --revision ${gitops_branch:?}  \
          --helm-set repoURL=${gitops_url:?} \
          --helm-set targetRevision=${gitops_branch:?} \
-         --upsert
-   argocd app wait rhacm-app \
+         --sync-policy automated \
+         --revision ${gitops_branch:?}  \
+         --upsert \
+   && argocd app wait rhacm-app \
          --sync \
          --health
    ```
@@ -112,6 +80,7 @@ Once Argo completes synchronizing the applications, your cluster will have polic
 - `openshift-gitops-cloudpaks-cp4d`: Deploys the Argo applications for Cloud Pak for Data.
 - `openshift-gitops-cloudpaks-cp4aiops`: Deploys the Argo applications for Cloud Pak for Watson AIOps.
 - `openshift-gitops-cloudpaks-cp4i`: Deploys the Argo applications for Cloud Pak for Integration.
+- `openshift-gitops-cloudpaks-cp4s`: Deploys the Argo applications for Cloud Pak for Security.
 - `openshift-gitops-installed`: Deploys OpenShift GitOps.
 
 ### Label your clusters
@@ -130,6 +99,7 @@ Values for each label:
 - `cp4aiops`: Namespace for deploying the Cloud Pak. Unless you want multiple Cloud Paks in different namespaces of the cluster, use the default value `ibm-cloudpaks`.
 - `cp4d`: Namespace for deploying the Cloud Pak. As of release 4.0.6, and as a product limitation, do not use the same namespace as other Cloud Paks if installing  Cloud Pak for Data to the same cluster.
 - `cp4i`: Namespace for deploying the Cloud Pak. Unless you want multiple Cloud Paks in different namespaces of the cluster, use the default value `ibm-cloudpaks`.
+- `cp4s`: Namespace for deploying the Cloud Pak. Unless you want multiple Cloud Paks in different namespaces of the cluster, use the default value `ibm-cloudpaks`.
 
 ### Examples
 
