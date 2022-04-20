@@ -1,5 +1,7 @@
 # IBM Cloud Paks - GitOps
 
+[![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/5972/badge)](https://bestpractices.coreinfrastructure.org/projects/5972)
+
 ## Contents 
 
 - [Overview](#overview)
