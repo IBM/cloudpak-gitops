@@ -1,6 +1,7 @@
 ---
 repoURL: https://github.com/IBM/cloudpak-gitops
 targetRevision: main
+admin_user: cp4s_admin
 cluster_domain: ""
 serviceaccount:
   argocd_application_controller: openshift-gitops-argocd-application-controller

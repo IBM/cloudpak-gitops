@@ -5,7 +5,7 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "200"
   name: cp4s-all
-  namespace: openshift-gitops
+  namespace: {{.Values.metadata.argocd_namespace}}
 spec:
   destination:
     namespace: "{{.Values.metadata.argocd_app_namespace}}"
@@ -18,6 +18,8 @@ spec:
           value: ${ARGOCD_APP_NAME}
         - name: argocd_app_namespace
           value: ${ARGOCD_APP_NAMESPACE}
+        - name: admin_user
+          value: {{.Values.admin_user}}
         - name: cluster_domain
           value: {{.Values.cluster_domain}}
         - name: metadata.argocd_app_namespace

@@ -4,7 +4,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: cp4s-app
-  namespace: openshift-gitops
+  namespace: {{.Values.metadata.argocd_namespace}}
 spec:
   destination:
     server: 'https://kubernetes.default.svc'
@@ -23,6 +23,8 @@ spec:
           value: ${ARGOCD_APP_NAME}
         - name: argocd_app_namespace
           value: ${ARGOCD_APP_NAMESPACE}
+        - name: admin_user
+          value: {{.Values.admin_user}}
         - name: cluster_domain
           value: {{.Values.cluster_domain}}
         - name: metadata.argocd_app_namespace

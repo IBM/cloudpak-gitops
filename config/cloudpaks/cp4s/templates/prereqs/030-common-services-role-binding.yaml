@@ -1,0 +1,18 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-options: "Replace=true"
+    argocd.argoproj.io/sync-wave: "30"
+  creationTimestamp: null
+  name: common-services-cp4s-binding
+  namespace: ibm-common-services
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: common-services-cp4s-role
+subjects:
+  - kind: ServiceAccount
+    name: {{.Values.serviceaccount.ibm_cloudpaks_installer}}
+    namespace: {{.Values.metadata.argocd_namespace}}
