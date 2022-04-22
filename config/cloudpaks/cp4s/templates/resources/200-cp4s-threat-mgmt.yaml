@@ -10,7 +10,7 @@ metadata:
 spec:
   acceptLicense: true
   basicDeploymentConfiguration:
-    adminUser: admin
+    adminUser: {{.Values.admin_user}}
     domain: cp4s.{{.Values.cluster_domain}}
     storageClass: {{.Values.storageclass.rwo}}
   extendedDeploymentConfiguration:

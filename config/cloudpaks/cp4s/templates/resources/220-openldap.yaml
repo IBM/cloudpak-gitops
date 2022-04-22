@@ -6,7 +6,7 @@ metadata:
     argocd.argoproj.io/hook: Sync
     argocd.argoproj.io/sync-wave: "220"
   name: cp4s-openldap
-  namespace: openshift-gitops
+  namespace: {{.Values.metadata.argocd_namespace}}
 spec:
   template:
     spec:
@@ -17,6 +17,8 @@ spec:
           env:
             - name: TARGET_NAMESPACE
               value: {{.Values.metadata.argocd_app_namespace}}
+            - name: CP4S_ADMIN
+              value: "{{.Values.admin_user}}"
             - name: IS_ROKS
               value: "{{.Values.roks_authentication}}"
           command:
@@ -39,7 +41,7 @@ spec:
 
               cd $HOME \
               && oc project "${TARGET_NAMESPACE}" \
-              && admin_user=ldap_admin \
+              && admin_user=${CP4S_ADMIN} \
               && admin_pwd=$(echo $RANDOM | md5sum | head -c 32) \
               && if oc get secret cp4s-openldap-creds 2> /dev/null; then
                     echo "INFO: Credentials already created."
