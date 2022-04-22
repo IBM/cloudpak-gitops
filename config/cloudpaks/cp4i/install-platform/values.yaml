@@ -1,17 +1,10 @@
 ---
-repoURL: https://github.com/IBM/cloudpak-gitops
-targetRevision: main
 serviceaccount:
-  ibm_cloudpaks_installer: ibm-cp4i-installer
   argocd_application_controller: openshift-gitops-argocd-application-controller
+  ibm_cloudpaks_installer: ibm-cp4i-installer
 metadata:
   argocd_app_namespace: ibm-cloudpaks
   argocd_namespace: openshift-gitops
 storageclass:
   rwo: ocs-storagecluster-ceph-rbd
   rwx: ocs-storagecluster-cephfs
-modules:
-  apic: true
-  mq: true
-  platform: true
-  client: false

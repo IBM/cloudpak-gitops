@@ -86,7 +86,7 @@ do
         ht_result=1;
     fi
 done <<< "$(find . -name Chart.yaml | sed "s|/Chart.yaml||g")"
-log "INFO: Completed helm templae run: ${ht_result}"
+log "INFO: Completed helm template run: ${ht_result}"
 
 result=$((sc_result+yl_result+hl_result+ht_result))
 log "INFO: Global test failures: ${result}"

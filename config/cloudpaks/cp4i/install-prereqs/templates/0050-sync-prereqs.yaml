@@ -1,0 +1,60 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: "50"
+    argocd.argoproj.io/hook: Sync
+  name: sync-cp4i-prereqs
+  namespace: {{.Values.metadata.argocd_namespace}}
+spec:
+  template:
+    spec:
+      containers:
+        - name: config
+          image: quay.io/openshift/origin-cli:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: ARGOCD_NAMESPACE
+              value: "{{.Values.metadata.argocd_namespace}}"
+            - name: IBM_ENTITLEMENT_SECRET
+              value: ibm-entitlement-key
+            - name: TARGET_NAMESPACE
+              value: "{{.Values.metadata.argocd_app_namespace}}"
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -eo pipefail
+              set -x
+
+              result=0
+              # https://www.ibm.com/docs/en/cloud-paks/cp-integration/2021.4?topic=installing-applying-your-entitlement-key-online-installation
+              oc extract secret/"${IBM_ENTITLEMENT_SECRET}" \
+                  --namespace "${ARGOCD_NAMESPACE}" \
+                  --keys=.dockerconfigjson \
+                  --to=/tmp \
+                  --confirm \
+              && if oc get secret ibm-entitlement-key --namespace "${TARGET_NAMESPACE}" 2>/dev/null ; then
+                    oc patch secret ibm-entitlement-key \
+                        --namespace "${TARGET_NAMESPACE}" \
+                        --patch "{\"data\": {\".dockerconfigjson\": \"$(cat /tmp/.dockerconfigjson | base64 -w0)\" }}"
+                 else
+                     oc create secret docker-registry ibm-entitlement-key \
+                        --namespace "${TARGET_NAMESPACE}" \
+                        --from-file=.dockerconfigjson=/tmp/.dockerconfigjson
+                 fi \
+              && rm -rf /tmp/.dockerconfigjson \
+              || result=1
+
+              if [ ${result} -eq 0 ]; then
+                  echo "INFO: CP4I prereq configuration successful."
+              else
+                  echo "ERROR: CP4I prereq configuration failed."
+              fi
+
+              exit ${result}
+
+      restartPolicy: Never
+      serviceAccountName: {{.Values.serviceaccount.argocd_application_controller}}
+  backoffLimit: 1

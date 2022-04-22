@@ -1,0 +1,63 @@
+{{- $argocd_app_namespace := .Values.metadata.argocd_app_namespace -}}
+{{- $argocd_namespace := .Values.metadata.argocd_namespace -}}
+{{- $argocd_serviceaccount := .Values.serviceaccount.argocd_application_controller -}}
+{{- $repoUrl := .Values.repoURL -}}
+{{- $storage_class_rwo := .Values.storageclass.rwo -}}
+{{- $storage_class_rwx := .Values.storageclass.rwx -}}
+{{- $targetRevision := .Values.targetRevision -}}
+{{- range $module_name, $module_enabled := .Values.modules }}
+{{- if not (eq $module_name "client") }}
+{{- if eq ( default false $module_enabled ) true  }}
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: "300"
+  name: cp4i-{{ $module_name }}
+  namespace: {{ $argocd_namespace }}
+spec:
+  destination:
+    namespace: {{ $argocd_app_namespace }}
+    server: 'https://kubernetes.default.svc'
+  ignoreDifferences:
+    - group: argoproj.io
+      jsonPointers:
+        - /spec/source/repoURL
+        - /spec/source/targetRevision
+        - /status
+      kind: Application
+    - group: datapower.ibm.com
+      jsonPointers:
+        - /metadata/labels
+      kind: DataPowerService
+  project: default
+  source:
+    helm:
+      parameters:
+        - name: argocd_app_name
+          value: ${ARGOCD_APP_NAME}
+        - name: argocd_app_namespace
+          value: ${ARGOCD_APP_NAMESPACE}
+        - name: metadata.argocd_app_namespace
+          value: {{ $argocd_app_namespace }}
+        - name: repoURL
+          value: ${ARGOCD_APP_SOURCE_REPO_URL}
+        - name: serviceaccount.argocd_application_controller
+          value: {{ $argocd_serviceaccount }}
+        - name: storageclass.rwo
+          value: {{ $storage_class_rwo }}
+        - name: storageclass.rwx
+          value: {{ $storage_class_rwx }}
+        - name: targetRevision
+          value: ${ARGOCD_APP_SOURCE_TARGET_REVISION}
+    path: config/cloudpaks/cp4i/install-{{ $module_name }}
+    repoURL: {{ $repoUrl }}
+    targetRevision: {{ $targetRevision }}
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+{{- end }}
+{{- end }}
+{{- end }}

@@ -387,6 +387,7 @@ EOF
                 --selector app.kubernetes.io/instance="${app_name}" \
                 --sync \
                 --health \
+                --operation \
                 --timeout 10800 \
             && log "INFO: Synchronization of ${app_name} complete." \
             || cp_result=1
