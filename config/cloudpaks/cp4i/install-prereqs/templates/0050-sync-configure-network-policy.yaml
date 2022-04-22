@@ -1,0 +1,58 @@
+# https://www.ibm.com/docs/en/cloud-paks/cp-integration/2021.2?topic=configuration-installation
+#
+# Some Red Hat OpenShift clusters have additional network policies configured to secure pod communication traffic,
+# which can block external traffic and communication between namespaces. Extra configuration is then required to
+# allow external traffic to reach the routes.
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  annotations:
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/sync-wave: "50"
+  name: sync-cp4i-network-policy
+  namespace: {{.Values.metadata.argocd_app_namespace}}
+spec:
+  template:
+    spec:
+      containers:
+        - name: config
+          image: quay.io/openshift/origin-cli:latest
+          imagePullPolicy: IfNotPresent
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -eo pipefail
+              set -x
+
+              default_policy=$(oc get namespace default -o jsonpath={.metadata.labels.'network\.openshift\.io/policy-group'}) \
+              || {
+                echo "ERROR: Unable to get default ingress policy ."
+                exit 1
+              }
+              if [ "${default_policy}" == "ingress" ]; then
+                echo "INFO: Default network policy is already \"ingress\"."
+                exit
+              else
+                no_strategy=0
+                strategy=$(oc get ingresscontroller default \
+                  -n openshift-ingress-operator \
+                  -o jsonpath={.status.endpointPublishingStrategy.type}) \
+                  || {
+                    echo "ERROR: Getting ingress controller strategy failed."
+                    no_strategy=1
+                  }
+                if [ "${strategy}" == "HostNetwork" ] || [ "${no_strategy}" -eq 1 ]; then
+                  oc label namespace default 'network.openshift.io/policy-group=ingress' --overwrite \
+                  && echo "INFO: Default network policy set to \"ingress\"." \
+                  || {
+                    echo "ERROR: Patching network policy labels failed."
+                    exit 1
+                  }
+                fi
+              fi
+
+      restartPolicy: Never
+      serviceAccountName: {{.Values.serviceaccount.ibm_cloudpaks_installer}}
+  backoffLimit: 1

@@ -1,0 +1,69 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  creationTimestamp: null
+  name: cp4i-app
+  namespace: {{.Values.metadata.argocd_namespace}}
+  annotations:
+    argocd.argoproj.io/sync-wave: "100"
+spec:
+  destination:
+    namespace: {{.Values.metadata.argocd_app_namespace}}
+    server: https://kubernetes.default.svc
+  ignoreDifferences:
+    - group: argoproj.io
+      jsonPointers:
+        - /spec/source/helm/parameters
+        - /spec/source/repoURL
+        - /spec/source/targetRevision
+        - /status
+      kind: Application
+    - group: route.openshift.io
+      jsonPointers:
+        - /spec/host
+      kind: Route
+  project: default
+  source:
+    helm:
+      parameters:
+        - name: argocd_app_name
+          value: ${ARGOCD_APP_NAME}
+        - name: argocd_app_namespace
+          value: ${ARGOCD_APP_NAMESPACE}
+        - name: metadata.argocd_app_namespace
+          value: {{.Values.metadata.argocd_app_namespace}}
+        - name: modules.apic
+          value: "{{.Values.modules.apic}}"
+        - name: modules.client
+          value: "{{.Values.modules.client}}"
+        - name: modules.mq
+          value: "{{.Values.modules.mq}}"
+        - name: modules.platform
+          value: "{{.Values.modules.platform}}"
+        - name: repoURL
+          value: ${ARGOCD_APP_SOURCE_REPO_URL}
+        - name: serviceaccount.argocd_application_controller
+          value: {{.Values.serviceaccount.argocd_application_controller}}
+        - name: storageclass.rwo
+          value: {{.Values.storageclass.rwo}}
+        - name: storageclass.rwx
+          value: {{.Values.storageclass.rwx}}
+        - name: targetRevision
+          value: ${ARGOCD_APP_SOURCE_TARGET_REVISION}
+    path: config/argocd-cloudpaks/cp4i
+    repoURL: {{.Values.repoURL}}
+    targetRevision: {{.Values.targetRevision}}
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+status:
+  health: {}
+  summary: {}
+  sync:
+    comparedTo:
+      destination: {}
+      source:
+        repoURL: ""
+    status: ""

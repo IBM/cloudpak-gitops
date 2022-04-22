@@ -1,0 +1,20 @@
+---
+# https://ibm.biz/integration-documentation
+apiVersion: integration.ibm.com/v1beta1
+kind: PlatformNavigator
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "200"
+  name: integration-navigator
+  namespace: {{.Values.metadata.argocd_app_namespace}}
+spec:
+  license:
+    accept: true
+    # https://ibm.biz/integration-licenses
+    license: L-RJON-C7QG3S
+  mqDashboard: true
+  replicas: 1
+  storage:
+    class: {{.Values.storageclass.rwx}}
+  version: 2021.4.1

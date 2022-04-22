@@ -1,0 +1,23 @@
+---
+# https://ibm.biz/integration-documentation
+apiVersion: apiconnect.ibm.com/v1beta1
+kind: APIConnectCluster
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "200"
+  labels:
+    app.kubernetes.io/instance: apiconnect
+    app.kubernetes.io/managed-by: ibm-apiconnect
+    app.kubernetes.io/name: apiconnect-minimum
+  name: apis-minimum
+  namespace: {{.Values.metadata.argocd_app_namespace}}
+spec:
+  license:
+    accept: true
+    use: nonproduction
+    # https://ibm.biz/apiclicenses
+    license: L-RJON-C7BJ42
+  storageClassName: {{.Values.storageclass.rwo}}
+  profile: n1xc10.m48
+  version: 10.0.4
