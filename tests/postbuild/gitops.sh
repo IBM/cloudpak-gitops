@@ -131,12 +131,6 @@ function create_secrets() {
 
     local result=0
 
-    local target_namespace=cicd
-
-    # shellcheck disable=SC2154
-    oc project "${target_namespace}" > /dev/null 2>&1 \
-        || oc new-project "${target_namespace}"
-
     log "INFO: Creating all secrets used in this repo."
 
     local registry_email="cicd@nonexistent.email.ibm.com"
@@ -532,6 +526,16 @@ function setup_gitops_server() {
         log "ERROR: Failed to set secrets."
     }
 
+    set_argo_tls || \
+    {
+        result=1
+        log "ERROR: Failed to set Argo TLS."
+    }
+
+    # Patch ArgoCD admin password
+    set_argo_admin_pwd "${cluster_type}" "${cluster_name}" "${username}" "${api_key}" \
+        || result=1
+
     add_argo_cd_app "${gitops_repo}" "${gitops_branch}" "${github_pat}" "${app_labels}" \
         && log "INFO: ArgoCD added to the cluster." \
         || result=1
@@ -543,16 +547,6 @@ function setup_gitops_server() {
 
     set_argo_branch "${gitops_branch}" || \
         log "WARNING: Unable to set target branch."
-
-    set_argo_tls || \
-    {
-        result=1
-        log "ERROR: Failed to set Argo TLS."
-    }
-
-    # Patch ArgoCD admin password
-    set_argo_admin_pwd "${cluster_type}" "${cluster_name}" "${username}" "${api_key}" \
-        || result=1
 
     if [ "${result}" -eq 0 ]; then
         log "INFO: GitOps setup complete on cluster ${cluster_name}."
