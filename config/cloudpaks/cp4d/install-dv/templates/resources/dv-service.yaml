@@ -12,3 +12,4 @@ spec:
     accept: true
     license: Enterprise
   size: "small"
+  version: 1.7.8

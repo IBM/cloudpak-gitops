@@ -1,18 +1,27 @@
 #!/bin/bash
 
+: "${ODF_NAMESPACE:=openshift-storage}"
+: "${ODF_DISK_SIZE:=500Gi}"
+: "${MON_DISK_SIZE:=20Gi}"
+: "${ROKS_CLUSTER_STORAGE_SI:=sdlc-cluster-storage}"
+: "${ROKS_STORAGE_CLASS:=ibmc-vpc-block-10iops-tier}"
+
 #
-# Sets up the OpenShift Data Framework on ROSA
+# Sets up the OpenShift Data Framework.
 #
 # arg1 infrastructure type of cluster to be configured
 # arg2 name of the cluster to be configured
-# arg3 if "true", places ODF workloads on an isolated worker pool. 
+# arg3 base storage class name for the ODF cluster
+# arg4 if "true", places ODF workloads on an isolated worker pool. 
 #      setting it to "false" has no effect for ROSA clusters, 
 #      since it always needs its own worker pool.
 #
-function setup_ocs_aws_storage() {
+function setup_ocs_storage() {
     local cluster_type=${1}
     local cluster_name=${2}
-    local isolate_odf_workload=${3:-false}
+    local disk_size=${3:-${ODF_DISK_SIZE}}
+    local sc_name=${4:-gp2}
+    local isolate_odf_workload=${5:-false}
     
     local result=0
 
@@ -45,8 +54,6 @@ EOF
        [ "${ocp_version}" == "4.7" ] || 
        [ "${ocp_version}" == "4.8" ]; then
         odf=0
-    elif [ "${ocp_version}" == "4.10" ]; then
-        ocp_version=4.9
     fi
 
     local operator_name=odf-operator
@@ -192,11 +199,11 @@ spec:
             - ReadWriteOnce
           resources:
             requests:
-              storage: ${ODF_DISK_SIZE}
-          storageClassName: gp2
+              storage: ${disk_size}
+          storageClassName: ${sc_name}
           volumeMode: Block
         status: {}
-      name: ocs-deviceset-gp2
+      name: ocs-deviceset-${sc_name}
       placement: {}
       portable: true
       replica: 3
@@ -304,12 +311,14 @@ EOF
 #
 # Sets up the OpenShift Data Framework on ROKS VPC Gen2 clusters.
 #
-# https://cloud.ibm.com/docs/openshift?topic=openshift-ocs-storage-install 
+# https://cloud.ibm.com/docs/openshift?topic=openshift-deploy-odf-vpc
 #
 # arg1 name of the cluster to be configured
 #
 function setup_ocs_vpc_gen2_storage() {
     local cluster_name=${1}
+    local disk_size=${2:-${ODF_DISK_SIZE}}
+    local sc_name=${3:-${ROKS_STORAGE_CLASS}}
 
     local result=0
 
@@ -370,18 +379,14 @@ EOF
     local addon_name=openshift-data-foundation
     if [ "${odf_version}" == "4.6.0" ]; then
         addon_name=openshift-container-storage
-    else
-        odf_version=4.7.0
     fi
     if ! ibmcloud oc cluster addon ls -c "${cluster_name}" | grep -q "${addon_name}"; then
         ibmcloud oc cluster addon enable "${addon_name}" \
             -c "${cluster_name}" \
             --version "${odf_version}" \
-            --param "osdSize=${ODF_DISK_SIZE}" \
-            --param "monStorageClassName=${STORAGE_CLASS}" \
-            --param "osdStorageClassName=${STORAGE_CLASS}" \
+            --param "osdSize=${disk_size}" \
+            --param "osdStorageClassName=${sc_name}" \
             --param "odfDeploy=true" \
-            --param "monSize=${MON_DISK_SIZE}" \
         && ibmcloud oc cluster addon ls -c "${cluster_name}" \
         || return 1
     fi
@@ -414,7 +419,7 @@ EOF
     log "INFO: Wait for storagecluster to be ready."
     while true; do
         if [[ $(oc get storagecluster -n "${ODF_NAMESPACE}") =~ Ready ]]; then
-            echo "The OCS storagecluster is Ready"
+            log "INFO: The ODF storagecluster is Ready"
             break
         else
             oc get storagecluster,po,pvc -n "${ODF_NAMESPACE}" | grep -Ev "1/1|2/2|3/3|4/4|5/5|6/6|Comple|Bound"
