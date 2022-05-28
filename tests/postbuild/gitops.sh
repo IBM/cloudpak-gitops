@@ -376,11 +376,14 @@ EOF
 
         if [ ${cp_result} -eq 0 ]; then
             log "INFO: Synchronizing ${app_name}" \
-            && sleep 30 \
+            && sleep 60 \
             && argocd app wait \
                 --selector app.kubernetes.io/instance="${app_name}" \
-                --sync \
                 --health \
+                --operation \
+                --timeout 10800 \
+            && argocd app wait \
+                --selector app.kubernetes.io/instance="${app_name}" \
                 --operation \
                 --timeout 10800 \
             && log "INFO: Synchronization of ${app_name} complete." \

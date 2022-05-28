@@ -63,7 +63,7 @@ function usage() {
     echo ""
     echo "Usage: ${scriptname} [OPTIONS]...[ARGS]"
     echo
-    echo "   -t | --type <aro|aws|azure|fyre|fyre-quick-burn|ibmcloud|ibmcloud-gen2|ocp|rosa>"
+    echo "   -t | --type <aro|aws|azure|fyre|fyre-quick-burn|gcp|ibmcloud|ibmcloud-gen2|ocp|rosa>"
     echo "                      Indicates the type of cluster to be built or configured. Default is: ${NEW_CLUSTER_TYPE}"
     echo "   -r | --rhacm-server <server_name>"
     echo "                      Uses RHACM to create the cluster. "
@@ -118,7 +118,7 @@ function usage() {
     echo "                      Choice of storage for the target platform."
     echo "                      The choices are:"
     echo "                      \"default\": rook-cephfs for fyre, ibmc-file for ibmcloud, "
-    echo "                      ODF for ibmcloud-gen2, aws, rosa, gcp."
+    echo "                      ODF for ibmcloud-gen2, aro, aws, rosa, gcp."
     echo "                      \"none\": No additional storage added to the cluster."
     echo "                      If not specified, the default choice is \"${storage_type}\"."
     echo "        [--upgrade-cluster]"
@@ -132,6 +132,9 @@ function usage() {
     echo "                      API Key in the target platform"
     echo "        --ocp-token"
     echo "                      Key or token for managed OCP platform if not ROKS."
+    echo "        --redhat-pull-secret"
+    echo "                      Pull secret for RedHat registries. Only needed for ARO."
+    echo "                      Defaults to REDHAT_PULL_SECRET environment variable."
     echo "   -l | --managed-cluster-labels <label1, label2, ..., labelN>"
     echo "                      Companion to the --create command."
     echo "                      Comma-separated list of labels for the cluster."
@@ -297,7 +300,8 @@ function setup_global_pull_secrets() {
           --namespace openshift-config \
             --output "jsonpath={.data.\.dockerconfigjson}" \
         | base64 -d \
-        | jq -cr . > "${gps_file}"
+        | jq -cr . > "${gps_file}" \
+    || return 1
 
     local registry_optional=0
     local registry_required=1
@@ -961,6 +965,141 @@ function create_fyre_cluster() {
 
 
 #
+# Creates a new cluster in ARO.
+#
+# https://docs.microsoft.com/en-us/azure/openshift/tutorial-create-cluster
+#
+# arg1 name of the cluster to be checked
+# arg2 number of workers for the cluster
+# arg3 max number of workers for the cluster
+# arg4 size of workers for the cluster
+# arg5 username for the target cloud
+# arg6 apikey for the target cloud
+# arg7 RedHat Pull secret (https://console.redhat.com/openshift/install/azure/aro-provisioned)
+# arg8 whether or not to wait for the cluster to be up if still being created
+#      1=wait | 0=do not wait
+#
+function create_aro_cluster() {
+    local cluster_name=${1}
+    local min_cluster_workers=${2}
+    local max_cluster_workers=${3}
+    local cluster_worker_size=${4}
+    local username=${5}
+    local api_key=${6}
+    local redhat_pull_secret=${7}
+    local wait_cluster=${8:-0}
+
+    local result=0
+
+    login_aro "" "${username}" "${api_key}" \
+        || return 1
+
+    # No OCP versions for ARO. It always installs the latest
+
+    local watch_logs_param=()
+    if [ "${wait_cluster}" -eq 1 ]; then
+        watch_logs_param=(--watch)
+    fi
+    local replicas_param=(--worker-count "${min_cluster_workers}")
+    if [ -n "${min_cluster_workers}" ] && [ -n "${max_cluster_workers}" ] && [ "${max_cluster_workers}" -gt "${min_cluster_workers}" ]; then
+        replicas_param=(\
+            --enable-autoscaling \
+            --min-replicas "${min_cluster_workers}" \
+            --max-replicas "${max_cluster_workers}")
+    fi
+
+    log "INFO: Create target resource group"
+    local vnet_name=aro_vnet
+    az group show \
+        --name "${AZURE_RESOURCE_GROUP:?}" \
+        -o tsv 2> /dev/null \
+    || az group create \
+        --resource-group "${AZURE_RESOURCE_GROUP:?}" \
+        --location "${AZURE_CLOUD_REGION:?}" \
+        -o tsv
+
+    log "INFO: Create network and subnetworks"
+    az network vnet show \
+        --resource-group "${AZURE_RESOURCE_GROUP:?}" \
+        --name "${vnet_name}" \
+        -o tsv 2> /dev/null \
+    || az network vnet create \
+        --resource-group "${AZURE_RESOURCE_GROUP:?}" \
+        --location "${AZURE_CLOUD_REGION:?}" \
+        --name "${vnet_name}" \
+        --address-prefixes 10.0.0.0/22
+
+    az network vnet subnet show \
+        --resource-group "${AZURE_RESOURCE_GROUP:?}" \
+        --vnet-name "${vnet_name}" \
+        --name master-subnet \
+        -o tsv 2> /dev/null \
+    || az network vnet subnet create \
+        --resource-group "${AZURE_RESOURCE_GROUP:?}" \
+        --vnet-name "${vnet_name}" \
+        --name master-subnet \
+        --address-prefixes 10.0.0.0/23 \
+        --service-endpoints Microsoft.ContainerRegistry
+
+    az network vnet subnet show \
+        --resource-group "${AZURE_RESOURCE_GROUP:?}" \
+        --vnet-name "${vnet_name}" \
+        --name worker-subnet \
+        -o tsv 2> /dev/null \
+    || az network vnet subnet create \
+        --resource-group "${AZURE_RESOURCE_GROUP:?}" \
+        --vnet-name "${vnet_name}" \
+        --name worker-subnet \
+        --address-prefixes 10.0.2.0/23 \
+        --service-endpoints Microsoft.ContainerRegistry
+
+    if [ "$(az network vnet subnet show \
+        --name master-subnet \
+        --resource-group "${AZURE_RESOURCE_GROUP:?}" \
+        --vnet-name "${vnet_name}" \
+        --query "privateLinkServiceNetworkPolicies" 2> /dev/null)" != "\"Disabled\"" ]; then
+        log "INFO: Updated master subnet"
+        az network vnet subnet update \
+            --name master-subnet \
+            --resource-group "${AZURE_RESOURCE_GROUP:?}" \
+            --vnet-name "${vnet_name}" \
+            --disable-private-link-service-network-policies true
+    fi
+
+    # https://docs.microsoft.com/en-us/cli/azure/aro?view=azure-cli-latest#az-aro-create
+    log "INFO: Creating cluster..."
+    az provider register -n Microsoft.RedHatOpenShift --wait \
+    && az provider register -n Microsoft.Compute --wait \
+    && az provider register -n Microsoft.Storage --wait \
+    && az provider register -n Microsoft.Authorization --wait \
+    && LOCATION="${AZURE_CLOUD_REGION}" az aro create \
+        --client-id "${username}" \
+        --client-secret "${api_key}" \
+        --name "${cluster_name}" \
+        --pull-secret "${redhat_pull_secret}" \
+        --resource-group "${AZURE_RESOURCE_GROUP:?}" \
+        --worker-vm-size "${cluster_worker_size}" \
+        --vnet ${vnet_name} \
+        --master-subnet master-subnet \
+        --worker-subnet worker-subnet \
+        "${replicas_param[@]}" \
+    && LOCATION="${AZURE_CLOUD_REGION}" az aro wait --name  "${cluster_name}" \
+        --resource-group "${AZURE_RESOURCE_GROUP:?}" \
+        --created \
+        --timeout 7200 \
+    && log "INFO: Cluster [${cluster_name}] creation request succeeded." \
+    || result=1
+
+    if [ ${result} -eq 1 ]; then
+        log "ERROR: Creation of cluster [${cluster_name}] failed."
+        result=1
+    fi
+
+    return ${result}
+}
+
+
+#
 # Creates a new cluster in ROSA.
 #
 # arg1 name of the cluster to be checked
@@ -1072,9 +1211,21 @@ function create_rhacm_cluster() {
         esac
         odf_params=(--odf-autoscale-workers 6 \
                 --odf-autoscale-worker-flavor "${odf_worker_flavor}")
+    elif [ "${storage_type}" == "odf-large" ]; then
+        local odf_worker_flavor
+        case "${managed_cluster_type}" in
+            aws)
+                odf_worker_flavor="m5.8xlarge"
+                ;;
+            *)
+                log "INFO: Sizing ODF worker nodes to the same size as other cluster workers."
+                odf_worker_flavor="${worker_flavor}"
+        esac
+        odf_params=(--odf-autoscale-workers 3 \
+                --odf-autoscale-worker-flavor "${odf_worker_flavor}")
     fi
 
-    PIPELINE_DEBUG=${PIPELINE_DEBUG} "${scriptdir}/rhacm.sh" \
+    PIPELINE_DEBUG=${PIPELINE_DEBUG} AWS_CLOUD_REGION=${CLUSTER_SITE} "${scriptdir}/rhacm.sh" \
         --type "ocp" \
         --cluster "${rhacm_server}" \
         --username "${username}" \
@@ -1209,11 +1360,52 @@ function delete_rhacm_cluster() {
 #
 # Deletes the specified cluster.
 #
-# arg1 name of the cluster to be checked
-# arg2 username for the target cloud
-# arg3 apikey for the target cloud
-# arg4 ROSA token
-# arg5 whether or not to wait for the cluster to be up if still being created
+# arg1 name of the cluster to be deleted.
+# arg2 username for the target cloud.
+# arg3 apikey for the target cloud.
+# arg4 wait for operation to complete.
+#
+function delete_aro_cluster() {
+    local cluster_name=${1}
+    local username=${2}
+    local api_key=${3}
+    local wait_cluster=${4:-0}
+
+    local result=0
+
+    login_aro "" "${username}" "${api_key}" \
+        || return 1
+
+    local wait_param=(--no-wait)
+    if [ "${wait_cluster}" -eq 1 ]; then
+        wait_param=()
+    fi
+
+    LOCATION="${AZURE_CLOUD_REGION}" az aro delete \
+        --name "${cluster_name}" \
+        --resource-group "${AZURE_RESOURCE_GROUP:?}" \
+        --yes \
+        "${wait_param[@]}" \
+    || result=1
+
+    if [ ${result} -eq 0 ]; then
+        log "INFO: Deletion requested for ARO cluster [${cluster_name}]"
+    else
+        log "ERROR: Unable to delete ARO cluster [${cluster_name}]."
+    fi
+
+    return ${result}
+}
+
+
+#
+# Deletes the specified cluster.
+#
+# arg1 name of the cluster to be deleted.
+# arg2 username for the target cloud.
+# arg3 apikey for the target cloud.
+# arg4 ROSA token.
+# arg5 whether or not to wait for the cluster to be deleted
 #      1=wait | 0=do not wait
 #
 function delete_rosa_cluster() {
@@ -1227,14 +1419,18 @@ function delete_rosa_cluster() {
 
     login_rosa "" "${username}" "${api_key}" "${rosa_token}" \
         || return 1
-    if [ ${result} -eq 0 ]; then
-        rosa delete cluster \
-            --cluster="${cluster_name}" \
-            --region "${AWS_CLOUD_REGION}" \
-            --yes \
-            --watch \
-        || result=1
+
+    local wait_param=()
+    if [ "${wait_cluster}" -eq 1 ]; then
+        wait_param=(--watch)
     fi
+
+    rosa delete cluster \
+        --cluster="${cluster_name}" \
+        --region "${AWS_CLOUD_REGION}" \
+        --yes \
+        "${wait_param[@]}" \
+    || result=1
 
     if [ ${result} -eq 0 ]; then
         log "INFO: Deletion requested for ROSA cluster [${cluster_name}]"
@@ -1271,6 +1467,10 @@ function delete_cluster() {
             || return 1
     else
         case ${cluster_type} in
+            aro)
+                delete_aro_cluster "${cluster_name}" "${username}" "${api_key}" "${wait_cluster}" \
+                    || return 1
+            ;;
             ibmcloud|ibmcloud-gen2)
                 delete_ibm_cloud_cluster "${cluster_name}" "${username}" "${api_key}" "${wait_cluster}" \
                     || return 1
@@ -1313,6 +1513,10 @@ function check_cluster() {
     local result=0
 
     case ${cluster_type} in
+        aro)
+            check_aro_cluster "${cluster_name}" "${username}" "${api_key}" "${wait_cluster}" \
+                || return 1
+        ;;
         aws)
             login_ocp_cluster "${cluster_name}" "${username}" "${api_key}"  \
                 || result=1
@@ -1369,15 +1573,20 @@ function create_cluster() {
     local username=${8}
     local api_key=${9}
     local managed_ocp_token=${10}
-    local rhacm_server=${11}
-    local cluster_labels=${12}
-    local wait_cluster=${13:-0}
+    local redhat_pull_secret=${11}
+    local rhacm_server=${12}
+    local cluster_labels=${13}
+    local wait_cluster=${14:-0}
 
     if [ -n "${rhacm_server}" ]; then
         create_rhacm_cluster "${rhacm_server}" "${cluster_type}" "${cluster_name}" "${cluster_workers}" "${worker_flavor}" "${autoscale_cluster_workers}" "${storage_type}" "${cluster_labels}" "${username}" "${api_key}" "${wait_cluster}" \
             || return 1
     else
         case ${cluster_type} in
+            aro)
+                create_aro_cluster "${cluster_name}" "${cluster_workers}" "${autoscale_cluster_workers}" "${worker_flavor}" "${username}" "${api_key}" "${redhat_pull_secret}" "${wait_cluster}" \
+                    || return 1
+            ;;
             ibmcloud|ibmcloud-gen2)
                 create_ibm_cloud_cluster "${cluster_type}" "${cluster_name}" "${cluster_workers}" "${worker_flavor}" "${autoscale_cluster_workers}" "${autoscale_worker_flavor}" "${username}" "${api_key}" "${IBM_CLOUD_CLUSTER_ZONE}" "${wait_cluster}" \
                     || return 1
@@ -1450,7 +1659,7 @@ function setup_ceph_storage() {
     local ca_work_dir="${WORKDIR}/clone"
     local ceph_dir="${ca_work_dir}/cluster/examples/kubernetes/ceph"
 
-    git clone --depth 1 -b release-1.6 https://github.com/rook/rook.git "${ca_work_dir}" \
+    git clone --depth 1 -b release-1.7 https://github.com/rook/rook.git "${ca_work_dir}" \
         && log "INFO: Applying Ceph storage." \
         && "${oc_cmd}" create -f "${ceph_dir}/common.yaml" \
         && "${oc_cmd}" create -f "${ceph_dir}/crds.yaml" \
@@ -1483,15 +1692,21 @@ function setup_ceph_storage() {
 #
 # arg1 infrastructure type of cluster to be deleted
 # arg2 name of the cluster to be configured
+# arg3 type of storage to be added to the cluster.
 # 
 function setup_ibm_cloud_storage() {
     local cluster_type=${1}
     local cluster_name=${2}
+    local storage_type=${3}
 
     local result=0
 
     if [ "${cluster_type}" == "ibmcloud-gen2" ]; then
-        setup_ocs_vpc_gen2_storage "${cluster_name}" || 
+        local disk_size=500Gi
+        if [ "${storage_type}" == "odf-large" ]; then
+            disk_size=2Ti
+        fi
+        setup_ocs_vpc_gen2_storage "${cluster_name}" "${disk_size}" || 
         {
             log "ERROR: Unable to setup storage for ROKS Gen2 cluster."
             result=1
@@ -1693,8 +1908,73 @@ function configure_ibm_cloud_cluster() {
         fi
 
         if [ "${storage_type}" != "none" ]; then
-            setup_ibm_cloud_storage "${cluster_type}" "${cluster_name}" \
+            setup_ibm_cloud_storage "${cluster_type}" "${cluster_name}" "${storage_type}" \
                 || result=1
+        fi
+    fi
+
+    return ${result}
+}
+
+
+#
+# Configures specified ARO cluster.
+#
+# arg1 infrastructure type of cluster to be configured
+# arg2 name of the cluster to be configured
+# arg3 username for the target cloud
+# arg4 apikey for the target cloud
+# arg5 apply custom PKI settings, 0 or 1
+# arg6 type of storage to be added to the cluster.
+# arg7 configure global pull secret, 0 (no) or 1 (yes)
+#
+function configure_aro_cluster() {
+    local cluster_type=${1}
+    local cluster_name=${2}
+    local username=${3}
+    local api_key=${4}
+    local custom_pki=${5}
+    local storage_type=${6}
+    local set_global_pull_secret=${7}
+
+    local result=0
+
+    check_cluster "${cluster_type}" "${cluster_name}" "${username}" "${api_key}" "" "1" \
+    && login_cluster "${cluster_type}" "${cluster_name}" "${username}" "${api_key}" "${managed_ocp_token}" \
+    || result=1
+
+    if [ ${result} -eq 0 ]; then
+        if [ "${upgrade_cluster_latest}" -eq 1 ]; then
+            check_upgrade_cluster
+        fi
+        approve_csrs \
+            || result=1
+
+        if [ "${set_global_pull_secret}" -eq 1 ]; then
+            setup_global_pull_secrets \
+                || result=1
+        fi
+
+        oc_wait_nodes \
+            || result=1
+
+        config_pki "${cluster_type}" "${custom_pki}" \
+            || result=1
+
+        if [ "${storage_type}" != "none" ]; then
+            local disk_size=500Gi
+            local sc_name=managed-premium
+
+            local odf_isolated="false"
+            if [ "${storage_type}" == "odf-isolated" ]; then
+                odf_isolated="true"
+            fi
+            if [ "${storage_type}" == "odf-large" ]; then
+                disk_size=2Ti
+                odf_isolated="true"
+            fi
+            setup_ocs_storage "${cluster_type}" "${cluster_name}" "${disk_size}" "${sc_name}" "${odf_isolated}" \
+            || result=1
         fi
     fi
 
@@ -1750,12 +2030,19 @@ function configure_aws_cluster() {
                 || result=1
         fi
 
-        local odf_isolated="false"
-        if [ "${storage_type}" == "odf-isolated" ]; then
-            odf_isolated="true"
-        fi
         if [ "${storage_type}" != "none" ]; then
-            setup_ocs_storage "${cluster_type}" "${cluster_name}" "gp2" "${odf_isolated}" \
+            local disk_size=500Gi
+            local sc_name=gp2
+
+            local odf_isolated="false"
+            if [ "${storage_type}" == "odf-isolated" ]; then
+                odf_isolated="true"
+            fi
+            if [ "${storage_type}" == "odf-large" ]; then
+                disk_size=2Ti
+                odf_isolated="true"
+            fi
+            setup_ocs_storage "${cluster_type}" "${cluster_name}" "${disk_size}" "${sc_name}" "${odf_isolated}" \
             || result=1
         fi
     fi
@@ -1816,11 +2103,28 @@ function configure_rhacm_cluster() {
             || result=1
 
         if [ "${storage_type}" != "none" ]; then
+            local disk_size=500Gi
+            case ${managed_cluster_type} in
+                aws|rosa)
+                    sc_name=gp2
+                    ;;
+                gcp)
+                    sc_name=standard
+                    ;;
+                *)
+                    log "ERROR: Unrecognized cluster type: ${managed_cluster_type}"
+                    return 1
+            esac
+
             local odf_isolated="false"
             if [ "${storage_type}" == "odf-isolated" ]; then
                 odf_isolated="true"
             fi
-            setup_ocs_storage "${cluster_type}" "${cluster_name}" "gp2" "${odf_isolated}" \
+            if [ "${storage_type}" == "odf-large" ]; then
+                disk_size=2Ti
+                odf_isolated="true"
+            fi
+            setup_ocs_storage "${cluster_type}" "${cluster_name}" "${disk_size}" "${sc_name}" "${odf_isolated}" \
             || result=1
         fi
     fi
@@ -1934,6 +2238,10 @@ function configure_cluster() {
             || return 1
     else
         case ${cluster_type} in
+            aro)
+                configure_aro_cluster "${cluster_type}" "${cluster_name}" "${username}" "${api_key}" "${custom_pki}"  "${storage_type}" "${set_global_pull_secret}" \
+                    || result=1
+            ;;
             aws|rosa)
                 configure_aws_cluster "${cluster_type}" "${cluster_name}" "${username}" "${api_key}" "${managed_ocp_token}" "${custom_pki}"  "${storage_type}" "${set_global_pull_secret}" \
                     || result=1
@@ -2061,6 +2369,10 @@ case ${key} in
     managed_ocp_token=$1
     shift
     ;;
+    --redhat-pull-secret)
+    redhat_pull_secret=$1
+    shift
+    ;;
     --ocp-version)
     OCP_VERSION=$1
     shift
@@ -2149,6 +2461,28 @@ case ${cluster_type} in
 esac
 
 case ${cluster_type} in
+    aro)
+        : "${username:=${AZURE_CLIENT_ID}}"
+        : "${apikey:=${AZURE_CLIENT_SECRET}}"
+        : "${redhat_pull_secret:=${REDHAT_PULL_SECRET}}"
+
+        if [ -z "${redhat_pull_secret}" ]; then
+            log "ERROR: An Red Hat pull secret was not specified."
+        fi
+
+        [ "${worker_flavor}" == "medium" ] \
+            && worker_flavor=Standard_D4s_v3
+
+        azure_cli=0
+        install_azure_cli \
+            && install_azure_cli \
+            || azure_cli=1
+
+        if [ ${azure_cli} -eq 1 ]; then
+            log "ERROR: Unable to install Azure CLI."
+            exit 1
+        fi
+    ;;
     aws|gcp)
         if [ -z "${rhacm_server}" ]; then
             log "ERROR: ${cluster_type} cluster operations only supported through RHACM."
@@ -2265,7 +2599,7 @@ result=0
 if [ ${ensure} -eq 1 ]; then
     login_cluster "${cluster_type}" "${cluster_name}" "${username}" "${apikey}" "" 1 \
     || {
-        create_cluster "${cluster_type}"  "${cluster_name}" "${cluster_workers}" "${worker_flavor}" "${autoscale_cluster_workers}" "${autoscale_worker_flavor}" "${storage_type}" "${username}" "${apikey}" "${managed_ocp_token}" "${rhacm_server}" "${managed_cluster_labels}" "${wait_cluster}" \
+        create_cluster "${cluster_type}"  "${cluster_name}" "${cluster_workers}" "${worker_flavor}" "${autoscale_cluster_workers}" "${autoscale_worker_flavor}" "${storage_type}" "${username}" "${apikey}" "${managed_ocp_token}" "${redhat_pull_secret}" "${rhacm_server}" "${managed_cluster_labels}" "${wait_cluster}" \
         || {
             check_cluster "${cluster_type}" "${cluster_name}" "${username}" "${apikey}" "${managed_ocp_token}" "${wait_cluster}" 1 \
             || result=1
@@ -2276,7 +2610,7 @@ if [ ${ensure} -eq 1 ]; then
         || result=1
     fi
 elif [ ${create} -eq 1 ]; then
-    create_cluster "${cluster_type}"  "${cluster_name}" "${cluster_workers}" "${worker_flavor}" "${autoscale_cluster_workers}" "${autoscale_worker_flavor}" "${storage_type}" "${username}" "${apikey}" "${managed_ocp_token}" "${rhacm_server}" "${managed_cluster_labels}" "${wait_cluster}"
+    create_cluster "${cluster_type}"  "${cluster_name}" "${cluster_workers}" "${worker_flavor}" "${autoscale_cluster_workers}" "${autoscale_worker_flavor}" "${storage_type}" "${username}" "${apikey}" "${managed_ocp_token}" "${redhat_pull_secret}" "${rhacm_server}" "${managed_cluster_labels}" "${wait_cluster}"
     result=$?
 elif [ ${delete} -eq 1 ]; then
     delete_cluster  "${cluster_type}" "${cluster_name}" "${username}" "${apikey}" "${managed_ocp_token}" "${rhacm_server}" "${wait_cluster}"
