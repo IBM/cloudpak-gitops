@@ -73,7 +73,11 @@ log "INFO: Completed yamllint run: ${yl_result}"
 
 log "INFO: Starting helm lint run"
 hl_result=0
-find . -name Chart.yaml | sed "s|/Chart.yaml||g" | xargs helm lint || hl_result=1
+find . -name Chart.yaml \
+    | grep -v /config/rhacm/cloudpaks \
+    | sed "s|/Chart.yaml||g" \
+    | xargs helm lint \
+|| hl_result=1
 log "INFO: Completed helm lint run: ${hl_result}"
 
 log "INFO: Starting helm template run"
@@ -85,7 +89,9 @@ do
     if [ ${htl} -eq 1 ]; then
         ht_result=1;
     fi
-done <<< "$(find . -name Chart.yaml | sed "s|/Chart.yaml||g")"
+done <<< "$(find . -name Chart.yaml \
+    | grep -v /config/rhacm/cloudpaks \
+    | sed "s|/Chart.yaml||g")"
 log "INFO: Completed helm template run: ${ht_result}"
 
 result=$((sc_result+yl_result+hl_result+ht_result))
