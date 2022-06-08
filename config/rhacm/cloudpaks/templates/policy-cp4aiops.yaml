@@ -35,7 +35,9 @@ spec:
                 kind: Application
                 metadata:
                   name: cp4aiops-app
-                  namespace: openshift-gitops
+                  # Look up used to delay the application of the policy
+                  # until this secret is created
+                  namespace: '{{ "{{ (lookup \"v1\" \"Secret\" \"openshift-gitops\" \"ibm-entitlement-key\").metadata.namespace }}" }}'
                 spec:
                   destination:
                     namespace: '{{ "{{ fromClusterClaim \"cp4aiops\" }}" }}'

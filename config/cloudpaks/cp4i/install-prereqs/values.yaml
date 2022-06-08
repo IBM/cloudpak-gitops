@@ -4,6 +4,7 @@ serviceaccount:
   ibm_cloudpaks_installer: ibm-cp4i-installer
 metadata:
   argocd_namespace: openshift-gitops
+  argocd_app_namespace: ibm-cloudpaks
 storageclass:
   rwo: ocs-storagecluster-ceph-rbd
   rwx: ocs-storagecluster-cephfs
