@@ -7,6 +7,7 @@ ignore: |
   config/argocd-cloudpaks/cp4aiops/templates/021-cloudpaks-emgr-binding.yaml
   config/argocd-cloudpaks/cp4aiops/templates/110-cp4aiops-aimgr-app.yaml
   config/argocd-cloudpaks/cp4aiops/templates/120-cp4aiops-emgr-app.yaml
+  config/argocd-cloudpaks/cp4aiops/templates/130-cp4aiops-ia-app.yaml
   config/argocd-cloudpaks/cp4d/templates/cp4d-module-template-app.yaml
   config/argocd-cloudpaks/cp4i/templates/0300-cp4i-module-template-app.yaml
   config/argocd-cloudpaks/cp4i/templates/0400-cp4i-client-app.yaml
