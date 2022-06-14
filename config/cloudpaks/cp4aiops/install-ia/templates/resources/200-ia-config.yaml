@@ -1,0 +1,21 @@
+---
+apiVersion: aiops.ibm.com/v1alpha1
+kind: IAConfig
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "200"
+  name: ibm-ia-installer
+  namespace: "{{.Values.metadata.argocd_app_namespace}}"
+spec:
+  imagePullSecret: ibm-entitlement-key
+  infraAutoComposableComponents:
+    - enabled: true
+      name: ibm-management-im-install
+      spec: {}
+    - enabled: true
+      name: ibm-management-cam-install
+      spec: {}
+  license:
+    accept: true
+  storageClass: {{.Values.storageclass.rwx}}

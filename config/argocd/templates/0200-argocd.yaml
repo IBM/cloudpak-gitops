@@ -321,6 +321,27 @@ spec:
         hs.status = "Progressing"
         hs.message = "Unknown"
         return hs
+    aiops.ibm.com/IAConfig:
+      health.lua: |
+        hs = {}
+        if obj.status ~= nil then
+          if obj.status.phase ~= nil then
+            hs.message = obj.status.phase
+            if obj.status.phase == "Running" then
+              hs.status = "Healthy"
+            elseif obj.status.phase == "Failed" then
+              hs.status = "Degraded"
+              hs.message = obj.status.failureMessage
+            else
+              hs.status = "Progressing"
+            end
+            return hs
+          end
+        end
+
+        hs.status = "Progressing"
+        hs.message = "Unknown"
+        return hs
     noi.ibm.com/NOI:
       health.lua: |
         hs = {}

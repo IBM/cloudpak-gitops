@@ -36,7 +36,7 @@ spec:
                   automation_base_instance_name="$(oc get AutomationBase.base.automation.ibm.com \
                       --namespace "${TARGET_NAMESPACE}" \
                       -o jsonpath='{.items[].metadata.name}' \
-                      --ignore-not-found=false)" \
+                      --ignore-not-found=true)" \
                   || result=1
               fi
 
@@ -50,7 +50,7 @@ spec:
                   echo "INFO: Did not find an existing instance of AutomationBase in the namespace."
               else
                   echo "INFO: Found an existing instance of AutomationBase in the namespace."
-                  abase_params=$(oc get AutomationBase.base.automation.ibm.com "${automation_base_instance_name}" --namespace ${TARGET_NAMESPACE} -o jsonpath='{.spec}' --ignore-not-found=false) \
+                  abase_params=$(oc get AutomationBase.base.automation.ibm.com "${automation_base_instance_name}" --namespace ${TARGET_NAMESPACE} -o jsonpath='{.spec}' --ignore-not-found=true) \
                   || result=1
 
                   if [[ ! ${abase_params} == *aiops* ]]; then
