@@ -22,7 +22,7 @@ spec:
           name: openshift-gitops-argo-app
         spec:
           remediationAction: enforce
-          severity: med
+          severity: medium
           namespaceSelector:
             exclude:
               - kube-*
