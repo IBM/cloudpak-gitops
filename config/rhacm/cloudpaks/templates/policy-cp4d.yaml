@@ -22,7 +22,7 @@ spec:
           name: openshift-gitops-cloudpaks-cp4d
         spec:
           remediationAction: enforce
-          severity: med
+          severity: medium
           namespaceSelector:
             exclude:
               - kube-*
