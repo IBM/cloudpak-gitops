@@ -9,7 +9,7 @@ metadata:
   name: noi
   namespace: "{{.Values.metadata.argocd_app_namespace}}"
 spec:
-  channel: v1.7
+  channel: v1.8
   installPlanApproval: Automatic
   name: noi
   source: ibm-operator-catalog
