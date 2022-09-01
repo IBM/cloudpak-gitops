@@ -9,5 +9,4 @@ metadata:
   namespace: knative-serving
 spec:
   high-availability:
-    # Causes problem with pod disruption budget
-    replicas: 1
+    replicas: 2
