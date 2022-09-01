@@ -7,7 +7,7 @@ metadata:
   name: ibm-cp-security-operator
   namespace: "{{.Values.metadata.argocd_app_namespace}}"
 spec:
-  channel: v1.9
+  channel: v1.10
   installPlanApproval: Automatic
   name: ibm-cp-security-operator
   source: ibm-operator-catalog
