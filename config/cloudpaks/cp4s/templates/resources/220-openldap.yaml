@@ -28,11 +28,6 @@ spec:
               set -eo pipefail
               set -x
 
-              if [ "${IS_ROKS}" == "true" ]; then
-                  echo "WARNING: Waiting for problem resolution in Cloud Pak for Security. The download of the cpctl tool is timing out."
-                  exit 0
-              fi
-
               export HOME=/tmp
 
               result=0
@@ -52,7 +47,15 @@ spec:
                         --from-literal=password="${admin_pwd}"
                 fi \
               && pod_name=$(oc get pod --no-headers -lrun=cp-serviceability | cut -d' ' -f1) \
-              && oc cp ${pod_name}:/opt/bin/linux/cpctl cpctl && chmod +x ./cpctl \
+              && rsync \
+                    --rsh='oc rsh' \
+                    -av \
+                    -c \
+                    --inplace \
+                    --partial \
+                    --append \
+                    --progress $pod_name:/opt/bin/linux/cpctl ./cpctl \
+              && chmod +x ./cpctl \
               || result=1
 
               if [ ${result} -eq 0 ]; then
