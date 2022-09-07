@@ -13,6 +13,12 @@ spec:
   clusterResourceWhitelist:
     - group: ''
       kind: Namespace
+    - group: rbac.authorization.k8s.io
+      kind: ClusterRole
+    - group: rbac.authorization.k8s.io
+      kind: ClusterRoleBinding
+    - group: user.openshift.io
+      kind: Group
   description: Configurations for the cluster hosting RHACM
   destinations:
     - name: in-cluster
@@ -21,6 +27,8 @@ spec:
     - namespace: 'policy'
       server: '*'
     - namespace: 'open-cluster-management'
+      server: '*'
+    - namespace: 'rhacm-cloud-creds'
       server: '*'
   namespaceResourceWhitelist:
     - group: argoproj.io
@@ -34,7 +42,11 @@ spec:
     - group: operators.coreos.com
       kind: '*'
     - group: rbac.authorization.k8s.io
-      kind: '*'
+      kind: Role
+    - group: rbac.authorization.k8s.io
+      kind: RoleBinding
+    - group: batch
+      kind: Job
   sourceRepos:
     - {{.Values.repoURL}}
 status: {}

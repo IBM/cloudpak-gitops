@@ -9,6 +9,7 @@
   * [Policies](#policies)
   * [Label your clusters](#label-your-clusters)
   * [Examples](#examples)
+- [The "rhacm-users" group](#the--rhacm-users--group)
 - [Contributing](#contributing)
 - [References](#references)
 
@@ -25,7 +26,7 @@ This repository contains governance policies and placement rules for Argo CD its
 
 ### Install RHACM on OCP cluster via Argo
 
-These steps assume you  logged in to the OCP server with the `oc` command-line interface:
+These steps assume you logged in to the OCP server with the `oc` command-line interface:
 
 1. [Install the Argo CD command-line interface](https://argoproj.github.io/argo-cd/cli_installation/)
 
@@ -117,6 +118,20 @@ Labeling an OCP cluster with `gitops-branch=main` and `cp4i=ibm-cloudpaks` deplo
 - `openshift-gitops-argo-app`: The Argo configuration is pulled from the `main` branch of this repository.
 `openshift-gitops-cloudpaks-cp-shared`: The Argo configuration is pulled from this repository's `main` branch.
 - `openshift-gitops-cloudpaks-cp4i`: The Cloud Pak is deployed to the namespace `ibm-cloudpaks`
+
+## The "rhacm-users" group
+
+The repository creates the roles and role bindings for a "rhacm-users" user group.
+
+Users in that group will be granted permission to manage clusters in the "default" cluster set, but WITHOUT the permission to manage cloud credentials. That arrangement is ideal for environments where a set of people manages the clusters but not necessarily the underlying cloud accounts.
+
+Refer to OpenShift's [documentation](https://docs.openshift.com/container-platform/4.11/post_installation_configuration/preparing-for-users.html) for more information on user management, such as configuring identity providers and adding users to the Openshift cluster
+
+Once you have the respective users added to the cluster, you can add them to the group via OCP console using the "Add users" option in the panel for the user group (under "User Management" -> "Groups" in the left navigation bar) or using the following command from a terminal window:
+
+```sh
+oc adm groups add-users rhacm-users "${username:?}"
+```
 
 
 ## Contributing

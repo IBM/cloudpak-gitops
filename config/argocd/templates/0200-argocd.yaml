@@ -97,6 +97,27 @@ spec:
           end
         end
         return hs
+    operator.open-cluster-management.io/MultiClusterHub:
+      health.lua: |
+        hs = {}
+        hs.status = "Progressing"
+        hs.message = "Unknown"
+
+        if obj.status ~= nil then
+          if obj.status.phase ~= nil then
+            hs.message = obj.status.wsStatus
+            if obj.status.phase == "Running" then
+              hs.status = "Healthy"
+            elseif obj.status.phase == "Installing" then
+              hs.status = "Progressing"
+            else
+              hs.status = "Degraded"
+            end
+            return hs
+          end
+        end
+
+        return hs
     core.automation.ibm.com/Cartridge:
       health.lua: |
         hs = {}

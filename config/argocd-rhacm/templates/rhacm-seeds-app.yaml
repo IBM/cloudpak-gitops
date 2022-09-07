@@ -19,6 +19,8 @@ spec:
         - /spec/syncPolicy
         - /status
       kind: Application
+    - group: user.openshift.io
+      kind: Group
   project: {{.Values.project}}
   source:
     helm:
@@ -38,6 +40,7 @@ spec:
       selfHeal: true
     syncOptions:
       - PruneLast=true
+      - RespectIgnoreDifferences=true
 status:
   health: {}
   summary: {}
