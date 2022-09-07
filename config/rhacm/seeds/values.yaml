@@ -7,4 +7,5 @@ metadata:
   argocd_app_namespace: open-cluster-management
   argocd_namespace: openshift-gitops
   policy_namespace: policy
+rhacm_users_group: rhacm-users
 spec:

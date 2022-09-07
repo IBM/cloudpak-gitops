@@ -1,0 +1,46 @@
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: "30"
+  name: rhacm-users-projects
+subjects:
+  - kind: Group
+    apiGroup: rbac.authorization.k8s.io
+    name: rhacm-users
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: rhacm-users-projects
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: "30"
+  name: rhacm-users-cloud-creds
+  namespace: rhacm-cloud-creds
+subjects:
+  - kind: Group
+    apiGroup: rbac.authorization.k8s.io
+    name: rhacm-users
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: rhacm-users-creds
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: "30"
+  name: rhacm-users-cluster-set
+subjects:
+  - kind: Group
+    apiGroup: rbac.authorization.k8s.io
+    name: rhacm-users
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: 'open-cluster-management:managedclusterset:admin:default'

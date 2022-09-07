@@ -1,0 +1,58 @@
+---
+# Note that I tried to created this group via declarative approach but, at least as of
+# version 2.3.7, Argo overrides the "users" field of the group, effectively removing
+# users manually added to it, despite our best efforts to set the appropriate
+# "ignoreDifferences" and "RespectIgnoreDifferences" in the respective "Application"
+# resource.
+#
+# If that situation ever changes, remove this Job and add a new YAML for the
+# resource in the repo
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: sync-rhacm-users-group
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+    argocd.argoproj.io/hook: Sync
+  namespace: openshift-gitops
+spec:
+  template:
+    spec:
+      containers:
+        - name: config
+          image: quay.io/openshift/origin-cli:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: GROUP_NAME
+              value: "{{.Values.rhacm_users_group}}"
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -eo pipefail
+              set -x
+
+              result=0
+
+              found=1
+              oc get Group.user.openshift.io ${GROUP_NAME:?} \
+              || found=0
+
+              if [ ${found} -eq 1 ]; then
+                  echo "INFO: Group named ${GROUP_NAME} already exists."
+              else
+                  echo "INFO: Creating group named ${GROUP_NAME:?}." \
+                  && oc adm groups new ${GROUP_NAME} \
+                  && echo "INFO: Created group named ${GROUP_NAME}." \
+                  || result=1
+              fi
+
+              if [ ${result} -eq 1 ]; then
+                  echo "ERROR: Unable to create group named ${GROUP_NAME}."
+              fi
+
+              exit ${result}
+
+      restartPolicy: Never
+      serviceAccountName: {{.Values.serviceaccount.argocd_application_controller}}
+  backoffLimit: 1
