@@ -17,7 +17,7 @@ oc_cmd=$(type -p oc)
 
 : "${NEW_CLUSTER_TYPE:=fyre-quick-burn}"
 : "${WORKER_FLAVOR:=medium}"
-: "${OCP_VERSION:=4.8}"
+: "${OCP_VERSION:=4.10}"
 
 # In hours
 : "${CLUSTER_EXPIRATION:=12}"
