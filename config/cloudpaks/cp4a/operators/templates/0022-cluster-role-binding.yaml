@@ -8,7 +8,7 @@ metadata:
     app.kubernetes.io/instance: ibm-dba
     app.kubernetes.io/managed-by: ibm-dba
     app.kubernetes.io/name: ibm-dba
-    release: 21.0.1
+    release: 22.0.1
   annotations:
     argocd.argoproj.io/sync-wave: "22"
 roleRef:
