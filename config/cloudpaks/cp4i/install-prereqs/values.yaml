@@ -8,7 +8,3 @@ metadata:
 storageclass:
   rwo: ocs-storagecluster-ceph-rbd
   rwx: ocs-storagecluster-cephfs
-# https://ibm.biz/integration-licenses
-platform_navigator:
-  license: L-RJON-C7QG3S
-  version: 2021.4.1
