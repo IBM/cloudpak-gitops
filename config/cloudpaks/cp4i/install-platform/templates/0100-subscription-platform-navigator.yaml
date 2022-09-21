@@ -8,7 +8,7 @@ metadata:
   name: ibm-integration-platform-navigator
   namespace: {{.Values.metadata.argocd_app_namespace}}
 spec:
-  channel: v5.2
+  channel: v6.0
   installPlanApproval: Automatic
   name: ibm-integration-platform-navigator
   source: ibm-operator-catalog

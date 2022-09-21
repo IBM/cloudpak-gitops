@@ -17,7 +17,7 @@ spec:
     accept: true
     use: nonproduction
     # https://ibm.biz/apiclicenses
-    license: L-RJON-C7BJ42
+    license: L-RJON-CEBLEH
   storageClassName: {{.Values.storageclass.rwo}}
   profile: n1xc10.m48
-  version: 10.0.4
+  version: 10.0.5
