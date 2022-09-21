@@ -11,6 +11,15 @@ metadata:
     argocd.argoproj.io/sync-wave: "201"
   namespace: {{.Values.argocd_app_namespace}}
 spec:
+  appVersion: 22.0.1
+  olm_starter_content: false
+  olm_starter_decisions: true
+  olm_starter_document_processing: false
+  olm_starter_workflow: true
+  olm_production_application: false
+  olm_starter_application: false
+  olm_production_decisions_ads: false
+  olm_production_workflow: false
   olm_production_document_processing: false
   olm_production_decisions: false
   olm_production_content: false
@@ -98,8 +107,6 @@ spec:
       bai: false
     workfow_runtime:
       bai: false
-  olm_starter_application: false
-  olm_production_decisions_ads: false
   olm_starter_option:
     adp:
       cmis: false
@@ -123,12 +130,9 @@ spec:
       case: false
       content_integration: false
       workstreams: false
-  olm_production_workflow: false
-  appVersion: 21.0.3
-  olm_starter_decisions: true
-  olm_starter_document_processing: false
-  olm_production_application: false
-  olm_starter_content: false
+      pfs: false
+      bai: false
+      baml: false
   datasource_configuration:
     dc_ca_datasource:
       tenant_databases: []
@@ -174,7 +178,7 @@ spec:
         database_ssl_secret_name: ''
         dc_common_os_datasource_name: DEVOS1DS
         dc_common_os_xa_datasource_name: DEVOS1DSXA
-        dc_database_type: db2
+        dc_database_type: postgresql
         dc_hadr_max_retries_for_client_reroute: 3
         dc_hadr_retry_interval_for_client_reroute: 15
         dc_hadr_standby_port: ''
@@ -189,7 +193,7 @@ spec:
         database_ssl_secret_name: ''
         dc_common_os_datasource_name: BAWDOCS
         dc_common_os_xa_datasource_name: BAWDOCSXA
-        dc_database_type: db2
+        dc_database_type: postgresql
         dc_hadr_max_retries_for_client_reroute: 3
         dc_hadr_retry_interval_for_client_reroute: 15
         dc_hadr_standby_port: ''
@@ -203,7 +207,7 @@ spec:
         database_ssl_secret_name: ''
         dc_common_os_datasource_name: BAWDOS
         dc_common_os_xa_datasource_name: BAWDOSXA
-        dc_database_type: db2
+        dc_database_type: postgresql
         dc_hadr_max_retries_for_client_reroute: 3
         dc_hadr_retry_interval_for_client_reroute: 15
         dc_hadr_standby_port: ''
@@ -217,7 +221,7 @@ spec:
         database_ssl_secret_name: ''
         dc_common_os_datasource_name: BAWTOS
         dc_common_os_xa_datasource_name: BAWTOSXA
-        dc_database_type: db2
+        dc_database_type: postgresql
         dc_hadr_max_retries_for_client_reroute: 3
         dc_hadr_retry_interval_for_client_reroute: 15
         dc_hadr_standby_port: ''
@@ -231,7 +235,7 @@ spec:
         database_ssl_secret_name: ''
         dc_common_os_datasource_name: AWSINS1DOCS
         dc_common_os_xa_datasource_name: AWSINS1DOCSXA
-        dc_database_type: db2
+        dc_database_type: postgresql
         dc_hadr_max_retries_for_client_reroute: 3
         dc_hadr_retry_interval_for_client_reroute: 15
         dc_hadr_standby_port: ''
@@ -260,7 +264,7 @@ spec:
         database_ssl_secret_name: ''
         dc_common_os_datasource_name: AEOS
         dc_common_os_xa_datasource_name: AEOSXA
-        dc_database_type: db2
+        dc_database_type: postgresql
         dc_hadr_max_retries_for_client_reroute: 3
         dc_hadr_retry_interval_for_client_reroute: 15
         dc_hadr_standby_port: ''
@@ -275,7 +279,7 @@ spec:
         database_ssl_secret_name: ''
         dc_common_os_datasource_name: FNOS1DS
         dc_common_os_xa_datasource_name: FNOS1DSXA
-        dc_database_type: db2
+        dc_database_type: postgresql
         dc_hadr_max_retries_for_client_reroute: 3
         dc_hadr_retry_interval_for_client_reroute: 15
         dc_hadr_standby_port: ''
@@ -297,6 +301,7 @@ spec:
       sc_medium_file_storage_classname: ''
       sc_slow_file_storage_classname: ''
     root_ca_secret: icp4a-root-ca
+    sc_drivers_url: ''
     sc_deployment_license: non-production
     sc_ingress_enable: false
     sc_ingress_tls_secret_name: ''
@@ -328,4 +333,3 @@ spec:
     lc_ldap_group_name_attribute: '*:cn'
     lc_ldap_group_display_name_attr: cn
     lc_ldap_ssl_enabled: true
-  olm_starter_workflow: true

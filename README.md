@@ -25,6 +25,18 @@ You may decide to include one or more of these `Application` objects to the targ
 
 The supported deployment mechanisms for Cloud Paks are documented in their respective [documentation pages](https://www.ibm.com/docs/en/cloud-paks) and typically included a UI-based deployment through the Operator Hub page or, in some cases, scripted alternatives based on command-line interfaces.
 
+Supported versions:
+
+
+| Cloud Pak | Version | Installation mode |
+| ----------|---------|-------------------|
+| Cloud Pak for Business Automation | [22.0.1](https://www.ibm.com/docs/en/cloud-paks/cp-biz-automation/22.0.1) | Starter Path|
+| Cloud Pak for Data | [4.0](https://www.ibm.com/docs/en/cloud-paks/cp-data/4.0) (See [Issue for CP4D 4.5 support](https://github.com/IBM/cloudpak-gitops/issues/173) ) | Starter Path|
+| Cloud Pak for Integration | [2022.2](https://www.ibm.com/docs/en/cloud-paks/cp-integration/2022.2) | Starter Path |
+| Cloud Pak for Security | [1.10](https://www.ibm.com/docs/en/cloud-paks/cp-security/1.10) | Starter Path |
+| Cloud Pak for Watson AIOps | [3.4.2](https://www.ibm.com/docs/en/cloud-paks/cloud-pak-watson-aiops/3.4.2) | Starter Path |
+
+
 ### GitOps 
 
 GitOps is a declarative way to implement continuous deployment for cloud-native applications. The Red Hat® OpenShift® Container Platform offers the [OpenShift GitOps operator](https://docs.openshift.com/container-platform/4.7/cicd/gitops/understanding-openshift-gitops.html), which manages the entire lifecycle for [Argo CD](https://argoproj.github.io/argo-cd/) and its components.
