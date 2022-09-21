@@ -11,8 +11,8 @@ ignore: |
   config/argocd-cloudpaks/cp4d/templates/cp4d-module-template-app.yaml
   config/argocd-cloudpaks/cp4i/templates/0300-cp4i-module-template-app.yaml
   config/argocd-cloudpaks/cp4i/templates/0400-cp4i-client-app.yaml
-  config/cloudpaks/cp4a/operators/templates/01-namespaces/individual.yaml
-  config/cloudpaks/cp4a/operators/templates/07-operators/100-operator-group.yaml
+  config/cloudpaks/cp4a/operators/templates/0000-cp4ba-namespace.yaml
+  config/cloudpaks/cp4a/operators/templates/0100-operator-group.yaml
   config/cloudpaks/cp4aiops/install-aimgr/templates/resources/200-ai-manager.yaml
   config/cloudpaks/cp4aiops/install-aimgr/templates/subscriptions/050-operator-group.yaml
   config/cloudpaks/cp4d/install-platform/templates/prereqs/000-app-namespace.yaml
