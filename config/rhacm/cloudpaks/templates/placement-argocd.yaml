@@ -16,10 +16,9 @@ spec:
       - key: {{.}}
         operator: Exists
         values: []
-      - key: vendor
-        operator: In
-        values:
-          - OpenShift
+      - key: openshiftVersion
+        operator: Exists
+        values: []
 ---
 apiVersion: policy.open-cluster-management.io/v1
 kind: PlacementBinding
