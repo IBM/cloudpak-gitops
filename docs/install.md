@@ -1,6 +1,6 @@
 # Installation
 
-## Contents 
+## Contents
 
 - [Prerequisites](#prerequisites)
 - [Install the OpenShift GitOps operator](#install-the-openshift-gitops-operator)
@@ -14,7 +14,13 @@
 - [Adding Cloud Pak GitOps Application objects to your GitOps server](#adding-cloud-pak-gitops-application-objects-to-your-gitops-server)
   * [Using the OCP console](#using-the-ocp-console-1)
   * [Using a terminal](#using-a-terminal-1)
+- [Post-configuration steps](#post-configuration-steps)
+  * [Local configuration steps](#local-configuration-steps)
+    + [Cloud Pak for Data](#cloud-pak-for-data)
+    + [Cloud Pak for Integration](#cloud-pak-for-integration)
+- [Duplicate this repository](#duplicate-this-repository)
 
+---
 
 ## Prerequisites
 
@@ -30,37 +36,40 @@
 
   The applications were tested with [OpenShift Container Storage](https://docs.openshift.com/container-platform/4.8/storage/persistent_storage/persistent-storage-ocs.html), [Rook Ceph](https://github.com/rook/rook), [AWS EFS](https://aws.amazon.com/efs/), and the built-in file storage in ROKS classic clusters.
 
-- [An entitlement key to the IBM Entitled Registry](#obtaining-your-entitlement-key)
+- [An entitlement key to the IBM Entitled Registry](#obtain-an-entitlement-key)
+
+---
 
 ## Install the OpenShift GitOps operator
 
 ### Using the OCP console
 
-
 1. From the Administrator's perspective, navigate to the OperatorHub page.
 
-1. Search for "Red Hat OpenShift GitOps". Click on the tile and then click on "Install".
+1. Search for "Red Hat OpenShift GitOps." Click on the tile and then click on "Install."
 
-1. Keep the defaults in the wizard and click on "Install".
+1. Keep the defaults in the wizard and click on "Install."
 
-1. Wait for it to show up in the list of "Installed Operators." If it doesn't install correctly, you can check its status on the "Installed Operators" page in the `openshift-operators` namespace.
-
+1. Wait for it to appear in the " Installed Operators list." If it doesn't install correctly, you can check its status on the "Installed Operators" page in the `openshift-operators` namespace.
 
 ### Using a terminal
 
 1. Open a terminal and ensure you have the OpenShift CLI installed:
+
    ```sh
    oc version --client
 
    # Client Version: 4.8.2
    ```
-   Ideally, the client's minor version should not be more than one iteration behind the version of the server. Most commands here are pretty basic and will work with more significant differences, but keep that in mind if you see errors about unrecognized commands and parameters.
+
+   Ideally, the client's minor version should be at most one iteration behind the server version. Most commands here are pretty basic and will work with more significant differences, but keep that in mind if you see errors about unrecognized commands and parameters.
 
    If you do not have the CLI installed, follow [these instructions](https://docs.openshift.com/container-platform/4.7/cli_reference/openshift_cli/getting-started-cli.html).
 
-1. [Log in to the OpenShift CLI](https://docs.openshift.com/container-platform/4.7/cli_reference/openshift_cli/getting-started-cli.html#cli-logging-in_cli-developer-commands)
+1. [Login to the OpenShift CLI](https://docs.openshift.com/container-platform/4.7/cli_reference/openshift_cli/getting-started-cli.html#cli-logging-in_cli-developer-commands)
 
 1. Create the `Subscription` resource for the operator:
+
    ```sh
    cat << EOF | oc apply -f -
    ---
@@ -78,15 +87,17 @@
    EOF
    ```
 
+---
+
 ## Obtain an entitlement key
 
 If you don't already have an entitlement key to the IBM Entitled Registry, obtain your key using the following instructions:
 
 1. Go to the [Container software library](https://myibm.ibm.com/products-services/containerlibrary).
 
-1. Click "Copy key."
+1. Click the "Copy key."
 
-1. Copy the entitlement key to a safe place so you can use it when updating the global pull secret for the cluster.
+1. Copy the entitlement key to a safe place to update the cluster's global pull secret.
 
 1. (Optional) Verify the validity of the key by logging in to the IBM Entitled Registry using a container tool:
 
@@ -95,29 +106,30 @@ If you don't already have an entitlement key to the IBM Entitled Registry, obtai
    podman login cp.icr.io --username cp --password "${IBM_ENTITLEMENT_KEY:?}"
    ```
 
+---
+
 ## Update the OCP global pull secret
 
 [Update the OCP global pull secret](https://docs.openshift.com/container-platform/4.7/openshift_images/managing_images/using-image-pull-secrets.html) with the entitlement key.
 
-Keep in mind that the registry user for that secret is "cp". A common mistakes is to assume the registry user is the name or email of the user owning the entitlement key.
+Remember that that secret's registry user is `cp`. A common mistake is to assume the registry user is the name or email of the user owning the entitlement key.
 
 ### Update the global pull secret using the OpenShift console
 
 1. Navigate to the "Workloads > Secrets" page in the "Administrator" perspective.
 
-1. Select the object "pull-secret".
+1. Select the object "pull-secret."
 
-1. Click on "Actions -> Edit secret".
+1. Click on "Actions -> Edit secret."
 
-1. Scroll to the bottom of that page and click on "Add credentials", using the following values for each field:
+1. Scroll to the bottom of that page and click on "Add credentials," using the following values for each field:
 
    - "Registry Server Address" cp.icr.io
    - "Username": cp
-   - "Password": paste the entitlement key you copied from the [Obtain an entitlement key](#obtain-an-entitlement-key) setp
-   - "Email": any email, valid or not, will work. This fields is mostly a hint to other people who may see the entry in the configuration
+   - "Password": paste the entitlement key you copied from the [Obtain an entitlement key](#obtain-an-entitlement-key) 
+   - "Email": any email, valid or not, will work. This field is mostly a hint to other people who may see the entry in the configuration
 
-1. Click on "Save"
-
+1. Click on "Save."
 
 ### Special note about global pull secrets on ROKS
 
@@ -125,10 +137,11 @@ Updating the OCP global pull secret triggers the staggered restart of each node 
 
 You can perform the reloading or replacement of workers directly from the cluster page in the IBM Cloud console or use a terminal, following the instructions listed [here](https://cloud.ibm.com/docs/openshift?topic=openshift-registry&_ga=2.262606922.775805413.1629911830-822975074.1629149367#cluster_global_pull_secret).
 
+---
 
 ## Update the pull secret in the openshift-gitops namespace
 
-Global pull secrets require granting too much priviledge to the OpenShift GitOps service account, so we have started to transition to the definition of pull secrets at a namespace level.
+Global pull secrets require granting too much privilege to the OpenShift GitOps service account, so we have started transitioning to the definition of pull secrets at a namespace level.
 
 The Application resources are transitioning to use `PreSync` hooks to copy the entitlement key from a `Secret` named `ibm-entitlement-key` in the `openshift-gitops` namespace, so issue the following command to create that secret:
 
@@ -144,6 +157,7 @@ oc create secret docker-registry ibm-entitlement-key \
         --namespace=openshift-gitops
 ```
 
+---
 
 ## Adding Cloud Pak GitOps Application objects to your GitOps server
 
@@ -151,17 +165,17 @@ oc create secret docker-registry ibm-entitlement-key \
 
 The instructions in this section assume you have administrative privileges to the Argo CD instance.
 
-After completing the list of activities listed in the previous sections, you have the option of adding the Argo CD `Application` objects for a Cloud Pak using either the OpenShift Container Platform console or using commands in a terminal.
+After completing the list of activities listed in the previous sections, you can add the Argo CD `Application` objects for a Cloud Pak using either the OpenShift Container Platform console or using commands in a terminal.
 
 ### Using the OCP console
 
-1. Launch the Argo CD console: Click on the grid-like icon in the upper-left section of the screen, where you should click on "Cluster Argo CD".
+1. Launch the Argo CD console: Click on the grid-like icon in the upper-left section of the screen, where you should click on "Cluster Argo CD."
 
-1. The Argo CD login screen will prompt you for an admin user and password. The default user is `admin .` The admin password is located in the secret `openshift-gitops-cluster` in the `openshift-gitops` namespace.
+1. The Argo CD login screen will prompt you for an admin user and password. The default user is `admin .` The admin password is located in secret `openshift-gitops-cluster` in the `openshift-gitops` namespace.
 
    - Switch to the `openshift-gitops` project, locate the secret in the "Workloads -> Secrets" selections in the left-navigation tree of the Administrator view, scroll to the bottom, and click on "Reveal Values" to retrieve the value of the `admin.password` field.
 
-   - Type in the user and password listed in the previous steps, and then click the "Sign In" button.
+   - Type in the user and password listed in the previous steps, and click the "Sign In" button.
 
 1. (add Argo app) Once logged to the Argo CD console, click on the "New App+" button in the upper left of the Argo CD console and fill out the form with values matching the Cloud Pak of your choice, according to the table below:
 
@@ -169,15 +183,15 @@ After completing the list of activities listed in the previous sections, you hav
 
     | Field | Value |
     | ----- | ----- |
-    | Application Name | argo-app | 
-    | Path | config/argocd | 
-    | Namespace | openshift-gitops | 
+    | Application Name | argo-app |
+    | Path | config/argocd |
+    | Namespace | openshift-gitops |
     | Project | default |
     | Sync policy | Automatic |
     | Self Heal | true |
-    | Repository URL | https://github.com/IBM/cloudpak-gitops |
+    | Repository URL | <https://github.com/IBM/cloudpak-gitops> |
     | Revision | HEAD |
-    | Cluster URL | https://kubernetes.default.svc |
+    | Cluster URL | <https://kubernetes.default.svc> |
 
 1. (add Cloud Pak Shared app) Click on the "New App+" button again and fill out the form with values matching the Cloud Pak of your choice, according to the table below:
 
@@ -185,15 +199,15 @@ After completing the list of activities listed in the previous sections, you hav
 
     | Field | Value |
     | ----- | ----- |
-    | Application Name | cp-shared-app | 
-    | Path | config/argocd-cloudpaks/cp-shared | 
-    | Namespace | ibm-cloudpaks | 
+    | Application Name | cp-shared-app |
+    | Path | config/argocd-cloudpaks/cp-shared |
+    | Namespace | ibm-cloudpaks |
     | Project | default |
     | Sync policy | Automatic |
     | Self Heal | true |
-    | Repository URL | https://github.com/IBM/cloudpak-gitops |
+    | Repository URL | <https://github.com/IBM/cloudpak-gitops> |
     | Revision | HEAD |
-    | Cluster URL | https://kubernetes.default.svc |
+    | Cluster URL | <https://kubernetes.default.svc> |
 
 1. After filling out the form details, click the "Create" button
 
@@ -214,32 +228,33 @@ After completing the list of activities listed in the previous sections, you hav
     | Project | default |
     | Sync policy | Automatic |
     | Self Heal | true |
-    | Repository URL | https://github.com/IBM/cloudpak-gitops |
+    | Repository URL | <https://github.com/IBM/cloudpak-gitops> |
     | Revision | HEAD |
-    | Cluster URL | https://kubernetes.default.svc |
+    | Cluster URL | <https://kubernetes.default.svc> |
 
 1. After filling out the form details, click the "Create" button
 
-1. Under "Parameters", set the values for the fields `storageclass.rwo` and `storageclass.rwx` with the appropriate storage classes. For OpenShift Container Storage, the values will be `ocs-storagecluster-ceph-rbd` and `ocs-storagecluster-cephfs`, respectively.
+1. Under "Parameters," set the values for the fields `storageclass.rwo` and `storageclass.rwx` with the appropriate storage classes. For OpenShift Container Storage, the values will be `ocs-storagecluster-ceph-rbd` and `ocs-storagecluster-cephfs`, respectively.
 
 1. After filling out the form details, click the "Create" button
 
 1. Wait for the synchronization to complete.
 
-
 ### Using a terminal
 
 1. Open a terminal and ensure you have the OpenShift CLI installed:
+
    ```sh
    oc version --client
 
-   # Client Version: 4.8.2
+   # Client Version: 4.10.35
    ```
-   Ideally, the client's minor version should not be more than one iteration behind the version of the server. Most commands here are pretty basic and will work with more significant differences, but keep that in mind if you see errors about unrecognized commands and parameters.
+
+   Ideally, the client's minor version should be at most one iteration behind the server version. Most commands here are pretty basic and will work with more significant differences, but keep that in mind if you see errors about unrecognized commands and parameters.
 
    If you do not have the CLI installed, follow [these instructions](https://docs.openshift.com/container-platform/4.7/cli_reference/openshift_cli/getting-started-cli.html).
 
-1. [Log in to the OpenShift CLI](https://docs.openshift.com/container-platform/4.7/cli_reference/openshift_cli/getting-started-cli.html#cli-logging-in_cli-developer-commands)
+1. [Login to the OpenShift CLI](https://docs.openshift.com/container-platform/4.7/cli_reference/openshift_cli/getting-started-cli.html#cli-logging-in_cli-developer-commands)
 
 1. [Install the Argo CD CLI](https://argoproj.github.io/argo-cd/cli_installation/)
 
@@ -260,7 +275,7 @@ After completing the list of activities listed in the previous sections, you hav
          --insecure
    ```
 
-1. Add the `argo` application. (this step assumes you still have the shell variables assigned from previous steps) :
+1. Add the `argo` application. (this step assumes you still have the shell variables assigned from previous actions) :
 
    ```sh
    argocd proj create argocd-control-plane \
@@ -278,7 +293,6 @@ After completing the list of activities listed in the previous sections, you hav
          --sync-policy automated \
          --upsert 
     ```
-
 
 1. Add the `cp-shared` application. (this step assumes you still have the shell variables assigned from previous steps) :
 
@@ -305,7 +319,7 @@ After completing the list of activities listed in the previous sections, you hav
    # cp4waiops-app, cp4d-app, etc >>
    cp=cp4i
    app_name=${cp}-app
-   # app_path=<< choose the respective value from the "path Name" 
+   # app_path=<< choose the respective value from the "path name." 
    # column in the table of Cloud Paks above, such as 
    # config/argocd-cloudpaks/cp4i/cp4a, config/argocd-cloudpaks/cp4i, 
    # etc
@@ -339,3 +353,38 @@ After completing the list of activities listed in the previous sections, you hav
          --health \
          --timeout 3600
    ```
+
+---
+
+## Post-configuration steps
+
+In a GitOps practice, the "post-configuration" phase would entail committing changes to the repository and waiting for the GitOps operator to synchronize those settings toward the target environments.
+
+### Local configuration steps
+
+This repository allows some light customizations to enable its reuse for demonstration purposes without requiring the cloning or forking of the repository.
+
+#### Cloud Pak for Data
+
+The main Argo Application for the Cloud Pak (`config/argocd-cloudpaks/cp4i`) has a parameter named `components`, which contains a comma-separated list of components names matching the values in the [product documentation](https://www.ibm.com/docs/en/cloud-paks/cp-data/4.5.x?topic=information-determining-which-components-install).
+
+Alter the values in this array with the element names found in the product documentation (e.g., `wml` for Watson Machine Learning) to define the list of components installed in the target cluster.
+
+#### Cloud Pak for Integration
+
+The main Argo Application for the Cloud Pak (`config/argocd-cloudpaks/cp4i`) has a parameter array named `modules`, where you will find boolean values for various modules, such as `apic`, `mq`, and `platform`.
+
+Set those values to `true` or `false` to define which Cloud Pak modules you want to install in the target cluster.
+
+---
+
+## Duplicate this repository
+
+Given the demonstration purposes of this repository, it is unsuited for anchoring a true GitOps deployment for many reasons. The primary limitation is the repository not being designed to represent any concrete deployment environment (e.g., there is no environment-specific folder where you could list the Cloud Pak components for a specific cluster.)
+
+In that sense, you can duplicate the repository on a different Git organization and use that repository as the starting point to deploy Cloud Paks in your environments. This is a non-comprehensive list of aspects you should address in that new repository:
+
+- If you already have the OpenShift GitOps operator installed in your target clusters:
+   1. Merge the `.spec.resourceCustomizations` resources found in `argocd/templates/argocd.yaml` into the `ArgoCD.argoproj.io` instance for your cluster
+   1. Delete the entire folder `/argocd`
+- Delete folders corresponding to Cloud Paks you don't plan on using. These Cloud Pak folders are located under the `/config/argocd-cloudpaks` and `/config` folders.

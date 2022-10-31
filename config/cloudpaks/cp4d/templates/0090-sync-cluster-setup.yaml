@@ -1,0 +1,74 @@
+---
+# https://www.ibm.com/docs/en/cloud-paks/cp-data/4.0?topic=tasks-changing-required-node-settings
+apiVersion: batch/v1
+kind: Job
+metadata:
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/sync-wave: "90"
+  name: pre-sync-cp4d-cluster-setup
+  namespace: {{.Values.metadata.argocd_namespace}}
+spec:
+  template:
+    spec:
+      containers:
+        - name: configure-cluster
+          image: icr.io/cpopen/cpd/olm-utils:latest
+          env:
+            - name: COMPONENTS
+              value: {{.Values.components}}
+          command:
+            - /bin/bash
+            - -c
+            - |
+              set -eo pipefail
+              set -x
+
+              result=0
+
+              # https://www.ibm.com/docs/en/cloud-paks/cp-data/4.5.x?topic=information-setting-up-installation-environment-variables
+              OPENSHIFT_TYPE=self-managed
+              platform=$(oc get Infrastructure cluster  -o jsonpath={.status.platform})
+              case "${platform}" in
+                  Azure)
+                      oc get Infrastructure cluster -o jsonpath={.status.platformStatus} \
+                          | grep red-hat-managed \
+                      && OPENSHIFT_TYPE=aro
+                      ;;
+                  AWS)
+                      oc get Infrastructure cluster -o jsonpath={.status.platformStatus} \
+                          | grep red-hat-managed \
+                      && OPENSHIFT_TYPE=rosa
+                      ;;
+                  IBMCloud)
+                      OPENSHIFT_TYPE=roks
+                      ;;
+                  *)
+                      OPENSHIFT_TYPE=self-managed
+              esac
+
+              # https://www.ibm.com/docs/en/cloud-paks/cp-data/4.5.x?topic=settings-changing-cri-o-container
+              if [ "${OPENSHIFT_TYPE}" != "roks" ]; then
+                  if [[ ${COMPONENTS} =~ cognos_analytics ]] \
+                        || [[ ${COMPONENTS} =~ dv ]] \
+                        || [[ ${COMPONENTS} =~ db2 ]] \
+                        || [[ ${COMPONENTS} =~ bigsql ]] \
+                        || [[ ${COMPONENTS} =~ watson_discovery ]] \
+                        || [[ ${COMPONENTS} =~ wkc ]] \
+                        || [[ ${COMPONENTS} =~ ws ]] \
+                        || [[ ${COMPONENTS} =~ wml_accelerator ]]; then
+                      echo "INFO: Changing CRI-O container settings"
+                      bin/apply-crio --openshift-type=${OPENSHIFT_TYPE} --extra-vars="pid_limit=16384" \
+                      || result=1
+                  fi
+              fi
+
+              # Not attempting to set the IBM entitlement key because it is
+              # already a prerequisite for this repository.
+              # bin/add-icr-cred-to-global-pull-secret ${IBM_ENTITLEMENT_KEY} || result=1
+
+              exit ${result}
+      restartPolicy: Never
+      serviceAccountName: {{.Values.serviceaccount.argocd_application_controller}}
+
+  backoffLimit: 1

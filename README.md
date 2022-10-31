@@ -1,21 +1,23 @@
-# IBM Cloud Paks - GitOps
+# IBM Cloud Paks - GitOps Demo
 
-## Contents 
+## Contents
 
 - [Overview](#overview)
-  * [IBM Cloud Paks](#ibm-cloud-paks)
-  * [GitOps](#gitops)
-  * [Governance Policies](#governance-policies)
+  - [IBM Cloud Paks](#ibm-cloud-paks)
+  - [GitOps](#gitops)
+  - [Governance Policies](#governance-policies)
 - [Installation](#installation)
-  * [Individual clusters](#individual-clusters)
-  * [Fleet of clusters with governance](#fleet-of-clusters-with-governance)
+  - [Individual clusters](#individual-clusters)
+  - [Fleet of clusters with governance](#fleet-of-clusters-with-governance)
 - [Contributing](#contributing)
 
 ---
 
 ## Overview
 
-This repository contains Argo CD `Application` resources representing basic deployments of IBM Cloud Paks, and, as such, they are meant for inclusion in an Argo CD cluster. Different Cloud Paks are represented with different `Application` resources and grouped by a resource label tied to each Cloud Pak.
+This repository contains Argo CD `Application` resources representing sample deployments of IBM Cloud Paks, and, as such, they are meant for inclusion in an Argo CD cluster. Different Cloud Paks are represented with different `Application` resources and grouped by a resource label tied to each Cloud Pak.
+
+**Important**: This repository is meant as a demonstration of how Cloud Pak deployments can be deployed and managed with GitOps practices. Adoption in a production environment can start from a repository fork, followed by customization of folders and files to match the desired configuration.
 
 You may decide to include one or more of these `Application` objects to the target cluster and then determine which ones you want to synchronize into the cluster.
 
@@ -27,24 +29,21 @@ The supported deployment mechanisms for Cloud Paks are documented in their respe
 
 Supported versions:
 
-
 | Cloud Pak | Version | Installation mode |
 | ----------|---------|-------------------|
 | Cloud Pak for Business Automation | [22.0.1](https://www.ibm.com/docs/en/cloud-paks/cp-biz-automation/22.0.1) | Starter Path|
-| Cloud Pak for Data | [4.0](https://www.ibm.com/docs/en/cloud-paks/cp-data/4.0) (See [Issue for CP4D 4.5 support](https://github.com/IBM/cloudpak-gitops/issues/173) ) | Starter Path|
+| Cloud Pak for Data | [4.5.3](https://www.ibm.com/docs/en/cloud-paks/cp-data/4.5.x?topic=overview) | Express Installation |
 | Cloud Pak for Integration | [2022.2](https://www.ibm.com/docs/en/cloud-paks/cp-integration/2022.2) | Starter Path |
 | Cloud Pak for Security | [1.10](https://www.ibm.com/docs/en/cloud-paks/cp-security/1.10) | Starter Path |
 | Cloud Pak for Watson AIOps | [3.5.1](https://www.ibm.com/docs/en/cloud-paks/cloud-pak-watson-aiops/3.5.1) | Starter Path |
 
-
-### GitOps 
+### GitOps
 
 GitOps is a declarative way to implement continuous deployment for cloud-native applications. The Red Hat® OpenShift® Container Platform offers the [OpenShift GitOps operator](https://docs.openshift.com/container-platform/4.7/cicd/gitops/understanding-openshift-gitops.html), which manages the entire lifecycle for [Argo CD](https://argoproj.github.io/argo-cd/) and its components.
 
 ### Governance Policies
 
 Practicing GitOps at scale, with dozens or even hundreds of clusters, benefits from a level of abstraction where each cluster follows a few select policies. This repository contains a simple deployment of governance policies for the deployment of OpenShift GitOps and Cloud Paks to a fleet of clusters.
-
 
 ## Installation
 
@@ -59,7 +58,6 @@ Refer to the [installation page](docs/install.md) for instructions on configurin
 Use governance policies and placement rules to configure entire clusters with GitOps infrastructure and manage Cloud Pak deployments from Red Hat Advanced Cluster Management for Kubernetes (RHACM.)
 
 Refer to the [RHACM page](docs/rhacm.md) for an overview and instructions on how to add RHACM to an existing OpenShift cluster.
-
 
 ## Contributing
 

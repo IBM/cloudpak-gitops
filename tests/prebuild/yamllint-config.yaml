@@ -1,5 +1,8 @@
 ---
 ignore: |
+  config/argocd-cloudpaks/cp4d/templates/0000-app-namespace.yaml
+  config/argocd-cloudpaks/cp4i/templates/0300-cp4i-module-template-app.yaml
+  config/argocd-cloudpaks/cp4i/templates/0400-cp4i-client-app.yaml
   config/argocd-cloudpaks/cp4waiops/templates/000-aimgr-namespace.yaml
   config/argocd-cloudpaks/cp4waiops/templates/020-cloudpaks-aimgr-role.yaml
   config/argocd-cloudpaks/cp4waiops/templates/020-cloudpaks-emgr-role.yaml
@@ -8,30 +11,18 @@ ignore: |
   config/argocd-cloudpaks/cp4waiops/templates/110-cp4waiops-aimgr-app.yaml
   config/argocd-cloudpaks/cp4waiops/templates/120-cp4waiops-emgr-app.yaml
   config/argocd-cloudpaks/cp4waiops/templates/130-cp4waiops-ia-app.yaml
-  config/argocd-cloudpaks/cp4d/templates/cp4d-module-template-app.yaml
-  config/argocd-cloudpaks/cp4i/templates/0300-cp4i-module-template-app.yaml
-  config/argocd-cloudpaks/cp4i/templates/0400-cp4i-client-app.yaml
   config/cloudpaks/cp4a/operators/templates/0000-cp4ba-namespace.yaml
   config/cloudpaks/cp4a/operators/templates/0100-operator-group.yaml
-  config/cloudpaks/cp4waiops/install-aimgr/templates/resources/200-ai-manager.yaml
-  config/cloudpaks/cp4waiops/install-aimgr/templates/subscriptions/050-operator-group.yaml
-  config/cloudpaks/cp4d/install-platform/templates/prereqs/000-app-namespace.yaml
-  config/cloudpaks/cp4d/install-platform/templates/prereqs/000-operators-namespace.yaml
-  config/cloudpaks/cp4d/install-platform/templates/prereqs/020-app-operator-group.yaml
-  config/cloudpaks/cp4d/install-platform/templates/prereqs/020-operators-operator-group.yaml
+  config/cloudpaks/cp4d/templates/0000-operators-namespace.yaml
   config/cloudpaks/cp4i/install-prereqs/templates/0000-namespace.yaml
   config/cloudpaks/cp4i/install-prereqs/templates/0100-operator-group.yaml
   config/cloudpaks/cp4s/templates/prereqs/001-cp4s-namespace.yaml
   config/cloudpaks/cp4s/templates/subscriptions/050-cp4s-operator-group.yaml
+  config/cloudpaks/cp4waiops/install-aimgr/templates/resources/200-ai-manager.yaml
+  config/cloudpaks/cp4waiops/install-aimgr/templates/subscriptions/050-operator-group.yaml
   config/rhacm/cloudpaks/templates/placement-argocd.yaml
   config/rhacm/cloudpaks/templates/placement-cloudpaks.yaml
   config/rhacm/cloudpaks/templates/placement-cp-shared.yaml
-
-rules:
-  yaml-files:
-  - '*.yaml'
-  - '*.yml'
-  - '.yamllint'
 
 rules:
   braces: 
