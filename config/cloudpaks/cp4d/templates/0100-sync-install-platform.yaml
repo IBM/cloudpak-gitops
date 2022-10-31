@@ -1,0 +1,67 @@
+---
+# https://www.ibm.com/docs/en/cloud-paks/cp-data/4.0?topic=tasks-changing-required-node-settings
+apiVersion: batch/v1
+kind: Job
+metadata:
+  annotations:
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+    argocd.argoproj.io/sync-wave: "101"
+  name: sync-cp4d-install-components
+  namespace: {{.Values.metadata.argocd_namespace}}
+spec:
+  template:
+    spec:
+      containers:
+        - name: install-components
+          image: icr.io/cpopen/cpd/olm-utils:latest
+          env:
+            - name: PROJECT_CPFS_OPS
+              value: {{.Values.metadata.common_services_namespace}}
+            - name: PROJECT_CPD_OPS
+              value: {{.Values.metadata.operators_namespace}}
+            - name: PROJECT_CPD_INSTANCE
+              value: {{.Values.metadata.argocd_app_namespace}}
+            - name: STG_CLASS_BLOCK
+              value: {{.Values.storageclass.rwo}}
+            - name: STG_CLASS_FILE
+              value: {{.Values.storageclass.rwx}}
+            - name: VERSION
+              value: {{.Values.version}}
+            - name: COMPONENTS
+              value: {{.Values.components}}
+          command:
+            - /bin/bash
+            - -c
+            - |
+              set -eo pipefail
+              set -x
+
+              result=0
+
+              # https://www.ibm.com/docs/en/cloud-paks/cp-data/4.5.x?topic=si-installing-components
+              echo "INFO: Installing components in a specialized installation."
+              bin/setup-instance-ns \
+                  --cpd_instance_ns=${PROJECT_CPD_INSTANCE} \
+                  --cpd_operator_ns=${PROJECT_CPD_OPS} \
+              && bin/apply-cr \
+                  --components=${COMPONENTS} \
+                  --release=${VERSION} \
+                  --cpd_instance_ns=${PROJECT_CPD_INSTANCE} \
+                  --block_storage_class=${STG_CLASS_BLOCK} \
+                  --file_storage_class=${STG_CLASS_FILE} \
+                  --license_acceptance=true \
+              && bin/get-cr-status \
+                  --cpd_instance_ns=${PROJECT_CPD_INSTANCE} \
+              && echo "INFO: CP4D installation complete." \
+              || {
+                  echo "ERROR: CP4D installation failed."
+                  result=1
+              }
+
+              exit ${result}
+
+      restartPolicy: Never
+      serviceAccountName: {{.Values.serviceaccount.argocd_application_controller}}
+
+  backoffLimit: 2

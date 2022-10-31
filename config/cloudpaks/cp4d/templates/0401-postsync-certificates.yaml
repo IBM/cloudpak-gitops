@@ -1,0 +1,100 @@
+---
+# https://www.ibm.com/docs/en/cloud-paks/cp-data/4.5.x?topic=environment-customizing-securing-route-platform
+apiVersion: batch/v1
+kind: Job
+metadata:
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/sync-wave: "401"
+  name: post-cp4d-adjust-certs
+  namespace: openshift-gitops
+spec:
+  template:
+    spec:
+      containers:
+        - name: config
+          image: icr.io/cpopen/cpd/olm-utils:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: ARGOCD_NAMESPACE
+              value: "openshift-gitops"
+            - name: TARGET_NAMESPACE
+              value: "{{.Values.metadata.argocd_app_namespace}}"
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -eo pipefail
+              set -x
+
+              secret_found=0
+              oc get secret cp4d-custom-tls-secret \
+                  -n "${TARGET_NAMESPACE}" 2> /dev/null \
+              && secret_found=1 \
+              || secret_found=0
+
+              if [ "${secret_found}" -eq 1 ]; then
+                  echo "INFO: External secret already set."
+                  exit 0
+              fi
+
+              result=0
+              ingress_secret_name=$(oc get ingresscontroller.operator default \
+                  --namespace openshift-ingress-operator \
+                  -o jsonpath='{.spec.defaultCertificate.name}') || result=1
+
+              if [ -n "${ingress_secret_name}" ] && [ "${result}" -eq 0 ]; then
+                  oc extract secret/${ingress_secret_name} \
+                      -n openshift-ingress \
+                      --keys=tls.crt,tls.key \
+                      --confirm \
+                  && sed -n `sed -n '/END CERTIFICATE/=' tls.crt | head -1`',$p' tls.crt | tail -n +2 > ca.crt \
+                  && sed -i '/END/q' tls.crt \
+                  && oc delete secret cp4d-custom-tls-secret \
+                         -n "${TARGET_NAMESPACE}" \
+                        --ignore-not-found=true \
+                  && oc create secret generic cp4d-custom-tls-secret \
+                        --from-file=tls.crt=tls.crt \
+                        --from-file=tls.key=tls.key \
+                        --from-file=ca.crt=ca.crt \
+                         -n "${TARGET_NAMESPACE}" \
+                  && oc get route -l component=ibm-nginx \
+                        -n "${TARGET_NAMESPACE}" \
+                        -o 'jsonpath={.items[0].spec.host}{" "}{.items[0].spec.tls.termination}{" "}{.items[0].metadata.name}' \
+                  && oc get route -l component=ibm-nginx \
+                        -n "${TARGET_NAMESPACE}" \
+                  && sed -i "/bin\/bash/a set -x" bin/setup-route \
+                  && bin/setup-route \
+                      --cpd_instance_ns="${TARGET_NAMESPACE}" \
+                      --route_name=cpd \
+                      --route_type=passthrough \
+                      --cert_secret=cp4d-custom-tls-secret \
+                  && echo "INFO: Configured CPD route." \
+                  || result=1
+
+                  if [ ${result} -eq 1 ]; then
+                      echo "WARNING: Failed to configure CPD route. Attempting to recover." \
+                      && ocp_domain=$(oc get ingress.config.openshift.io cluster -o jsonpath={.spec.domain}) \
+                      && bin/setup-route \
+                          --cpd_instance_ns="${TARGET_NAMESPACE}" \
+                          --route_name=cpd \
+                          --route_type=passthrough \
+                          --cert_secret=cp4d-custom-tls-secret \
+                          --custom_hostname=cpd-${TARGET_NAMESPACE}.${ocp_domain} \
+                      && result=0 \
+                      && echo "INFO: Configured CPD route on second attempt." \
+                      || {
+                          echo "ERROR: External secret not set."
+                          oc delete secret cp4d-custom-tls-secret \
+                              -n "${TARGET_NAMESPACE}" \
+                              --ignore-not-found=true
+                          result=1
+                      }
+                  fi
+              fi
+
+              exit ${result}
+
+      restartPolicy: Never
+      serviceAccountName: {{.Values.serviceaccount.argocd_application_controller}}
+  backoffLimit: 1
