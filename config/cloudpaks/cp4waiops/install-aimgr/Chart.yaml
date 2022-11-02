@@ -1,7 +1,7 @@
 ---
 apiVersion: v2
-name: rhacm-cloudpaks
-description: Red Hat Advanced Cluster Management policies for Cloud Paks
+name: icp4waiops-aimgr
+description: Cloud Pak for Watson AIOps - AI Manager
 
 # A chart can be either an 'application' or a 'library' chart.
 #
@@ -13,12 +13,9 @@ description: Red Hat Advanced Cluster Management policies for Cloud Paks
 # pipeline. Library charts do not define any templates and therefore cannot be deployed.
 type: application
 
-# This is the chart version. This version number should be incremented each time you make changes
-# to the chart and its templates, including the app version.
-# Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 0.4.0
+version: 0.10.0
 
 # This is the version number of the application being deployed. This version number should be
 # incremented each time you make changes to the application. Versions are not expected to
 # follow Semantic Versioning. They should reflect the version the application is using.
-appVersion: 0.9.2
+appVersion: 3.5.1

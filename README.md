@@ -34,7 +34,7 @@ Supported versions:
 | Cloud Pak for Data | [4.0](https://www.ibm.com/docs/en/cloud-paks/cp-data/4.0) (See [Issue for CP4D 4.5 support](https://github.com/IBM/cloudpak-gitops/issues/173) ) | Starter Path|
 | Cloud Pak for Integration | [2022.2](https://www.ibm.com/docs/en/cloud-paks/cp-integration/2022.2) | Starter Path |
 | Cloud Pak for Security | [1.10](https://www.ibm.com/docs/en/cloud-paks/cp-security/1.10) | Starter Path |
-| Cloud Pak for Watson AIOps | [3.4.2](https://www.ibm.com/docs/en/cloud-paks/cloud-pak-watson-aiops/3.4.2) | Starter Path |
+| Cloud Pak for Watson AIOps | [3.5.1](https://www.ibm.com/docs/en/cloud-paks/cloud-pak-watson-aiops/3.5.1) | Starter Path |
 
 
 ### GitOps 

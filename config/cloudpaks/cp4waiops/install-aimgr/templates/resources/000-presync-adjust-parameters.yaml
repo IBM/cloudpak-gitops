@@ -1,0 +1,102 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+  name: pre-cp4waiops-adjust-parameters
+  namespace: openshift-gitops
+spec:
+  template:
+    spec:
+      containers:
+        - name: config
+          image: quay.io/openshift/origin-cli:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: ARGOCD_NAMESPACE
+              value: "openshift-gitops"
+            - name: TARGET_NAMESPACE
+              value: {{.Values.metadata.argocd_app_namespace}}
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -eo pipefail
+              set -x
+
+              storage_class_rwo="$(oc get configmap argocd-cp4waiops-config \
+                --namespace "${ARGOCD_NAMESPACE}" -o jsonpath='{.data.storageclass\.rwo}')"
+              storage_class_rwx="$(oc get configmap argocd-cp4waiops-config \
+                --namespace "${ARGOCD_NAMESPACE}" -o jsonpath='{.data.storageclass\.rwx}')"
+
+              if [ -z "${storage_class_rwo}" ] || [ -z "${storage_class_rwx}" ] ; then
+                echo "ERROR: Did not find storage classes for target platform."
+                exit 1
+              fi
+
+               cluster_domain=$(oc get configmap argocd-cp4waiops-config \
+                  --namespace "${ARGOCD_NAMESPACE}" -o jsonpath='{.data.cluster_domain}')
+
+              automation_base_instance_name="$(oc get AutomationBase.base.automation.ibm.com --namespace "${TARGET_NAMESPACE}" -o jsonpath='{.items[].metadata.name}' 2> /dev/null)" \
+              && reuse_iaf_ab=1 \
+              || reuse_iaf_ab=0
+
+              automation_ui_config_instance_name="$(oc get AutomationUIConfig.core.automation.ibm.com --namespace "${TARGET_NAMESPACE}" -o jsonpath='{.items[].metadata.name}' 2> /dev/null)" \
+              && reuse_iaf_ui=1 \
+              || reuse_iaf_ui=0
+
+              echo "INFO: Install Argo CLI."
+              # Install it from cluster, not from Internet, so airgap scenarios still work
+              argo_route=openshift-gitops-server
+              argo_secret=openshift-gitops-cluster
+
+              export HOME=/tmp
+              argo_cmd="${HOME}/argocd"
+              result=0
+
+              argo_url=$(oc get route ${argo_route} -n ${ARGOCD_NAMESPACE} -ojsonpath='{.spec.host}') \
+              && curl -skL "${argo_url}/download/argocd-linux-amd64" -o "${argo_cmd}" \
+              && chmod 755 "${argo_cmd}" \
+              && argo_pwd=$(oc get secret ${argo_secret} -n ${ARGOCD_NAMESPACE} -ojsonpath='{.data.admin\.password}' | base64 -d ; echo ) \
+              && "${argo_cmd}" login "${argo_url}" --username admin --password "${argo_pwd}" --insecure \
+              || result=1
+
+              if [ ${result} -eq 0 ]; then
+                  for app_name in cp4waiops-app cp4waiops-aimgr; do
+                      if [ -n "${storage_class_rwo}" ] && [ -n "${storage_class_rwx}" ]; then
+                          echo "INFO: Patching storage for ${app_name}." \
+                          && "${argo_cmd}" app set "${app_name}" \
+                              --helm-set-string cluster_domain="${cluster_domain}" \
+                              --helm-set-string storageclass.rwo="${storage_class_rwo}" \
+                              --helm-set-string storageclass.rwx="${storage_class_rwx}" \
+                          && echo "INFO: ${app_name} successfully updated storage classes." \
+                          || result=1
+                      fi
+                      if [ "${reuse_iaf_ab}" -eq 1 ] && [ -n "${automation_base_instance_name}" ]; then
+                          echo "INFO: Patching IAF instances for ${app_name}." \
+                          && "${argo_cmd}" app set "${app_name}" \
+                              --helm-set-string automation_base_instance_name="${automation_base_instance_name}" \
+                          && echo "INFO: ${app_name} successfully updated IAF AutomationBase instance names." \
+                          || result=1
+                      fi
+                      if [ "${reuse_iaf_ui}" -eq 1 ] && [ -n "${automation_ui_config_instance_name}" ]; then
+                          echo "INFO: Patching IAF instances for ${app_name}." \
+                          && "${argo_cmd}" app set "${app_name}" \
+                              --helm-set-string automation_ui_config_instance_name="${automation_ui_config_instance_name}" \
+                          && echo "INFO: ${app_name} successfully updated IAF instance names." \
+                          || result=1
+                      fi
+                  done
+              fi
+
+              for app_name in cp4waiops-app cp4waiops-aimgr; do
+                  echo "INFO: Application ${app_name} current parameters:"
+                  "${argo_cmd}" app get "${app_name}" --show-params
+              done
+
+              exit ${result}
+
+      restartPolicy: Never
+      serviceAccountName: {{.Values.serviceaccount.ibm_cloudpaks_installer}}
+  backoffLimit: 2
