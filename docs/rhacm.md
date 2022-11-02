@@ -80,7 +80,7 @@ Once Argo completes synchronizing the applications, your cluster will have polic
 - `openshift-gitops-cloudpaks-cp-shared`: Deploys common Cloud Pak prerequisites.
 - `openshift-gitops-cloudpaks-cp4a`: Deploys the Argo applications for Cloud Pak for Business Automation.
 - `openshift-gitops-cloudpaks-cp4d`: Deploys the Argo applications for Cloud Pak for Data.
-- `openshift-gitops-cloudpaks-cp4aiops`: Deploys the Argo applications for Cloud Pak for Watson AIOps.
+- `openshift-gitops-cloudpaks-cp4waiops`: Deploys the Argo applications for Cloud Pak for Watson AIOps.
 - `openshift-gitops-cloudpaks-cp4i`: Deploys the Argo applications for Cloud Pak for Integration.
 - `openshift-gitops-cloudpaks-cp4s`: Deploys the Argo applications for Cloud Pak for Security.
 - `openshift-gitops-installed`: Deploys OpenShift GitOps.
@@ -90,7 +90,7 @@ Once Argo completes synchronizing the applications, your cluster will have polic
 Labels:
 
 - `gitops-branch` + `cp4a`: Placement for Cloud Pak for Business Automation.
-- `gitops-branch` + `cp4aiops`: Placement for Cloud Pak  for Cloud Pak for Watson AIOps.
+- `gitops-branch` + `cp4waiops`: Placement for Cloud Pak  for Cloud Pak for Watson AIOps.
 - `gitops-branch` + `cp4d`: Placement for Cloud Pak for Data.
 - `gitops-branch` + `cp4i`: Placement for Cloud Pak for Integration.
 
@@ -98,7 +98,7 @@ Values for each label:
 
 - `gitops-branch`: Branch of this repo for the Argo applications. Unless you are developing and testing on a new branch, use the default value `main`.
 - cp4a: Namespace for deploying the Cloud Pak. Unless you want multiple Cloud Paks in different namespaces of the cluster, use the default value `ibm-cloudpaks`.
-- `cp4aiops`: Namespace for deploying the Cloud Pak. Unless you want multiple Cloud Paks in different namespaces of the cluster, use the default value `ibm-cloudpaks`.
+- `cp4waiops`: Namespace for deploying the Cloud Pak. Unless you want multiple Cloud Paks in different namespaces of the cluster, use the default value `ibm-cloudpaks`.
 - `cp4d`: Namespace for deploying the Cloud Pak. As of release 4.0.6, and as a product limitation, do not use the same namespace as other Cloud Paks if installing  Cloud Pak for Data to the same cluster.
 - `cp4i`: Namespace for deploying the Cloud Pak. Unless you want multiple Cloud Paks in different namespaces of the cluster, use the default value `ibm-cloudpaks`.
 - `cp4s`: Namespace for deploying the Cloud Pak. Unless you want multiple Cloud Paks in different namespaces of the cluster, use the default value `ibm-cloudpaks`.

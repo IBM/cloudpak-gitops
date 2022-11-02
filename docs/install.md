@@ -203,7 +203,7 @@ After completing the list of activities listed in the previous sections, you hav
     | --------- | ---------------- | ---- | --------- |
     | Business Automation | cp4a-app | config/argocd-cloudpaks/cp4a | cp4a |
     | Integration | cp4i-app | config/argocd-cloudpaks/cp4i | cp4i |
-    | Watson AIOps | cp4aiops-app | config/argocd-cloudpaks/cp4aiops | cp4waiops |
+    | Watson AIOps | cp4waiops-app | config/argocd-cloudpaks/cp4waiops | cp4waiops |
     | Data | cp4d-app | config/argocd-cloudpaks/cp4d | cp4d |
     | Security | cp4s-app | config/argocd-cloudpaks/cp4s | cp4s |
 
@@ -302,7 +302,7 @@ After completing the list of activities listed in the previous sections, you hav
    ```sh
    # appname=<< choose a value from the "Application Name" column in the 
    # table of Cloud Paks above, such as cp4a-app, cp4i-app, 
-   # cp4aiops-app, cp4d-app, etc >>
+   # cp4waiops-app, cp4d-app, etc >>
    cp=cp4i
    app_name=${cp}-app
    # app_path=<< choose the respective value from the "path Name" 
