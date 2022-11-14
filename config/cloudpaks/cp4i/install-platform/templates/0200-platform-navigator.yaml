@@ -12,7 +12,7 @@ spec:
   license:
     accept: true
     # https://ibm.biz/integration-licenses
-    license: L-RJON-CD3JJU
+    license: L-RJON-CD3JKX
   mqDashboard: true
   replicas: 1
   storage:
