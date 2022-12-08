@@ -1,5 +1,5 @@
 ---
-# https://www.ibm.com/docs/en/cloud-paks/cp-data/4.0?topic=tasks-changing-required-node-settings
+# https://www.ibm.com/docs/en/cloud-paks/cp-data/4.6.x?topic=installing
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -39,7 +39,7 @@ spec:
 
               result=0
 
-              # https://www.ibm.com/docs/en/cloud-paks/cp-data/4.5.x?topic=si-installing-components
+              # https://www.ibm.com/docs/en/cloud-paks/cp-data/4.6.x?topic=si-installing-components
               echo "INFO: Installing components in a specialized installation."
               bin/setup-instance-ns \
                   --cpd_instance_ns=${PROJECT_CPD_INSTANCE} \

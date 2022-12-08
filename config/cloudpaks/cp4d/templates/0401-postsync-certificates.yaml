@@ -1,5 +1,5 @@
 ---
-# https://www.ibm.com/docs/en/cloud-paks/cp-data/4.5.x?topic=environment-customizing-securing-route-platform
+# https://www.ibm.com/docs/en/cloud-paks/cp-data/4.6.x?topic=environment-customizing-securing-route-platform
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -13,7 +13,8 @@ spec:
     spec:
       containers:
         - name: config
-          image: icr.io/cpopen/cpd/olm-utils:latest
+          # CP4D 4.6 image
+          image: icr.io/cpopen/cpd/olm-utils@sha256:2517fc08d78a3ecd8500cb71adfd85da613cf82028b9e34f25e2cf13930602fa
           imagePullPolicy: IfNotPresent
           env:
             - name: ARGOCD_NAMESPACE
@@ -26,6 +27,14 @@ spec:
             - |
               set -eo pipefail
               set -x
+
+              export KUBECONFIG=/tmp/kubeconfig
+              api_url=$(oc get Infrastructure cluster -o jsonpath='{.status.apiServerURL}')
+              oc login "${api_url}" --token="$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)" \
+              || {
+                  echo "WARNING: Unable to configure external certificate."
+                  exit 0
+              }
 
               secret_found=0
               oc get secret cp4d-custom-tls-secret \
@@ -66,9 +75,8 @@ spec:
                   && sed -i "/bin\/bash/a set -x" bin/setup-route \
                   && bin/setup-route \
                       --cpd_instance_ns="${TARGET_NAMESPACE}" \
-                      --route_name=cpd \
                       --route_type=passthrough \
-                      --cert_secret=cp4d-custom-tls-secret \
+                      --route_secret=cp4d-custom-tls-secret \
                   && echo "INFO: Configured CPD route." \
                   || result=1
 
@@ -77,9 +85,8 @@ spec:
                       && ocp_domain=$(oc get ingress.config.openshift.io cluster -o jsonpath={.spec.domain}) \
                       && bin/setup-route \
                           --cpd_instance_ns="${TARGET_NAMESPACE}" \
-                          --route_name=cpd \
                           --route_type=passthrough \
-                          --cert_secret=cp4d-custom-tls-secret \
+                          --route_secret=cp4d-custom-tls-secret \
                           --custom_hostname=cpd-${TARGET_NAMESPACE}.${ocp_domain} \
                       && result=0 \
                       && echo "INFO: Configured CPD route on second attempt." \

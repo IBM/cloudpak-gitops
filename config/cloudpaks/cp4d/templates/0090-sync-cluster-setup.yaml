@@ -1,5 +1,5 @@
 ---
-# https://www.ibm.com/docs/en/cloud-paks/cp-data/4.0?topic=tasks-changing-required-node-settings
+# https://www.ibm.com/docs/en/cloud-paks/cp-data/4.6.x?topic=information-setting-up-installation-environment-variables
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -26,7 +26,6 @@ spec:
 
               result=0
 
-              # https://www.ibm.com/docs/en/cloud-paks/cp-data/4.5.x?topic=information-setting-up-installation-environment-variables
               OPENSHIFT_TYPE=self-managed
               platform=$(oc get Infrastructure cluster  -o jsonpath={.status.platform})
               case "${platform}" in
@@ -47,7 +46,7 @@ spec:
                       OPENSHIFT_TYPE=self-managed
               esac
 
-              # https://www.ibm.com/docs/en/cloud-paks/cp-data/4.5.x?topic=settings-changing-cri-o-container
+              # https://www.ibm.com/docs/en/cloud-paks/cp-data/4.6.x?topic=settings-changing-cri-o-container
               if [ "${OPENSHIFT_TYPE}" != "roks" ]; then
                   if [[ ${COMPONENTS} =~ cognos_analytics ]] \
                         || [[ ${COMPONENTS} =~ dv ]] \
