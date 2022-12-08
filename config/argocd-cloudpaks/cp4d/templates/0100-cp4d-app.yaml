@@ -1,5 +1,5 @@
 ---
-# https://www.ibm.com/docs/en/cloud-paks/cp-data/4.0?topic=installing
+# https://www.ibm.com/docs/en/cloud-paks/cp-data/4.6.x
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:

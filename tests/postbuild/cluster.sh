@@ -200,7 +200,7 @@ spec:
   displayName: IBM Operator Catalog
   publisher: IBM
   sourceType: grpc
-  image: docker.io/ibmcom/ibm-operator-catalog:latest
+  image: icr.io/cpopen/ibm-operator-catalog:latest
   updateStrategy:
     registryPoll:
       interval: 45m

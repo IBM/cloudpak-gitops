@@ -8,7 +8,7 @@ metadata:
   common_services_namespace: ibm-common-services
   operators_namespace: cpd-operators
 
-# https://www.ibm.com/docs/en/cloud-paks/cp-data/4.5.x?topic=information-determining-which-components-install
+# https://www.ibm.com/docs/en/cloud-paks/cp-data/4.6.x?topic=information-determining-which-components-install
 components: "set in parent app"
 
 storageclass:

@@ -1,5 +1,5 @@
 ---
-# https://www.ibm.com/docs/en/cloud-paks/cp-data/4.0?topic=tasks-changing-required-node-settings
+# https://www.ibm.com/docs/en/cloud-paks/cp-data/4.6.x?topic=installing
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -35,7 +35,7 @@ spec:
 
               result=0
 
-              # https://www.ibm.com/docs/en/cloud-paks/cp-data/4.5.x?topic=cluster-creating-custom-sccs-services
+              # https://www.ibm.com/docs/en/cloud-paks/cp-data/4.6.x?topic=cluster-creating-custom-sccs-services
               echo "INFO: Creating custom security context constraints for services."
               # wkc only
               if [[ ${COMPONENTS} =~ wkc ]]; then
@@ -57,7 +57,7 @@ spec:
                   }
               fi
 
-              # https://www.ibm.com/docs/en/cloud-paks/cp-data/4.5.x?topic=si-creating-olm-objects
+              # https://www.ibm.com/docs/en/cloud-paks/cp-data/4.6.x?topic=si-creating-olm-objects
               echo "INFO: Creating OLM objects for a specialized installation."
               bin/apply-olm apply-olm \
                   --release=${VERSION} \
