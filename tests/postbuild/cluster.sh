@@ -281,7 +281,7 @@ function add_pull_secret() {
         | base64 -d) || result=1
     jq ".auths += ${new_auth}.auths" "${config_file}" > "${temp_config_file}" || result=1
     if [ ${result} -eq 0 ]; then
-        mv "${temp_config_file}" "${config_file}"
+        mv -f "${temp_config_file}" "${config_file}"
     fi
 
     return ${result}
@@ -292,6 +292,7 @@ function add_pull_secret() {
 # Modifies OCP global configuration to add pull secrets
 #
 function setup_global_pull_secrets() {
+    local change_output=${1:-"${WORKDIR}/set-global-pull-secret-output.txt"}
 
     local result=0
 
@@ -345,7 +346,8 @@ function setup_global_pull_secrets() {
         log "INFO: Updating global pull secrets"
         ${oc_cmd} set data secret/pull-secret \
             --namespace openshift-config \
-            --from-file=.dockerconfigjson="${gps_file}" || result=1
+            --from-file=.dockerconfigjson="${gps_file}" > "${change_output}" 2>&1 \
+        || result=1
         if [ ${result} -eq 0 ]; then
             log "INFO: Updated global pull secrets"
         else
@@ -1893,17 +1895,20 @@ function configure_ibm_cloud_cluster() {
                 || result=1
         }
 
-        # Reload workers after setting up global pull secret
-        # https://marketplace.redhat.com/en-us/documentation/deployment-troubleshooting#install-red-hat-marketplace-operator-script-was-successful-but-cluster-status-is-not-registered
-
-        local operation=reload
-        if [ "${cluster_type}" == "ibmcloud-gen2" ]; then
-            operation=replace
-        fi
         if [ "${set_global_pull_secret}" -eq 1 ]; then
-            setup_global_pull_secrets \
-                && ibm_cloud_cmd_workers "${cluster_type}" "${cluster_name}" ${operation} \
-                && oc_wait_nodes \
+            # Reload workers after setting up global pull secret
+            # https://marketplace.redhat.com/en-us/documentation/deployment-troubleshooting#install-red-hat-marketplace-operator-script-was-successful-but-cluster-status-is-not-registered
+
+            local operation=reload
+            if [ "${cluster_type}" == "ibmcloud-gen2" ]; then
+                operation=replace
+            fi
+            local change_output="${WORKDIR}/set-global-pull-secret-output.txt"
+            setup_global_pull_secrets "${change_output}" \
+                && if ! grep "not changed" "${change_output}" ; then
+                      ibm_cloud_cmd_workers "${cluster_type}" "${cluster_name}" ${operation} \
+                       && oc_wait_nodes
+                   fi \
                 || result=1
         fi
 

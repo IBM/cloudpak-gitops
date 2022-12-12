@@ -31,11 +31,11 @@ Supported versions:
 
 | Cloud Pak | Version | Installation mode |
 | ----------|---------|-------------------|
-| Cloud Pak for Business Automation | [22.0.1](https://www.ibm.com/docs/en/cloud-paks/cp-biz-automation/22.0.1) | Starter Path|
-| Cloud Pak for Data | [4.6.1](https://www.ibm.com/docs/en/cloud-paks/cp-data/4.6.x?topic=overview) | Express Installation |
-| Cloud Pak for Integration | [2022.2](https://www.ibm.com/docs/en/cloud-paks/cp-integration/2022.2) | Starter Path |
-| Cloud Pak for Security | [1.10](https://www.ibm.com/docs/en/cloud-paks/cp-security/1.10) | Starter Path |
-| Cloud Pak for Watson AIOps | [3.5.1](https://www.ibm.com/docs/en/cloud-paks/cloud-pak-watson-aiops/3.5.1) | Starter Path |
+| Cloud Pak for Business Automation | [22.0.1](https://www.ibm.com/docs/en/cloud-paks/cp-biz-automation/22.0.1) | Multi-pattern starter deployment |
+| Cloud Pak for Data | [4.6.0](https://www.ibm.com/docs/en/cloud-paks/cp-data/4.6.x?topic=overview) | Online, specialized installation |
+| Cloud Pak for Integration | [2022.4](https://www.ibm.com/docs/en/cloud-paks/cp-integration/2022.4) | Online installation |
+| Cloud Pak for Security | [1.10](https://www.ibm.com/docs/en/cloud-paks/cp-security/1.10) | Online installation |
+| Cloud Pak for Watson AIOps | [3.5.1](https://www.ibm.com/docs/en/cloud-paks/cloud-pak-watson-aiops/3.5.1) | Online Installation |
 
 ### GitOps
 

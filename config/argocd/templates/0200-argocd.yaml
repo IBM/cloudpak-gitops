@@ -242,6 +242,11 @@ spec:
                 hs.message = condition.message
                 return hs
               end
+              if condition.type == "Error" and condition.status == "True" then
+                hs.status = "Degraded"
+                hs.message = condition.message
+                return hs
+              end
             end
           end
         end
