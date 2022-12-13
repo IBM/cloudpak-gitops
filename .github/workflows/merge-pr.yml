@@ -2,14 +2,14 @@ name: Merge
 
 on:
   pull_request:
-    # types:
-    #   - closed
+    types:
+      - closed
     branches:
       - main
 
 jobs:
   promote:
-    # if: github.event.pull_request.merged
+    if: github.event.pull_request.merged
     runs-on: ubuntu-latest
 
     env:
@@ -19,13 +19,13 @@ jobs:
       - uses: actions/checkout@v3
 
       - id: setup-action
-        # if: github.event.pull_request.merged
+        if: github.event.pull_request.merged
         uses: actions/setup-node@v3
         with:
           node-version: 16.x
 
       - id: release
-        # if: github.event.pull_request.merged
+        if: github.event.pull_request.merged
         name: Semantic release
         run: npx semantic-release
         env:
