@@ -9,7 +9,7 @@ on:
 
 jobs:
   promote:
-    if: github.event.pull_request.merged
+    # if: github.event.pull_request.merged
     runs-on: ubuntu-latest
 
     env:
