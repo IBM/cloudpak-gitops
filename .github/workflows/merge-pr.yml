@@ -18,13 +18,15 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - id: calc
+      - id: setup-action
         if: github.event.pull_request.merged
-        name: Determine extent of testing
-        run: tests/postbuild/calc-settings.sh "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" "${GITHUB_SHA}" "${GITHUB_BASE_REF}"
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
 
-      - name: Promote release if test passes
+      - id: release
         if: github.event.pull_request.merged
-        run: tests/postbuild/promote-release.sh "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" "${GITHUB_HEAD_REF}" "$(cat test-sh-semver.txt)"
+        name: Semantic release
+        run: npx semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
