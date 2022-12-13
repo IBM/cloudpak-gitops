@@ -18,7 +18,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - id: release
+      - id: setup-action
         # if: github.event.pull_request.merged
         uses: actions/setup-node@v3
         with:
