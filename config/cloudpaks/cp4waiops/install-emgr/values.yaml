@@ -9,7 +9,7 @@ metadata:
   post_install_wait: 2h
 spec:
   deployment_type: trial
-  version: 1.6.6
+  version: 1.6.7
 storageclass:
   rwo: ocs-storagecluster-ceph-rbd
   rwx: ocs-storagecluster-cephfs
