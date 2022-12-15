@@ -15,107 +15,109 @@ spec:
     antiAffinity: false
     imagePullPolicy: IfNotPresent
     imagePullRepository: cp.icr.io/cp/noi
-  zen:
-    deploy: true
-    serviceInstanceName: iaf-zen-cpdservice
-    storage:
-      storageClassName: {{.Values.storageclass.rwx}}
   serviceContinuity:
     continuousAnalyticsCorrelation: false
     isBackupDeployment: false
   ldap:
-    port: '3389'
-    mode: standalone
-    userFilter: 'uid=%s,ou=users'
-    bindDN: 'cn=admin,dc=mycluster,dc=icp'
-    sslPort: '3636'
-    url: 'ldap://localhost:3389'
-    suffix: 'dc=mycluster,dc=icp'
-    groupFilter: 'cn=%s,ou=groups'
     baseDN: 'dc=mycluster,dc=icp'
-    storageSize: 1Gi
+    bindDN: 'cn=admin,dc=mycluster,dc=icp'
+    groupFilter: 'cn=%s,ou=groups'
+    mode: standalone
+    port: '3389'
     serverType: CUSTOM
+    sslPort: '3636'
     storageClass: {{.Values.storageclass.rwo}}
+    storageSize: 1Gi
+    suffix: 'dc=mycluster,dc=icp'
+    url: 'ldap://localhost:3389'
+    userFilter: 'uid=%s,ou=users'
   backupRestore:
     enableAnalyticsBackups: false
   topology:
-    storageClassElasticTopology: {{.Values.storageclass.rwo}}
-    storageSizeElasticTopology: 75Gi
-    storageSizeFileObserver: 5Gi
-    storageClassFileObserver: {{.Values.storageclass.rwo}}
-    iafCartridgeRequirementsName: ''
     appDisco:
-      enabled: false
-      scaleSSS: '1'
-      tlsSecret: ''
-      dbsecret: ''
-      db2database: taddm
-      dburl: ''
       certSecret: ''
       db2archuser: archuser
-      secure: false
-      scaleDS: '1'
+      db2database: taddm
       db2user: db2inst1
       dbport: '50000'
+      dbsecret: ''
+      dburl: ''
+      enabled: false
+      scaleDS: '1'
+      scaleSSS: '1'
+      secure: false
+      tlsSecret: ''
     observers:
-      docker: false
-      taddm: false
-      servicenow: true
-      ibmcloud: false
       alm: false
-      contrail: false
-      cienablueplanet: false
-      kubernetes: true
-      bigfixinventory: false
-      junipercso: false
-      dns: false
-      itnm: false
       ansibleawx: false
-      ciscoaci: false
-      azure: false
-      rancher: false
-      newrelic: false
-      vmvcenter: true
-      rest: true
       appdynamics: false
-      jenkins: false
-      zabbix: false
-      file: true
-      googlecloud: false
-      dynatrace: false
       aws: false
+      azure: false
+      bigcloudfabric: false
+      bigfixinventory: false
+      cienablueplanet: false
+      ciscoaci: false
+      contrail: false
+      dns: false
+      docker: false
+      dynatrace: false
+      file: true
+      gitlab: false
+      googlecloud: false
+      hpnfvd: false
+      ibmcloud: false
+      itnm: false
+      jenkins: false
+      junipercso: false
+      kubernetes: true
+      newrelic: false
       openstack: false
+      rancher: false
+      rest: true
+      sdconap: false
+      servicenow: true
+      sevone: false
+      taddm: false
+      viptela: false
+      vmvcenter: true
       vmwarensx: false
+      zabbix: false
+    aaionap: false
+    iafCartridgeRequirementsName: ''
     netDisco: false
-  version: {{.Values.spec.version}}
-  entitlementSecret: noi-registry-secret
-  clusterDomain: {{.Values.cluster_domain}}
+    storageClassElasticTopology: {{.Values.storageclass.rwo}}
+    storageClassFileObserver: {{.Values.storageclass.rwo}}
+    storageSizeElasticTopology: 75Gi
+    storageSizeFileObserver: 5Gi
+    storageSizeSdconapObserver: 5Gi
   integrations:
     humio:
       repository: ''
       url: ''
   persistence:
-    storageSizeNCOBackup: 5Gi
     enabled: false
-    storageSizeNCOPrimary: 5Gi
-    storageClassNCOPrimary: {{.Values.storageclass.rwo}}
-    storageSizeImpactServer: 5Gi
-    storageClassImpactServer: {{.Values.storageclass.rwo}}
-    storageClassKafka: {{.Values.storageclass.rwo}}
-    storageSizeKafka: 50Gi
     storageClassCassandraBackup: {{.Values.storageclass.rwo}}
-    storageSizeCassandraBackup: 50Gi
-    storageClassZookeeper: {{.Values.storageclass.rwo}}
     storageClassCouchdb: {{.Values.storageclass.rwo}}
-    storageSizeZookeeper: 5Gi
-    storageSizeCouchdb: 20Gi
     storageClassCassandraData: {{.Values.storageclass.rwo}}
-    storageSizeCassandraData: 50Gi
     storageClassElastic: {{.Values.storageclass.rwo}}
     storageClassImpactGUI: {{.Values.storageclass.rwo}}
-    storageSizeImpactGUI: 5Gi
-    storageSizeElastic: 75Gi
+    storageClassImpactServer: {{.Values.storageclass.rwo}}
+    storageClassKafka: {{.Values.storageclass.rwo}}
     storageClassNCOBackup: {{.Values.storageclass.rwo}}
-  helmValuesNOI:
-    "global.rbac.createSCC": false
+    storageClassNCOPrimary: {{.Values.storageclass.rwo}}
+    storageClassZookeeper: {{.Values.storageclass.rwo}}
+    storageSizeCassandraBackup: 50Gi
+    storageSizeCassandraData: 50Gi
+    storageSizeCouchdb: 20Gi
+    storageSizeElastic: 75Gi
+    storageSizeImpactGUI: 5Gi
+    storageSizeImpactServer: 5Gi
+    storageSizeKafka: 50Gi
+    storageSizeMinio: 10Gi
+    storageSizeNCOBackup: 5Gi
+    storageSizeNCOPrimary: 5Gi
+    storageSizeZookeeper: 5Gi
+  clusterDomain: {{.Values.cluster_domain}}
   deploymentType: {{.Values.spec.deployment_type}}
+  entitlementSecret: noi-registry-secret
+  version: {{.Values.spec.version}}
