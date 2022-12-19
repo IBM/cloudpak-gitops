@@ -15,4 +15,4 @@ storageclass:
   rwo: ocs-storagecluster-ceph-rbd
   rwx: ocs-storagecluster-cephfs
 
-version: 4.6.0
+version: 4.6.1
