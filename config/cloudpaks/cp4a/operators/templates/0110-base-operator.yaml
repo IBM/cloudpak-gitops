@@ -8,7 +8,7 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "110"
 spec:
-  channel: v22.1
+  channel: v22.2
   installPlanApproval: Automatic
   name: ibm-cp4a-operator
   source: ibm-operator-catalog
