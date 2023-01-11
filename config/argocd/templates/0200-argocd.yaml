@@ -97,6 +97,116 @@ spec:
           end
         end
         return hs
+    multicluster.odf.openshift.io/MirrorPeer:
+      health.lua: |
+        hs = {}
+        hs.status = "Progressing"
+        hs.message = "Unknown"
+
+        if obj.status ~= nil then
+          if obj.status.phase ~= nil then
+            if obj.status.phase == "ExchangedSecret" then
+              hs.status = "Healthy"
+            elseif obj.status.phase == "ExchangingSecret" then
+              hs.status = "Progressing"
+            else
+              hs.status = "Degraded"
+            end
+            return hs
+          end
+        end
+
+        return hs
+    ocs.openshift.io/StorageCluster:
+      health.lua: |
+        hs = {}
+        if obj.status ~= nil then
+          if obj.status.conditions ~= nil then
+            for i, condition in ipairs(obj.status.conditions) do
+              if condition.type == "Available" and condition.status == "True" then
+                hs.status = "Healthy"
+                hs.message = condition.reason
+                return hs
+              end
+              if condition.type == "Degraded" and condition.status == "True" then
+                hs.status = "Degraded"
+                hs.message = condition.reason
+                return hs
+              end
+            end
+          end
+        end
+
+        hs.status = "Progressing"
+        return hs
+    odf.openshift.io/StorageSystem:
+      health.lua: |
+        hs = {}
+        if obj.status ~= nil then
+          if obj.status.conditions ~= nil then
+            for i, condition in ipairs(obj.status.conditions) do
+              if condition.type == "Available" and condition.status == "True" then
+                hs.status = "Healthy"
+                hs.message = condition.message
+                return hs
+              end
+              if condition.type == "StorageSystemInvalid" and condition.status == "True" then
+                hs.status = "Degraded"
+                hs.message = condition.message
+                return hs
+              end
+              if condition.type == "Progressing" and condition.reason == "True" then
+                hs.status = "Progressing"
+                hs.message = condition.message
+                return hs
+              end
+            end
+          end
+        end
+
+        hs.status = "Progressing"
+        return hs
+    ramendr.openshift.io/DRPlacementControl:
+      health.lua: |
+        hs = {}
+
+        if obj.status ~= nil then
+          if obj.status.conditions ~= nil then
+            for i, condition in ipairs(obj.status.conditions) do
+              if condition.type == "Available" and condition.status == "True" then
+                hs.status = "Healthy"
+                hs.message = condition.message
+                return hs
+              end
+            end
+          end
+        end
+
+        hs.status = "Progressing"
+        return hs
+    ramendr.openshift.io/DRPolicy:
+      health.lua: |
+        hs = {}
+
+        if obj.status ~= nil then
+          if obj.status.conditions ~= nil then
+            for i, condition in ipairs(obj.status.conditions) do
+              if condition.type == "Validated" and condition.status == "True" then
+                hs.status = "Healthy"
+                hs.message = condition.message
+                return hs
+              end
+              if condition.type == "Validated" and condition.status == "False" then
+                hs.status = "Degraded"
+                hs.message = condition.message
+                return hs
+              end
+            end
+          end
+        end
+
+        hs.status = "Progressing"
+        return hs
     operator.open-cluster-management.io/MultiClusterHub:
       health.lua: |
         hs = {}
@@ -105,7 +215,6 @@ spec:
 
         if obj.status ~= nil then
           if obj.status.phase ~= nil then
-            hs.message = obj.status.wsStatus
             if obj.status.phase == "Running" then
               hs.status = "Healthy"
             elseif obj.status.phase == "Installing" then
@@ -117,6 +226,76 @@ spec:
           end
         end
 
+        return hs
+    submarineraddon.open-cluster-management.io/SubmarinerConfig:
+      health.lua: |
+        hs = {}
+
+        if obj.status ~= nil then
+          if obj.status.conditions ~= nil then
+            for i, condition in ipairs(obj.status.conditions) do
+              if condition.type == "SubmarinerGatewaysLabeled" and condition.status == "True" then
+                hs.status = "Healthy"
+                hs.message = condition.message
+                return hs
+              end
+            end
+          end
+        end
+
+        hs.status = "Progressing"
+        return hs
+
+    hive.openshift.io/ClusterDeployment:
+      health.lua: |
+        hs = {}
+
+        if obj.status ~= nil then
+          if obj.status.conditions ~= nil then
+            for i, condition in ipairs(obj.status.conditions) do
+              if condition.type == "Ready" and condition.status == "True" then
+                hs.status = "Healthy"
+                hs.message = condition.message
+                return hs
+              end
+              if condition.type == "ProvisionFailed" and condition.status == "True" then
+                hs.status = "Degraded"
+                hs.message = condition.message
+                return hs
+              end
+              if condition.type == "Provisioned" and condition.reason == "Provisioning" then
+                hs.status = "Progressing"
+                hs.message = condition.message
+                return hs
+              end
+            end
+          end
+        end
+
+        hs.status = "Progressing"
+        return hs
+    cluster.open-cluster-management.io/ManagedCluster:
+      health.lua: |
+        hs = {}
+
+        if obj.status ~= nil then
+          if obj.status.conditions ~= nil then
+            for i, condition in ipairs(obj.status.conditions) do
+              if condition.type == "ManagedClusterConditionAvailable" and condition.status == "True" then
+                hs.status = "Healthy"
+                hs.message = condition.message
+                return hs
+              end
+              if condition.type == "ManagedClusterConditionAvailable" then
+                hs.status = "Progressing"
+                hs.message = condition.message
+                return hs
+              end
+            end
+          end
+        end
+
+        hs.status = "Progressing"
         return hs
     core.automation.ibm.com/Cartridge:
       health.lua: |
@@ -580,6 +759,12 @@ spec:
       kinds:
       - TaskRun
       - PipelineRun
+    - apiGroups:
+      - internal.open-cluster-management.io
+      clusters:
+      - '*'
+      kinds:
+      - '*'
   server:
     autoscale:
       enabled: false
