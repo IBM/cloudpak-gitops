@@ -379,12 +379,14 @@ EOF
             && sleep 60 \
             && argocd app wait \
                 --selector app.kubernetes.io/instance="${app_name}" \
-                --health \
                 --operation \
+                --sync \
                 --timeout 10800 \
             && argocd app wait \
                 --selector app.kubernetes.io/instance="${app_name}" \
+                --sync \
                 --operation \
+                --health \
                 --timeout 10800 \
             && log "INFO: Synchronization of ${app_name} complete." \
             || cp_result=1
