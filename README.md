@@ -2,14 +2,16 @@
 
 ## Contents
 
-- [Overview](#overview)
-  - [IBM Cloud Paks](#ibm-cloud-paks)
-  - [GitOps](#gitops)
-  - [Governance Policies](#governance-policies)
-- [Installation](#installation)
-  - [Individual clusters](#individual-clusters)
-  - [Fleet of clusters with governance](#fleet-of-clusters-with-governance)
-- [Contributing](#contributing)
+- [IBM Cloud Paks - GitOps Demo](#ibm-cloud-paks---gitops-demo)
+  - [Contents](#contents)
+  - [Overview](#overview)
+    - [IBM Cloud Paks](#ibm-cloud-paks)
+    - [GitOps](#gitops)
+    - [Governance Policies](#governance-policies)
+  - [Installation](#installation)
+    - [Individual clusters](#individual-clusters)
+    - [Fleet of clusters with governance](#fleet-of-clusters-with-governance)
+  - [Contributing](#contributing)
 
 ---
 
@@ -32,7 +34,7 @@ Supported versions:
 | Cloud Pak | Version | Installation mode |
 | ----------|---------|-------------------|
 | Cloud Pak for Business Automation | [22.0.2](https://www.ibm.com/docs/en/cloud-paks/cp-biz-automation/22.0.2) | Multi-pattern starter deployment |
-| Cloud Pak for Data | [4.6.0](https://www.ibm.com/docs/en/cloud-paks/cp-data/4.6.x?topic=overview) | Online, specialized installation |
+| Cloud Pak for Data | [4.6.1](https://www.ibm.com/docs/en/cloud-paks/cp-data/4.6.x?topic=overview) | Online, specialized installation |
 | Cloud Pak for Integration | [2022.4](https://www.ibm.com/docs/en/cloud-paks/cp-integration/2022.4) | Online installation |
 | Cloud Pak for Security | [1.10](https://www.ibm.com/docs/en/cloud-paks/cp-security/1.10) | Online installation |
 | Cloud Pak for Watson AIOps | [3.6.0](https://www.ibm.com/docs/en/cloud-paks/cloud-pak-watson-aiops/3.6.0) | Online Installation |
