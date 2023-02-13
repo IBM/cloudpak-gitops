@@ -1,0 +1,32 @@
+# https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/2.7/html-single/clusters/index#hosting-service-cluster-configure-aws
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: post-sync-rhacm
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/sync-wave: "9000"
+  namespace: openshift-gitops
+spec:
+  template:
+    spec:
+      containers:
+        - name: config
+          image: quay.io/openshift/origin-cli:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: HYPERSHIFT_PREVIEW
+              value: "{{.Values.spec.components.hypershift_preview}}"
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -eo pipefail
+              set -x
+
+              oc patch mce multiclusterengine --type=merge -p "{\"spec\":{\"overrides\":{\"components\":[{\"name\":\"hypershift-preview\",\"enabled\": ${HYPERSHIFT_PREVIEW}}]}}}"
+
+      restartPolicy: Never
+      serviceAccountName: {{.Values.serviceaccount.argocd_application_controller}}
+  backoffLimit: 2

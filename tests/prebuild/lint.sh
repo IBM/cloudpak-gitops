@@ -51,13 +51,17 @@ helm version --short --client | grep "v2" > /dev/null 2>&1 && install_helm_3=1
 if [ ${install_helm_3} -eq 1 ]; then
     install_helm_result=0
     log "INFO: Installing helm 3"
-    WORKDIR=/tmp
-    curl -sL https://get.helm.sh/helm-v3.5.2-linux-amd64.tar.gz | tar xzf - -C "${WORKDIR}" \
-        && install "${WORKDIR}/linux-amd64/helm" /usr/local/bin/helm \
-        || install_helm_result=1
-        
-    if [ ${install_helm_result} -eq 1 ]; then
-        log "ERROR: helm 3 installation failed."
+    if [ "$(uname)" == "Darwin" ]; then
+        brew install helm
+    else
+        WORKDIR=/tmp
+        curl -sL https://get.helm.sh/helm-v3.5.2-linux-amd64.tar.gz | tar xzf - -C "${WORKDIR}" \
+            && install "${WORKDIR}/linux-amd64/helm" /usr/local/bin/helm \
+            || install_helm_result=1
+            
+        if [ ${install_helm_result} -eq 1 ]; then
+            log "ERROR: helm 3 installation failed."
+        fi
     fi
 fi
 

@@ -9,3 +9,5 @@ metadata:
   policy_namespace: policy
 rhacm_users_group: rhacm-users
 spec:
+  components:
+    hypershift_preview: false

@@ -5,7 +5,7 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "100"
   creationTimestamp: null
-  name: rhacm-seeds
+  name: rhacm-app
   namespace: {{.Values.metadata.argocd_namespace}}
 spec:
   destination:
@@ -19,8 +19,6 @@ spec:
         - /spec/syncPolicy
         - /status
       kind: Application
-    - group: user.openshift.io
-      kind: Group
   project: {{.Values.project}}
   source:
     helm:
@@ -29,18 +27,19 @@ spec:
           value: ${ARGOCD_APP_SOURCE_REPO_URL}
         - name: serviceaccount.argocd_application_controller
           value: {{.Values.serviceaccount.argocd_application_controller}}
+        - name: spec.components.hypershift_preview
+          value: "{{.Values.spec.components.hypershift_preview}}"
         - name: targetRevision
           value: {{.Values.targetRevision}}
-    path: config/rhacm/seeds
+    path: config/argocd-rhacm
     repoURL: {{.Values.repoURL}}
     targetRevision: {{.Values.targetRevision}}
   syncPolicy:
     automated:
-      prune: false
+      prune: true
       selfHeal: true
     syncOptions:
       - PruneLast=true
-      - RespectIgnoreDifferences=true
 status:
   health: {}
   summary: {}
