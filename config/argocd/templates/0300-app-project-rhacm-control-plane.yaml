@@ -26,6 +26,8 @@ spec:
       server: https://kubernetes.default.svc
     - namespace: 'policy'
       server: '*'
+    - namespace: 'multicluster-engine'
+      server: '*'
     - namespace: 'open-cluster-management'
       server: '*'
     - namespace: 'rhacm-cloud-creds'

@@ -23,6 +23,8 @@ ignore: |
   config/rhacm/cloudpaks/templates/placement-argocd.yaml
   config/rhacm/cloudpaks/templates/placement-cloudpaks.yaml
   config/rhacm/cloudpaks/templates/placement-cp-shared.yaml
+  config/rhacm/seeds/templates/0000-namespace-multi-cluster-engine.yaml
+  config/rhacm/seeds/templates/0020-rhacm-hypershift-preview-roles.yaml
 
 rules:
   braces: 

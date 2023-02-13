@@ -43,9 +43,9 @@ metadata:
   creationTimestamp: null
   name: argocd-rhacm-cluster-role
 rules:
-  - apiGroups:
-      - user.openshift.io
-    resources:
-      - groups
-    verbs:
-      - create
+  - apiGroups: ["user.openshift.io"]
+    resources: ["groups"]
+    verbs: ["create"]
+  - apiGroups: ["multicluster.openshift.io"]
+    resources: ["multiclusterengines"]
+    verbs: ["*"]
