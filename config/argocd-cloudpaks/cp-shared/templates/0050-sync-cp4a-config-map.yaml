@@ -56,6 +56,31 @@ spec:
                 fi
               fi
 
+              # NetApp/Trident support
+              if [ -z "${storage_class_rwo}" ] || [ -z "${storage_class_rwx}" ]; then
+                  storage_class_rwx=$(oc get storageclass \
+                        -o=custom-columns='NAME:metadata.name,PROVISIONER:provisioner,BACKEND-TYPE:parameters.backendType' \
+                    | grep "csi.trident.netapp.io.*ontap-nas" \
+                    | head -n 1 \
+                    | cut -d " " -f 1) || true
+                  storage_class_rwo=$(oc get storageclass \
+                        -o=custom-columns='NAME:metadata.name,PROVISIONER:provisioner,BACKEND-TYPE:parameters.backendType' \
+                    | grep "csi.trident.netapp.io.*ontap-san" \
+                    | head -n 1 \
+                    | cut -d " " -f 1) || true
+
+                  # If the cluster does not have the dedicated block storage class, the NFS
+                  # driver can address most use cases with the exception of "block" volume
+                  # mode, which is not needed for Cloud Paks
+                  if [ -z "${storage_class_rwo}" ] && [ -n "${storage_class_rwx}" ]; then
+                      storage_class_rwo=${storage_class_rwx}
+                  fi
+
+                  if [ -n "${storage_class_rwo}" ] && [ -n "${storage_class_rwx}" ]; then
+                      echo "INFO: Cluster has ONTAP installed, using ONTAP storage classes."
+                  fi
+              fi
+
               if [ -z "${storage_class_rwo}" ] || [ -z "${storage_class_rwx}" ] ; then
                 if [[ "${api_url}" == *fyre.ibm.com* ]]; then
                   storage_class_rwo="{{.Values.storageclass.rwo.fyre}}"
