@@ -8,6 +8,7 @@
     - [IBM Cloud Paks](#ibm-cloud-paks)
     - [GitOps](#gitops)
     - [Governance Policies](#governance-policies)
+  - [Storage](#storage)
   - [Installation](#installation)
     - [Individual clusters](#individual-clusters)
     - [Fleet of clusters with governance](#fleet-of-clusters-with-governance)
@@ -46,6 +47,23 @@ GitOps is a declarative way to implement continuous deployment for cloud-native 
 ### Governance Policies
 
 Practicing GitOps at scale, with dozens or even hundreds of clusters, benefits from a level of abstraction where each cluster follows a few select policies. This repository contains a simple deployment of governance policies for the deployment of OpenShift GitOps and Cloud Paks to a fleet of clusters.
+
+## Storage
+
+The instructions in this repository assume the user already has an OpenShift cluster with storage capable of RWO and RWX access mode.
+The Argo CD `Application` resources have pre-synchronization hooks that will attempt auto-detection of the storage in the cluster from common storage providers, in decreasing order of precedence:
+
+| Precedence | OpenShift platform | Storage | Storage classes |
+| ---------- | ------------ | ------- | --------------- |
+| Highest      | All          | OpenShift Data Foundation | `ocs-storagecluster-ceph-rbd` (RWO) and `ocs-storagecluster-cephfs` (RWX). |
+| High     | All          | Rook Ceph | `rook-ceph-block` (RWO) and `rook-cephfs` (RWX) |
+| Medium     | All          | NetApp ONTAP (Trident driver) | `trident-csi` (RWO and RWX.) Note about RWO access mode: the synchronization hooks give preference to a storage class named `trident-block-csi` if it can find one in the cluster. |
+| Low        | IBM Cloud (ROKS classic) | IBM Cloud File Storage | `ibmc-block-gold` (RWO) and `ibmc-file-gold-gid` (RWX) |
+| Low        | AWS (self-managed and ROSA) | Elastic Block Store and Elastic File System | `gp2` (RWO) and `efs` (RWX) |
+| Low        | Azure (self-managed and ARO) | Azure Disk (classic) and Azure File System | `managed-premium` (RWO) and `azure-file` (RWX) |
+
+Note that this is a list of supported storage providers for this repository.
+Cloud Paks may support different matrixes of storage vendors.
 
 ## Installation
 
