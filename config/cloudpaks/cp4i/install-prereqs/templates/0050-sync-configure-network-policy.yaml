@@ -26,6 +26,14 @@ spec:
               set -eo pipefail
               set -x
 
+              is_managed_ocp=0
+              managed_ocp=$(oc get Infrastructure cluster \
+                  -o jsonpath='{.status.platformStatus.*.resourceTags[?(@.key=="red-hat-managed")].value}' || is_managed_ocp=0)
+              if [ "${managed_ocp}" == "true" ]; then
+                  echo "INFO: Do not attempt to adjust network policy for managed OCP environments."
+                  exit 0
+              fi
+
               default_policy=$(oc get namespace default -o jsonpath={.metadata.labels.'network\.openshift\.io/policy-group'}) \
               || {
                 echo "ERROR: Unable to get default ingress policy ."

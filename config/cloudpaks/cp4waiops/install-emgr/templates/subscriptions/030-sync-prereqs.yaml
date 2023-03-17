@@ -45,11 +45,18 @@ spec:
                         --from-file=.dockerconfigjson=/tmp/.dockerconfigjson
                  fi \
               && rm -rf /tmp/.dockerconfigjson \
-              && if [ $(oc get ingresscontroller default -n openshift-ingress-operator -o jsonpath='{.status.endpointPublishingStrategy.type}') = "HostNetwork" ]; then
-                     oc patch namespace default --type=json -p '[{"op":"add","path":"/metadata/labels","value":{"network.openshift.io/policy-group":"ingress"}}]'
-                 fi \
               && echo "INFO: Event Manager prereq configuration successful." \
               || result=1
+
+              is_managed_ocp=0
+              managed_ocp=$(oc get Infrastructure cluster \
+                  -o jsonpath='{.status.platformStatus.*.resourceTags[?(@.key=="red-hat-managed")].value}' || is_managed_ocp=0)
+              if [ "${managed_ocp}" != "true" ]; then
+                  if [ $(oc get ingresscontroller default -n openshift-ingress-operator -o jsonpath='{.status.endpointPublishingStrategy.type}') = "HostNetwork" ]; then
+                    oc patch namespace default --type=json -p '[{"op":"add","path":"/metadata/labels","value":{"network.openshift.io/policy-group":"ingress"}}]'
+                  fi \
+                  || result=1
+              fi
 
               # https://www.ibm.com/docs/en/noi/1.6.5?topic=preparing-your-cluster
               oc get ServiceAccount noi-service-account --namespace "${TARGET_NAMESPACE}" -o yaml 2> /dev/null \
