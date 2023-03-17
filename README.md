@@ -55,14 +55,14 @@ The Argo CD `Application` resources have pre-synchronization hooks that will att
 
 | Precedence | OpenShift platform | Storage | Storage classes |
 | ---------- | ------------ | ------- | --------------- |
-| Highest      | All          | OpenShift Data Foundation | `ocs-storagecluster-ceph-rbd` (RWO) and `ocs-storagecluster-cephfs` (RWX). |
-| High     | All          | Rook Ceph | `rook-ceph-block` (RWO) and `rook-cephfs` (RWX) |
+| Highest    | All          | OpenShift Data Foundation | `ocs-storagecluster-ceph-rbd` (RWO) and `ocs-storagecluster-cephfs` (RWX). |
+| High       | All          | Rook Ceph | `rook-ceph-block` (RWO) and `rook-cephfs` (RWX) |
 | Medium     | All          | NetApp ONTAP (Trident driver) | `trident-csi` (RWO and RWX.) Note about RWO access mode: the synchronization hooks give preference to a storage class named `trident-block-csi` if it can find one in the cluster. |
 | Low        | IBM Cloud (ROKS classic) | IBM Cloud File Storage | `ibmc-block-gold` (RWO) and `ibmc-file-gold-gid` (RWX) |
-| Low        | AWS (self-managed and ROSA) | Elastic Block Store and Elastic File System | `gp2` (RWO) and `efs` (RWX) |
+| Low        | AWS (self-managed and ROSA) | Elastic Block Store and Elastic File System | First storage class with provisioner `ebs.csi.aws.com` (RWO) and first storage class with provisioner `efs.csi.aws.com` (RWX) |
 | Low        | Azure (self-managed and ARO) | Azure Disk (classic) and Azure File System | `managed-premium` (RWO) and `azure-file` (RWX) |
 
-Note that this is a list of supported storage providers for this repository.
+Note that this is a list of validated storage providers for this repository.
 Cloud Paks may support different matrixes of storage vendors.
 
 ## Installation
