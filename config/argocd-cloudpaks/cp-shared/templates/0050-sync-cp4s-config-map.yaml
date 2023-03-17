@@ -85,8 +85,11 @@ spec:
                 else
                     platform=$(oc get Infrastructure cluster  -o jsonpath={.status.platform})
                     if [ "${platform}" == "AWS" ]; then
-                        ebs=$(oc get StorageClasses | grep kubernetes.io/aws-ebs | cut -d " " -f 1) || true
-                        if [ -n "${ebs}" ] && [ -n "${efs}" ]; then
+                        ebs=$(oc get StorageClasses | grep ebs.csi.aws.com | head -n 1 | cut -d " " -f 1) || true
+                        if [ -z "${ebs}" ]; then
+                            ebs=$(oc get StorageClasses | grep kubernetes.io/aws-ebs | cut -d " " -f 1) || true
+                        fi
+                        if [ -n "${ebs}" ]; then
                             storage_class_rwo="${ebs}"
                         else
                             storage_class_rwo="{{.Values.storageclass.rwo.aws}}"
