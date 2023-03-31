@@ -97,12 +97,13 @@ spec:
   persistence:
     enabled: false
     storageClassCassandraBackup: {{.Values.storageclass.rwo}}
-    storageClassCouchdb: {{.Values.storageclass.rwo}}
     storageClassCassandraData: {{.Values.storageclass.rwo}}
+    storageClassCouchdb: {{.Values.storageclass.rwo}}
     storageClassElastic: {{.Values.storageclass.rwo}}
     storageClassImpactGUI: {{.Values.storageclass.rwo}}
     storageClassImpactServer: {{.Values.storageclass.rwo}}
     storageClassKafka: {{.Values.storageclass.rwo}}
+    storageClassMinio: {{.Values.storageclass.rwo}}
     storageClassNCOBackup: {{.Values.storageclass.rwo}}
     storageClassNCOPrimary: {{.Values.storageclass.rwo}}
     storageClassZookeeper: {{.Values.storageclass.rwo}}
