@@ -7,6 +7,7 @@ serviceaccount:
 metadata:
   argocd_app_namespace: ibm-cloudpaks
   argocd_namespace: openshift-gitops
+online_catalog_source_priority: -1
 storageclass:
   rwo:
     aws: gp2

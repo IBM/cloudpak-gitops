@@ -27,6 +27,8 @@ spec:
           value: ${ARGOCD_APP_NAME}
         - name: argocd_app_namespace
           value: ${ARGOCD_APP_NAMESPACE}
+        - name: online_catalog_source_priority
+          value: "{{.Values.online_catalog_source_priority}}"
         - name: repoURL
           value: ${ARGOCD_APP_SOURCE_REPO_URL}
         - name: serviceaccount.argocd_application_controller
