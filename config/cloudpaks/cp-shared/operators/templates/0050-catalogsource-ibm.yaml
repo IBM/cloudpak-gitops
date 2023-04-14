@@ -8,6 +8,7 @@ metadata:
     argocd.argoproj.io/sync-wave: "50"
 spec:
   displayName: "IBM Operator Catalog"
+  priority: {{.Values.online_catalog_source_priority}}
   publisher: IBM
   sourceType: grpc
   image: icr.io/cpopen/ibm-operator-catalog:latest

@@ -3,3 +3,4 @@ metadata:
   argocd_namespace: openshift-gitops
 serviceaccount:
   argocd_application_controller: openshift-gitops-argocd-application-controller
+online_catalog_source_priority: -1
