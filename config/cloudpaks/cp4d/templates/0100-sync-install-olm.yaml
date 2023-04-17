@@ -62,6 +62,7 @@ spec:
               bin/apply-olm apply-olm \
                   --release=${VERSION} \
                   --components=${COMPONENTS} \
+                  --cs_ns=${PROJECT_CPFS_OPS} \
                   --cpd_operator_ns=${PROJECT_CPD_OPS} \
               && bin/get-olm-artifacts \
                   --subscription_ns=${PROJECT_CPFS_OPS}  \

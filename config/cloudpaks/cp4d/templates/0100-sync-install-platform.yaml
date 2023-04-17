@@ -44,9 +44,11 @@ spec:
               bin/setup-instance-ns \
                   --cpd_instance_ns=${PROJECT_CPD_INSTANCE} \
                   --cpd_operator_ns=${PROJECT_CPD_OPS} \
+                  --cs_ns=${PROJECT_CPFS_OPS} \
               && bin/apply-cr \
                   --components=${COMPONENTS} \
                   --release=${VERSION} \
+                  --cs_ns=${PROJECT_CPFS_OPS} \
                   --cpd_instance_ns=${PROJECT_CPD_INSTANCE} \
                   --block_storage_class=${STG_CLASS_BLOCK} \
                   --file_storage_class=${STG_CLASS_FILE} \
