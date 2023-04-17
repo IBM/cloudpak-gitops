@@ -22,6 +22,8 @@ spec:
           value: {{.Values.components}}
         - name: metadata.argocd_app_namespace
           value: {{.Values.metadata.argocd_app_namespace}}
+        - name: metadata.common_services_namespace
+          value: {{.Values.metadata.common_services_namespace}}
         - name: metadata.operators_namespace
           value: {{.Values.metadata.operators_namespace}}
         - name: repoURL
