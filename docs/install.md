@@ -2,23 +2,25 @@
 
 ## Contents
 
-- [Prerequisites](#prerequisites)
-- [Install the OpenShift GitOps operator](#install-the-openshift-gitops-operator)
-  * [Using the OCP console](#using-the-ocp-console)
-  * [Using a terminal](#using-a-terminal)
-- [Obtain an entitlement key](#obtain-an-entitlement-key)
-- [Update the OCP global pull secret](#update-the-ocp-global-pull-secret)
-  * [Update the global pull secret using the OpenShift console](#update-the-global-pull-secret-using-the-openshift-console)
-  * [Special note about global pull secrets on ROKS](#special-note-about-global-pull-secrets-on-roks)
-- [Update the pull secret in the openshift-gitops namespace](#update-the-pull-secret-in-the-openshift-gitops-namespace)
-- [Adding Cloud Pak GitOps Application objects to your GitOps server](#adding-cloud-pak-gitops-application-objects-to-your-gitops-server)
-  * [Using the OCP console](#using-the-ocp-console-1)
-  * [Using a terminal](#using-a-terminal-1)
-- [Post-configuration steps](#post-configuration-steps)
-  * [Local configuration steps](#local-configuration-steps)
-    + [Cloud Pak for Data](#cloud-pak-for-data)
-    + [Cloud Pak for Integration](#cloud-pak-for-integration)
-- [Duplicate this repository](#duplicate-this-repository)
+- [Installation](#installation)
+  - [Contents](#contents)
+  - [Prerequisites](#prerequisites)
+  - [Install the OpenShift GitOps operator](#install-the-openshift-gitops-operator)
+    - [Using the OCP console](#using-the-ocp-console)
+    - [Using a terminal](#using-a-terminal)
+  - [Obtain an entitlement key](#obtain-an-entitlement-key)
+  - [Update the OCP global pull secret](#update-the-ocp-global-pull-secret)
+    - [Update the global pull secret using the OpenShift console](#update-the-global-pull-secret-using-the-openshift-console)
+    - [Special note about global pull secrets on ROKS](#special-note-about-global-pull-secrets-on-roks)
+  - [Update the pull secret in the openshift-gitops namespace](#update-the-pull-secret-in-the-openshift-gitops-namespace)
+  - [Adding Cloud Pak GitOps Application objects to your GitOps server](#adding-cloud-pak-gitops-application-objects-to-your-gitops-server)
+    - [Using the OCP console](#using-the-ocp-console-1)
+    - [Using a terminal](#using-a-terminal-1)
+  - [Post-configuration steps](#post-configuration-steps)
+    - [Local configuration steps](#local-configuration-steps)
+      - [Cloud Pak for Data](#cloud-pak-for-data)
+      - [Cloud Pak for Integration](#cloud-pak-for-integration)
+  - [Duplicate this repository](#duplicate-this-repository)
 
 ---
 
@@ -213,18 +215,19 @@ After completing the list of activities listed in the previous sections, you can
 
 1. (add actual Cloud Pak) Click on the "New App+" button again and fill out the form with values matching the Cloud Pak of your choice, according to the table below:
 
-    | Cloud Pak | Application Name | Path | Namespace |
-    | --------- | ---------------- | ---- | --------- |
-    | Business Automation | cp4a-app | config/argocd-cloudpaks/cp4a | cp4a |
-    | Integration | cp4i-app | config/argocd-cloudpaks/cp4i | cp4i |
-    | Watson AIOps | cp4waiops-app | config/argocd-cloudpaks/cp4waiops | cp4waiops |
-    | Data | cp4d-app | config/argocd-cloudpaks/cp4d | cp4d |
-    | Security | cp4s-app | config/argocd-cloudpaks/cp4s | cp4s |
+    | Cloud Pak | Application Name | Path |
+    | --------- | ---------------- | ---- |
+    | Business Automation | cp4a-app | config/argocd-cloudpaks/cp4a |
+    | Integration | cp4i-app | config/argocd-cloudpaks/cp4i |
+    | Watson AIOps | cp4waiops-app | config/argocd-cloudpaks/cp4waiops |
+    | Data | cp4d-app | config/argocd-cloudpaks/cp4d |
+    | Security | cp4s-app | config/argocd-cloudpaks/cp4s |
 
     For all other fields, use the following values:
 
     | Field | Value |
     | ----- | ----- |
+    | Namespace | ibm-cloudpaks |
     | Project | default |
     | Sync policy | Automatic |
     | Self Heal | true |
