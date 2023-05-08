@@ -553,6 +553,10 @@ spec:
         memory: 128Mi
     route:
       enabled: true
+      tls:
+        # https://access.redhat.com/solutions/6041341
+        insecureEdgeTerminationPolicy: Redirect
+        termination: reencrypt
     service:
       type: ""
   sso:
