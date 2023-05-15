@@ -13,6 +13,8 @@ spec:
   clusterResourceWhitelist:
     - group: ''
       kind: Namespace
+    - group: cluster.open-cluster-management.io
+      kind: ManagedClusterSet
     - group: rbac.authorization.k8s.io
       kind: ClusterRole
     - group: rbac.authorization.k8s.io
@@ -36,6 +38,8 @@ spec:
     - group: argoproj.io
       kind: Application
     - group: apps.open-cluster-management.io
+      kind: '*'
+    - group: cluster.open-cluster-management.io
       kind: '*'
     - group: policy.open-cluster-management.io
       kind: '*'
