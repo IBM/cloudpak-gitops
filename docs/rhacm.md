@@ -2,16 +2,18 @@
 
 ## Contents
 
-- [Overview](#overview)
-- [Installation](#installation)
-  * [Install RHACM on OCP cluster via Argo](#install-rhacm-on-ocp-cluster-via-argo)
-- [Using the policies](#using-the-policies)
-  * [Policies](#policies)
-  * [Label your clusters](#label-your-clusters)
-  * [Examples](#examples)
-- [The "rhacm-users" group](#the--rhacm-users--group)
-- [Contributing](#contributing)
-- [References](#references)
+- [Red Hat Advanced Cluster Management for Kubernetes](#red-hat-advanced-cluster-management-for-kubernetes)
+  - [Contents](#contents)
+  - [Overview](#overview)
+  - [Installation](#installation)
+    - [Install RHACM on OCP cluster via Argo](#install-rhacm-on-ocp-cluster-via-argo)
+  - [Using the policies](#using-the-policies)
+    - [Policies](#policies)
+    - [Label your clusters](#label-your-clusters)
+    - [Examples](#examples)
+  - [The "rhacm-users" group](#the-rhacm-users-group)
+  - [Contributing](#contributing)
+  - [References](#references)
 
 ---
 
@@ -90,9 +92,11 @@ Once Argo completes synchronizing the applications, your cluster will have polic
 Labels:
 
 - `gitops-branch` + `cp4a`: Placement for Cloud Pak for Business Automation.
-- `gitops-branch` + `cp4waiops`: Placement for Cloud Pak  for Cloud Pak for Watson AIOps.
 - `gitops-branch` + `cp4d`: Placement for Cloud Pak for Data.
 - `gitops-branch` + `cp4i`: Placement for Cloud Pak for Integration.
+- `gitops-branch` + `cp4s`: Placement for Cloud Pak for Security.
+- `gitops-branch` + `cp4waiops`: Placement for Cloud Pak for Watson AIOps.
+- `gitops-remote` + `true`: Assign cluster to the `gitops-cluster` cluster-set, registering it to the [GitOps Cluster](https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/2.7/html/applications/managing-applications#gitops-config).
 
 Values for each label:
 
