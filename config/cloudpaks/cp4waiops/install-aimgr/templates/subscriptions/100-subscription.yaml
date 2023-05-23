@@ -7,6 +7,10 @@ metadata:
   name: ibm-aiops-orchestrator
   namespace: "{{.Values.metadata.argocd_app_namespace}}"
 spec:
+  config:
+    env:
+      - name: REDIS_CHANNEL
+        value: v1.6
   channel: v3.7
   installPlanApproval: Automatic
   name: ibm-aiops-orchestrator
