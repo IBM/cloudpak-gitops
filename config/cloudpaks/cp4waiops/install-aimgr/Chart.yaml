@@ -13,9 +13,9 @@ description: Cloud Pak for Watson AIOps - AI Manager
 # pipeline. Library charts do not define any templates and therefore cannot be deployed.
 type: application
 
-version: 0.14.0
+version: 0.14.1
 
 # This is the version number of the application being deployed. This version number should be
 # incremented each time you make changes to the application. Versions are not expected to
 # follow Semantic Versioning. They should reflect the version the application is using.
-appVersion: 3.7.0
+appVersion: 3.7.1
