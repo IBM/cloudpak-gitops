@@ -7,6 +7,12 @@ serviceaccount:
 metadata:
   argocd_app_namespace: ibm-cloudpaks
   argocd_namespace: openshift-gitops
+namespace_mapping:
+  cp4a: cp4a
+  cp4d: cp4d
+  cp4i: cp4i
+  cp4s: cp4s
+  cp4waiops: cp4waiops
 online_catalog_source_priority: -1
 storageclass:
   rwo:

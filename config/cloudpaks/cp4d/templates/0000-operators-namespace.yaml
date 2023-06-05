@@ -1,4 +1,4 @@
-{{ if not ( eq ( default "" .Values.metadata.operators_namespace ) "ibm-common-services" ) }}
+{{ if not ( or ( eq ( default "" .Values.metadata.operators_namespace ) "ibm-common-services" ) ( eq .Values.metadata.common_services_namespace .Values.metadata.operators_namespace ) ) }}
 ---
 apiVersion: v1
 kind: Namespace

@@ -4,10 +4,10 @@ targetRevision: main
 serviceaccount:
   argocd_application_controller: openshift-gitops-argocd-application-controller
 metadata:
-  argocd_app_namespace: cpd
+  argocd_app_namespace: cp4d
   argocd_namespace: openshift-gitops
-  common_services_namespace: ibm-common-services
-  operators_namespace: cpd-operators
+  common_services_namespace: cp4d
+  operators_namespace: cp4d
 
 # https://www.ibm.com/docs/en/cloud-paks/cp-data/4.6.x?topic=information-determining-which-components-install
 components: cpfs,scheduler,cpd_platform,rstudio,wml,ws

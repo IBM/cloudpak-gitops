@@ -21,6 +21,7 @@ spec:
     repository: cp.icr.io/cp/cp4s
     repositoryType: entitled
     roksAuthentication: {{.Values.roks_authentication}}
+    CSNamespace: "{{.Values.metadata.argocd_app_namespace}}-cs"
   threatManagementCapabilities:
     deployDRC: true
     deployRiskManager: true

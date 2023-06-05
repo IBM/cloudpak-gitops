@@ -5,8 +5,8 @@ serviceaccount:
 metadata:
   argocd_app_namespace: cpd
   argocd_namespace: openshift-gitops
-  common_services_namespace: ibm-common-services
-  operators_namespace: cpd-operators
+  common_services_namespace: "set in parent app"
+  operators_namespace: "set in parent app"
 
 # https://www.ibm.com/docs/en/cloud-paks/cp-data/4.6.x?topic=information-determining-which-components-install
 components: "set in parent app"

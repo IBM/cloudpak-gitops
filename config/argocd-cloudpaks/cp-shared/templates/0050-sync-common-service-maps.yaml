@@ -1,0 +1,64 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: sync-common-service-maps
+  annotations:
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/sync-wave: "50"
+  namespace: openshift-gitops
+spec:
+  template:
+    spec:
+      containers:
+        - name: config
+          image: quay.io/openshift/origin-cli:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: ARGOCD_NAMESPACE
+              value: "openshift-gitops"
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -eou pipefail
+              set -x
+
+              # https://www.ibm.com/docs/en/cloud-paks/1.0?topic=cfs-installing-cloud-pak-foundational-services-in-multiple-namespaces#cli
+              if ! oc get ConfigMap common-service-maps -n kube-public 2>/dev/null
+              then
+                echo "INFO: ConfigMap common-service-maps needs to be created."
+                cat <<EOF | oc apply -f -
+              apiVersion: v1
+              kind: ConfigMap
+              metadata:
+                name: common-service-maps
+                namespace: kube-public
+              data:
+                common-service-maps.yaml: |
+                  controlNamespace: cs-control
+                  namespaceMapping:
+                  - map-to-common-service-namespace: {{.Values.namespace_mapping.cp4a}}
+                    requested-from-namespace:
+                    - {{.Values.namespace_mapping.cp4a}}
+                  - map-to-common-service-namespace: {{.Values.namespace_mapping.cp4d}}
+                    requested-from-namespace:
+                    - {{.Values.namespace_mapping.cp4d}}
+                  - map-to-common-service-namespace: {{.Values.namespace_mapping.cp4i}}
+                    requested-from-namespace:
+                    - {{.Values.namespace_mapping.cp4i}}
+                  - map-to-common-service-namespace: {{.Values.namespace_mapping.cp4s}}-cs
+                    requested-from-namespace:
+                    - {{.Values.namespace_mapping.cp4s}}
+                  - map-to-common-service-namespace: {{.Values.namespace_mapping.cp4waiops}}
+                    requested-from-namespace:
+                    - {{.Values.namespace_mapping.cp4waiops}}
+                    - {{.Values.namespace_mapping.cp4waiops}}-emgr
+              EOF
+              else
+                echo "INFO: ConfigMap common-service-maps already exists."
+              fi
+      restartPolicy: Never
+
+      serviceAccountName: {{.Values.serviceaccount.ibm_cloudpaks_installer}}
+  backoffLimit: 2

@@ -6,6 +6,7 @@
   - [Contents](#contents)
   - [Overview](#overview)
     - [IBM Cloud Paks](#ibm-cloud-paks)
+    - [Shared cluster](#shared-cluster)
     - [GitOps](#gitops)
     - [Governance Policies](#governance-policies)
   - [Storage](#storage)
@@ -37,8 +38,14 @@ Supported versions:
 | Cloud Pak for Business Automation | [22.0.2](https://www.ibm.com/docs/en/cloud-paks/cp-biz-automation/22.0.2) | Multi-pattern starter deployment |
 | Cloud Pak for Data | [4.6.5](https://www.ibm.com/docs/en/cloud-paks/cp-data/4.6.x?topic=overview) | Online, specialized installation |
 | Cloud Pak for Integration | [2022.4](https://www.ibm.com/docs/en/cloud-paks/cp-integration/2022.4) | Online installation |
-| Cloud Pak for Security | [1.10](https://www.ibm.com/docs/en/cloud-paks/cp-security/1.10) | Online installation |
-| Cloud Pak for Watson AIOps | [3.7.0](https://www.ibm.com/docs/en/cloud-paks/cloud-pak-watson-aiops/3.7.0) | Online Installation |
+| Cloud Pak for Security | [1.10.12](https://www.ibm.com/docs/en/cloud-paks/cp-security/1.10) | Online installation |
+| Cloud Pak for Watson AIOps | [3.7.1](https://www.ibm.com/docs/en/cloud-paks/cloud-pak-watson-aiops/3.7.1) | Online Installation |
+
+### Shared cluster
+
+All Cloud Paks are deployed using dedicated automation foundation instances.
+
+At the root of this configuration, lies a pre-synchronization hook inside the `cp-shared` application, which creates a default "common-service-maps" ConfigMap under the `kube-public` namespace, according to the instructions listed under <https://www.ibm.com/docs/en/cloud-paks/1.0?topic=cfs-installing-cloud-pak-foundational-services-in-multiple-namespaces>
 
 ### GitOps
 
