@@ -10,3 +10,6 @@ rules:
   - apiGroups: ["config.openshift.io"]
     resources: ["infrastructures", "ingresses"]
     verbs: ["get"]
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["*"]

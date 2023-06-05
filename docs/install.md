@@ -26,7 +26,7 @@
 
 ## Prerequisites
 
-- An OpenShift Container Platform cluster, version 4.6 or later.
+- An OpenShift Container Platform cluster, version 4.8 or later.
 
   The applications were tested on both managed and self-managed deployments.
 
@@ -61,7 +61,7 @@
    ```sh
    oc version --client
 
-   # Client Version: 4.8.2
+   # Client Version: 4.10.45
    ```
 
    Ideally, the client's minor version should be at most one iteration behind the server version. Most commands here are pretty basic and will work with more significant differences, but keep that in mind if you see errors about unrecognized commands and parameters.
@@ -215,19 +215,18 @@ After completing the list of activities listed in the previous sections, you can
 
 1. (add actual Cloud Pak) Click on the "New App+" button again and fill out the form with values matching the Cloud Pak of your choice, according to the table below:
 
-    | Cloud Pak | Application Name | Path |
-    | --------- | ---------------- | ---- |
-    | Business Automation | cp4a-app | config/argocd-cloudpaks/cp4a |
-    | Integration | cp4i-app | config/argocd-cloudpaks/cp4i |
-    | Watson AIOps | cp4waiops-app | config/argocd-cloudpaks/cp4waiops |
-    | Data | cp4d-app | config/argocd-cloudpaks/cp4d |
-    | Security | cp4s-app | config/argocd-cloudpaks/cp4s |
+    | Cloud Pak | Application Name | Path | Namespace |
+    | --------- | ---------------- | ---- | --------- |
+    | Business Automation | cp4a-app | config/argocd-cloudpaks/cp4a | cp4a |
+    | Integration | cp4i-app | config/argocd-cloudpaks/cp4i | cp4i |
+    | Watson AIOps | cp4waiops-app | config/argocd-cloudpaks/cp4waiops | cp4waiops |
+    | Data | cp4d-app | config/argocd-cloudpaks/cp4d | cp4d |
+    | Security | cp4s-app | config/argocd-cloudpaks/cp4s | cp4s |
 
     For all other fields, use the following values:
 
     | Field | Value |
     | ----- | ----- |
-    | Namespace | ibm-cloudpaks |
     | Project | default |
     | Sync policy | Automatic |
     | Self Heal | true |
@@ -321,6 +320,7 @@ After completing the list of activities listed in the previous sections, you can
    # table of Cloud Paks above, such as cp4a-app, cp4i-app, 
    # cp4waiops-app, cp4d-app, etc >>
    cp=cp4i
+   cp_namespace=$cp
    app_name=${cp}-app
    # app_path=<< choose the respective value from the "path name." 
    # column in the table of Cloud Paks above, such as 
@@ -354,6 +354,7 @@ After completing the list of activities listed in the previous sections, you can
    argocd app wait "${app_name}" \
          --sync \
          --health \
+         --operations \
          --timeout 3600
    ```
 

@@ -1,0 +1,16 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  creationTimestamp: null
+  name: {{.Values.metadata.argocd_app_namespace}}
+spec: {}
+status: {}
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  creationTimestamp: null
+  name: "{{.Values.metadata.argocd_app_namespace}}-cs"
+spec: {}
+status: {}

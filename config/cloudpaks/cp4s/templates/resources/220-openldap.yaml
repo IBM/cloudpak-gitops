@@ -32,7 +32,7 @@ spec:
 
               result=0
 
-              # https://www.ibm.com/docs/en/cloud-paks/cp-security/1.9?topic=support-installing-cpctl-utility-access-actions
+              # https://www.ibm.com/docs/en/cloud-paks/cp-security/1.10?topic=support-installing-cpctl-utility-access-actions
 
               cd $HOME \
               && oc project "${TARGET_NAMESPACE}" \

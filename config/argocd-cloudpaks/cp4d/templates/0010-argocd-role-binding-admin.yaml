@@ -12,8 +12,5 @@ roleRef:
   name: cluster-admin
 subjects:
   - kind: ServiceAccount
-    name: default
-    namespace: ibm-common-services
-  - kind: ServiceAccount
     name: "{{.Values.serviceaccount.argocd_application_controller}}"
     namespace: "{{.Values.metadata.argocd_namespace}}"

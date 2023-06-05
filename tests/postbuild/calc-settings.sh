@@ -5,7 +5,7 @@ set -x
 
 original_dir=$PWD
 : "${PIPELINE_DEBUG:=0}"
-if [ ${PIPELINE_DEBUG} -eq 1 ]; then
+if [ "${PIPELINE_DEBUG}" -eq 1 ]; then
     set -x
     env
 fi
@@ -132,15 +132,14 @@ cd "${WORKDIR}"
 
 branch_delta_output_file="${WORKDIR}/diff.txt"
 extract_branch_delta "${branch_delta_output_file}"
-# As of CP4D 4.0.6, cp4d has to be last in the "labels" field
-for cloudpak in cp4i cp4a cp4waiops cp4s cp4d
+for cloudpak in cp4a cp4d cp4i cp4waiops cp4s
 do
     if grep "/${cloudpak}/" "${branch_delta_output_file}"; then
         labels="${labels},${cloudpak}:${cloudpak}"
         if [ "${cloudpak}" == "cp4d" ]; then
             setup_gps=true
         fi
-        if [ "${cloudpak}" != "cp-shared" ]; then
+        if [ "${cloudpak}" != "cp-shared" ] && [ ${workers} -lt 9 ]; then
             workers=$((workers+3))
         fi
     fi

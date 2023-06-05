@@ -16,7 +16,6 @@ ignore: |
   config/cloudpaks/cp4d/templates/0000-operators-namespace.yaml
   config/cloudpaks/cp4i/install-prereqs/templates/0000-namespace.yaml
   config/cloudpaks/cp4i/install-prereqs/templates/0100-operator-group.yaml
-  config/cloudpaks/cp4s/templates/prereqs/001-cp4s-namespace.yaml
   config/cloudpaks/cp4s/templates/subscriptions/050-cp4s-operator-group.yaml
   config/cloudpaks/cp4waiops/install-aimgr/templates/resources/200-ai-manager.yaml
   config/cloudpaks/cp4waiops/install-aimgr/templates/subscriptions/050-operator-group.yaml
