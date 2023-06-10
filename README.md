@@ -43,9 +43,11 @@ Supported versions:
 
 ### Shared cluster
 
-All Cloud Paks are deployed using dedicated automation foundation instances.
+Starting with the v0.22 release, all Cloud Paks are deployed using dedicated automation foundation instances.
 
 At the root of this configuration, lies a pre-synchronization hook inside the `cp-shared` application, which creates a default "common-service-maps" ConfigMap under the `kube-public` namespace, according to the instructions listed under <https://www.ibm.com/docs/en/cloud-paks/1.0?topic=cfs-installing-cloud-pak-foundational-services-in-multiple-namespaces>
+
+Note that if you want to install a Cloud Pak to a non-default namespace, you must update the parameters to the `cp-shared-app` application to override that default location. 
 
 ### GitOps
 

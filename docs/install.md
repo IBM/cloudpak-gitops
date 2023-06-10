@@ -61,7 +61,7 @@
    ```sh
    oc version --client
 
-   # Client Version: 4.10.45
+   # Client Version: 4.10.60
    ```
 
    Ideally, the client's minor version should be at most one iteration behind the server version. Most commands here are pretty basic and will work with more significant differences, but keep that in mind if you see errors about unrecognized commands and parameters.
@@ -211,17 +211,31 @@ After completing the list of activities listed in the previous sections, you can
     | Revision | HEAD |
     | Cluster URL | <https://kubernetes.default.svc> |
 
+    **Optional**: If you want to deploy a Cloud Pak to a non-default namespace, you must override the default
+    value for the Cloud Paks, using the parameters below:
+
+    | Parameter | (Default) Value |
+    | --------- | --------------- |
+    | dedicated_cs.enabled | true |
+    | dedicated_cs.namespace_mapping.cp4a | cp4a |
+    | dedicated_cs.namespace_mapping.cp4d | cp4d |
+    | dedicated_cs.namespace_mapping.cp4i | cp4i |
+    | dedicated_cs.namespace_mapping.cp4s | cp4s |
+    | dedicated_cs.namespace_mapping.cp4waiops | cp4waiops |
+
 1. After filling out the form details, click the "Create" button
 
 1. (add actual Cloud Pak) Click on the "New App+" button again and fill out the form with values matching the Cloud Pak of your choice, according to the table below:
 
+    Note that if you want to deploy a Cloud Pak to a non-default namespace, you need to make sure you pass the same namespace values used in the optional parameter values for the `cp-shared` application.
+
     | Cloud Pak | Application Name | Path | Namespace |
     | --------- | ---------------- | ---- | --------- |
     | Business Automation | cp4a-app | config/argocd-cloudpaks/cp4a | cp4a |
-    | Integration | cp4i-app | config/argocd-cloudpaks/cp4i | cp4i |
-    | Watson AIOps | cp4waiops-app | config/argocd-cloudpaks/cp4waiops | cp4waiops |
     | Data | cp4d-app | config/argocd-cloudpaks/cp4d | cp4d |
+    | Integration | cp4i-app | config/argocd-cloudpaks/cp4i | cp4i |
     | Security | cp4s-app | config/argocd-cloudpaks/cp4s | cp4s |
+    | Watson AIOps | cp4waiops-app | config/argocd-cloudpaks/cp4waiops | cp4waiops |
 
     For all other fields, use the following values:
 
@@ -249,7 +263,7 @@ After completing the list of activities listed in the previous sections, you can
    ```sh
    oc version --client
 
-   # Client Version: 4.10.35
+   # Client Version: 4.10.60
    ```
 
    Ideally, the client's minor version should be at most one iteration behind the server version. Most commands here are pretty basic and will work with more significant differences, but keep that in mind if you see errors about unrecognized commands and parameters.
@@ -300,6 +314,17 @@ After completing the list of activities listed in the previous sections, you can
 
    ```sh
    cp_namespace=ibm-cloudpaks
+
+   # If you want to override the default target namespace for 
+   # one or more Cloud Paks, you need to adjust the values below
+   # to indicate the desired target namespace.
+   # dedicated_cs.enabled=true
+   cp4a_namespace=cp4a
+   cp4d_namespace=cp4d
+   cp4i_namespace=cp4i
+   cp4s_namespace=cp4s
+   cp4waiops_namespace=cp4waiops
+
    argocd app create cp-shared-app \
          --project default \
          --dest-namespace openshift-gitops \
@@ -308,6 +333,12 @@ After completing the list of activities listed in the previous sections, you can
          --path config/argocd-cloudpaks/cp-shared \
          --helm-set-string argocd_app_namespace="${cp_namespace}" \
          --helm-set-string metadata.argocd_app_namespace="${cp_namespace}" \
+         --helm-set-string dedicated_cs.enabled="${dedicated_cs.enabled:-false}" \
+         --helm-set-string dedicated_cs.namespace_mapping.cp4a="${cp4a_namespace}" \
+         --helm-set-string dedicated_cs.namespace_mapping.cp4d="${cp4d_namespace}" \
+         --helm-set-string dedicated_cs.namespace_mapping.cp4i="${cp4i_namespace}" \
+         --helm-set-string dedicated_cs.namespace_mapping.cp4s="${cp4s_namespace}" \
+         --helm-set-string dedicated_cs.namespace_mapping.cp4waiops="${cp4waiops_namespace}" \
          --sync-policy automated \
          --revision ${gitops_branch:?} \
          --upsert
@@ -320,7 +351,12 @@ After completing the list of activities listed in the previous sections, you can
    # table of Cloud Paks above, such as cp4a-app, cp4i-app, 
    # cp4waiops-app, cp4d-app, etc >>
    cp=cp4i
+
+   # Note that if you want to use a target namespace that is not the
+   # default, you must make the corresponding parameter update to the
+   # cp-shared-app
    cp_namespace=$cp
+
    app_name=${cp}-app
    # app_path=<< choose the respective value from the "path name." 
    # column in the table of Cloud Paks above, such as 

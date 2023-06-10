@@ -358,6 +358,11 @@ EOF
         if [ "${cp}" == "rhacm" ]; then
             app_path="config/argocd-rhacm"
         fi
+        local argocd_app_params=()
+        local dedicated_cs_enabled=false
+        if [ "${cp}" == "cp-shared" ]; then
+            argocd_app_params=(--helm-set-string dedicated_cs.enabled="${dedicated_cs_enabled:-false}")
+        fi
         argocd app create "${app_name}" \
             --project default \
             --dest-namespace "${GITOPS_NAMESPACE}" \
@@ -365,6 +370,7 @@ EOF
             --helm-set-string metadata.argocd_app_namespace="${cp_namespace}" \
             --helm-set-string repoURL="${gitops_repo}" \
             --helm-set-string targetRevision="${gitops_branch}" \
+            "${argocd_app_params[@]}" \
             --path "${app_path}" \
             --repo "${gitops_repo}" \
             --revision "${gitops_branch}" \
