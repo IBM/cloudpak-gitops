@@ -1,3 +1,4 @@
+{{ if eq (.Values.dedicated_cs.enabled | toString) "true" }}
 ---
 apiVersion: batch/v1
 kind: Job
@@ -36,24 +37,24 @@ spec:
                 namespace: kube-public
               data:
                 common-service-maps.yaml: |
-                  controlNamespace: cs-control
+                  controlNamespace: {{.Values.dedicated_cs.control_namespace}}
                   namespaceMapping:
-                  - map-to-common-service-namespace: {{.Values.namespace_mapping.cp4a}}
+                  - map-to-common-service-namespace: {{.Values.dedicated_cs.namespace_mapping.cp4a}}
                     requested-from-namespace:
-                    - {{.Values.namespace_mapping.cp4a}}
-                  - map-to-common-service-namespace: {{.Values.namespace_mapping.cp4d}}
+                    - {{.Values.dedicated_cs.namespace_mapping.cp4a}}
+                  - map-to-common-service-namespace: {{.Values.dedicated_cs.namespace_mapping.cp4d}}
                     requested-from-namespace:
-                    - {{.Values.namespace_mapping.cp4d}}
-                  - map-to-common-service-namespace: {{.Values.namespace_mapping.cp4i}}
+                    - {{.Values.dedicated_cs.namespace_mapping.cp4d}}
+                  - map-to-common-service-namespace: {{.Values.dedicated_cs.namespace_mapping.cp4i}}
                     requested-from-namespace:
-                    - {{.Values.namespace_mapping.cp4i}}
-                  - map-to-common-service-namespace: {{.Values.namespace_mapping.cp4s}}-cs
+                    - {{.Values.dedicated_cs.namespace_mapping.cp4i}}
+                  - map-to-common-service-namespace: {{.Values.dedicated_cs.namespace_mapping.cp4s}}-cs
                     requested-from-namespace:
-                    - {{.Values.namespace_mapping.cp4s}}
-                  - map-to-common-service-namespace: {{.Values.namespace_mapping.cp4waiops}}
+                    - {{.Values.dedicated_cs.namespace_mapping.cp4s}}
+                  - map-to-common-service-namespace: {{.Values.dedicated_cs.namespace_mapping.cp4waiops}}
                     requested-from-namespace:
-                    - {{.Values.namespace_mapping.cp4waiops}}
-                    - {{.Values.namespace_mapping.cp4waiops}}-emgr
+                    - {{.Values.dedicated_cs.namespace_mapping.cp4waiops}}
+                    - {{.Values.dedicated_cs.namespace_mapping.cp4waiops}}-emgr
               EOF
               else
                 echo "INFO: ConfigMap common-service-maps already exists."
@@ -62,3 +63,4 @@ spec:
 
       serviceAccountName: {{.Values.serviceaccount.ibm_cloudpaks_installer}}
   backoffLimit: 2
+{{ end }}

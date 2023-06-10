@@ -27,6 +27,20 @@ spec:
           value: ${ARGOCD_APP_NAME}
         - name: argocd_app_namespace
           value: ${ARGOCD_APP_NAMESPACE}
+        - name: dedicated_cs.control_namespace
+          value: "{{.Values.dedicated_cs.control_namespace}}"
+        - name: dedicated_cs.enabled
+          value: "{{.Values.dedicated_cs.enabled}}"
+        - name: dedicated_cs.namespace_mapping.cp4a
+          value: "{{.Values.dedicated_cs.namespace_mapping.cp4a}}"
+        - name: dedicated_cs.namespace_mapping.cp4d
+          value: "{{.Values.dedicated_cs.namespace_mapping.cp4d}}"
+        - name: dedicated_cs.namespace_mapping.cp4i
+          value: "{{.Values.dedicated_cs.namespace_mapping.cp4i}}"
+        - name: dedicated_cs.namespace_mapping.cp4s
+          value: "{{.Values.dedicated_cs.namespace_mapping.cp4s}}"
+        - name: dedicated_cs.namespace_mapping.cp4waiops
+          value: "{{.Values.dedicated_cs.namespace_mapping.cp4waiops}}"
         - name: online_catalog_source_priority
           value: "{{.Values.online_catalog_source_priority}}"
         - name: repoURL
