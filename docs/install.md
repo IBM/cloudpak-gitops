@@ -354,7 +354,7 @@ After completing the list of activities listed in the previous sections, you can
 
    # Note that if you want to use a target namespace that is not the
    # default, you must make the corresponding parameter update to the
-   # cp-shared-app
+   # cp-shared-app application.
    cp_namespace=$cp
 
    app_name=${cp}-app
