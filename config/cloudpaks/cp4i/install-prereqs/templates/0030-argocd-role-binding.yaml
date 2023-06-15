@@ -3,7 +3,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   annotations:
-    argocd.argoproj.io/sync-options: "Replace=true"
+
     argocd.argoproj.io/sync-wave: "30"
   creationTimestamp: null
   name: argocd-cp4i-binding
