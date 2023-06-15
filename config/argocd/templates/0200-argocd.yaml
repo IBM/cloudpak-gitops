@@ -6,8 +6,6 @@ metadata:
     argocd.argoproj.io/sync-options: "Replace=true"
     argocd.argoproj.io/sync-wave: "200"
   creationTimestamp: null
-  finalizers:
-    - argoproj.io/finalizer
   name: openshift-gitops
   namespace: openshift-gitops
 spec:
@@ -28,7 +26,9 @@ spec:
       requests:
         cpu: 250m
         memory: 1Gi
+    sharding: {}
   dex:
+    openShiftOAuth: true
     resources:
       limits:
         cpu: 500m
@@ -65,7 +65,11 @@ spec:
       enabled: false
     route:
       enabled: false
-  rbac: {}
+  rbac:
+    policy: |
+      g, system:cluster-admins, role:admin
+      g, cluster-admins, role:admin
+    scopes: '[groups]'
   redis:
     resources:
       limits:
