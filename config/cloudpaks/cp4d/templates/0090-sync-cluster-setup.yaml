@@ -46,8 +46,11 @@ spec:
                       OPENSHIFT_TYPE=self-managed
               esac
 
+              hypershift_deployment=$(oc get Infrastructure cluster \
+                -o jsonpath='{.metadata.labels.hypershift\.openshift\.io/managed}')
+
               # https://www.ibm.com/docs/en/cloud-paks/cp-data/4.6.x?topic=settings-changing-cri-o-container
-              if [ "${OPENSHIFT_TYPE}" != "roks" ]; then
+              if [ "${OPENSHIFT_TYPE}" != "roks" ] && [ -z "${hypershift_deployment}" ]; then
                   if [[ ${COMPONENTS} =~ cognos_analytics ]] \
                         || [[ ${COMPONENTS} =~ dv ]] \
                         || [[ ${COMPONENTS} =~ db2 ]] \
