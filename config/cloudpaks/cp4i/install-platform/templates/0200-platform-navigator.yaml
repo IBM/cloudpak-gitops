@@ -12,9 +12,9 @@ spec:
   license:
     accept: true
     # https://ibm.biz/integration-licenses
-    license: L-RJON-CJR2RX
+    license: L-YBXJ-ADJNSM
   mqDashboard: true
   replicas: 1
   storage:
     class: {{.Values.storageclass.rwx}}
-  version: 2022.4.1
+  version: 2023.2.1

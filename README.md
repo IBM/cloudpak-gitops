@@ -37,17 +37,17 @@ Supported versions:
 | ----------|---------|-------------------|
 | Cloud Pak for Business Automation | [22.0.2](https://www.ibm.com/docs/en/cloud-paks/cp-biz-automation/22.0.2) | Multi-pattern starter deployment |
 | Cloud Pak for Data | [4.6.6](https://www.ibm.com/docs/en/cloud-paks/cp-data/4.6.x?topic=overview) | Online, specialized installation |
-| Cloud Pak for Integration | [2022.4](https://www.ibm.com/docs/en/cloud-paks/cp-integration/2022.4) | Online installation |
+| Cloud Pak for Integration | [2023.2](https://www.ibm.com/docs/en/cloud-paks/cp-integration/2023.2) | Online installation |
 | Cloud Pak for Security | [1.10.12](https://www.ibm.com/docs/en/cloud-paks/cp-security/1.10) | Online installation |
-| Cloud Pak for Watson AIOps | [3.7.1](https://www.ibm.com/docs/en/cloud-paks/cloud-pak-watson-aiops/3.7.1) | Online Installation |
+| Cloud Pak for Watson AIOps | [3.7.2](https://www.ibm.com/docs/en/cloud-paks/cloud-pak-watson-aiops/3.7.2) | Online Installation |
 
 ### Shared cluster
 
-Starting with the v0.22 release, all Cloud Paks are deployed using dedicated automation foundation instances.
+Starting with the v0.22 release, it is possible to deploy Cloud Paks using dedicated automation foundation instances.
 
 At the root of this configuration, lies a pre-synchronization hook inside the `cp-shared` application, which creates a default "common-service-maps" ConfigMap under the `kube-public` namespace, according to the instructions listed under <https://www.ibm.com/docs/en/cloud-paks/1.0?topic=cfs-installing-cloud-pak-foundational-services-in-multiple-namespaces>
 
-Note that if you want to install a Cloud Pak to a non-default namespace, you must update the parameters to the `cp-shared-app` application to override that default location. 
+Note that if you want to enable this feature and customize the target namespaces for Cloud Paks, you must update the parameters to the `cp-shared-app` application to override that default location. 
 
 ### GitOps
 
