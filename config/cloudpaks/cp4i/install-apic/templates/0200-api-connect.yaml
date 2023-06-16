@@ -17,7 +17,7 @@ spec:
     accept: true
     use: nonproduction
     # https://www.ibm.com/docs/en/api-connect/10.0.5.x_lts?topic=requirements-api-connect-licenses
-    license: L-VQYA-YNM22H
+    license: L-KZXM-S7SNCU
   storageClassName: {{.Values.storageclass.rwo}}
   profile: n1xc10.m48
-  version: 10.0.5.3
+  version: 10.0.6.0

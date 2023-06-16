@@ -9,7 +9,7 @@ metadata:
   name: ibm-apiconnect
   namespace: {{.Values.metadata.argocd_app_namespace}}
 spec:
-  channel: v3.3
+  channel: v5.0
   installPlanApproval: Automatic
   name: ibm-apiconnect
   source: ibm-operator-catalog
