@@ -39,8 +39,6 @@ spec:
           value: "{{.Values.modules.client}}"
         - name: modules.mq
           value: "{{.Values.modules.mq}}"
-        - name: modules.platform
-          value: "{{.Values.modules.platform}}"
         - name: repoURL
           value: ${ARGOCD_APP_SOURCE_REPO_URL}
         - name: serviceaccount.argocd_application_controller

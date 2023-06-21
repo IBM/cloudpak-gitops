@@ -2,7 +2,7 @@
 ignore: |
   config/argocd-cloudpaks/cp-shared/templates/0050-sync-common-service-maps.yaml
   config/argocd-cloudpaks/cp4d/templates/0000-app-namespace.yaml
-  config/argocd-cloudpaks/cp4i/templates/0300-cp4i-module-template-app.yaml
+  config/argocd-cloudpaks/cp4i/templates/0301-cp4i-module-template-app.yaml
   config/argocd-cloudpaks/cp4i/templates/0400-cp4i-client-app.yaml
   config/argocd-cloudpaks/cp4waiops/templates/000-aimgr-namespace.yaml
   config/argocd-cloudpaks/cp4waiops/templates/020-cloudpaks-aimgr-role.yaml

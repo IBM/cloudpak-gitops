@@ -344,7 +344,11 @@ spec:
                 return hs
               end
               if condition.type == "Pending" and condition.status == "True" then
-                hs.status = "Progressing"
+                if condition.reason == "Error" then
+                  hs.status = "Degraded"
+                else
+                  hs.status = "Progressing"
+                end
                 hs.message = condition.message
                 return hs
               end

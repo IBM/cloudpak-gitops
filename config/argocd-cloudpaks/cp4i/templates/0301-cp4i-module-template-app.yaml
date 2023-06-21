@@ -13,7 +13,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   annotations:
-    argocd.argoproj.io/sync-wave: "300"
+    argocd.argoproj.io/sync-wave: "301"
   name: cp4i-{{ $module_name }}
   namespace: {{ $argocd_namespace }}
 spec:
