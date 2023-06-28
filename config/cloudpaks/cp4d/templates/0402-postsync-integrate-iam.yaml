@@ -1,0 +1,58 @@
+---
+# https://www.ibm.com/docs/en/cloud-paks/cp-data/4.6.x?topic=environment-integrating-iam-service
+apiVersion: batch/v1
+kind: Job
+metadata:
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/sync-wave: "402"
+  name: post-cp4d-integrate-iam
+  namespace: {{.Values.metadata.argocd_namespace}}
+spec:
+  template:
+    spec:
+      containers:
+        - name: install-olm
+          image: icr.io/cpopen/cpd/olm-utils:latest
+          env:
+            - name: PROJECT_CPFS_OPS
+              value: {{.Values.metadata.common_services_namespace}}
+            - name: PROJECT_CPD_INSTANCE
+              value: {{.Values.metadata.argocd_app_namespace}}
+            - name: IAM_INTEGRATION
+              value: "{{.Values.iam_integration}}"
+          command:
+            - /bin/bash
+            - -c
+            - |
+              set -eo pipefail
+              set -x
+
+              result=0
+
+              # https://www.ibm.com/docs/en/cloud-paks/cp-data/4.6.x?topic=cluster-creating-custom-sccs-services
+              iam_enabled=$(oc get zenservice lite-cr \
+                    -n "${PROJECT_CPD_INSTANCE}" \
+                    -o jsonpath='{.spec.iamIntegration}')
+              if [ "${iam_enabled}" == "${IAM_INTEGRATION}" ]; then
+                  echo "INFO: IAM integration is already configured to ${IAM_INTEGRATION}."
+                  exit
+              fi
+
+              echo "INFO: Setting IAM integration to ${IAM_INTEGRATION}."
+              bin/setup-iam-integration \
+                  --enable="${IAM_INTEGRATION}" \
+                  --cpd_instance_ns="${PROJECT_CPD_INSTANCE}" \
+              result=1
+
+              echo "INFO: IAM integration status" \
+              && oc get zenservice lite-cr \
+                    -n "${PROJECT_CPD_INSTANCE}" \
+                    -o jsonpath='{.spec.iamIntegration}'
+
+              exit ${result}
+
+      restartPolicy: Never
+      serviceAccountName: {{.Values.serviceaccount.argocd_application_controller}}
+
+  backoffLimit: 2

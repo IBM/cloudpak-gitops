@@ -25,6 +25,8 @@ spec:
           value: ${ARGOCD_APP_NAMESPACE}
         - name: components
           value: {{.Values.components}}
+        - name: iam_integration
+          value: "{{.Values.iam_integration}}"
         - name: metadata.argocd_app_namespace
           value: {{.Values.metadata.argocd_app_namespace}}
         - name: metadata.common_services_namespace

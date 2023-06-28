@@ -16,4 +16,6 @@ storageclass:
   rwx: "set in presync-hook of parent app"
 targetRevision: main
 
+iam_integration: "set in presync-hook of parent app"
+
 version: "set in parent app"
