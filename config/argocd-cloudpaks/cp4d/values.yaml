@@ -16,4 +16,6 @@ storageclass:
   rwo: ocs-storagecluster-ceph-rbd
   rwx: ocs-storagecluster-cephfs
 
+iam_integration: true
+
 version: 4.6.6
