@@ -1,5 +1,5 @@
-{{- $ia := .Values.modules.ia }}
-{{- if eq ( default false $ia ) true  }}
+{{- $ia := .Values.modules.ia | toString }}
+{{- if eq ( default "false" $ia ) "true" }}
 ---
 apiVersion: argoproj.io/v1alpha1
 kind: Application
@@ -38,6 +38,8 @@ spec:
           value: ${ARGOCD_APP_SOURCE_REPO_URL}
         - name: serviceaccount.argocd_application_controller
           value: {{.Values.serviceaccount.argocd_application_controller}}
+        - name: storageclass.rwo
+          value: {{.Values.storageclass.rwo}}
         - name: storageclass.rwx
           value: {{.Values.storageclass.rwx}}
         - name: targetRevision

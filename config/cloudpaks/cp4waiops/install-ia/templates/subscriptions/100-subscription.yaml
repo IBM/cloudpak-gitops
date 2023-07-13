@@ -7,7 +7,7 @@ metadata:
   name: ibm-infrastructure-automation-operator
   namespace: "{{.Values.metadata.argocd_app_namespace}}"
 spec:
-  channel: v3.7
+  channel: v4.1
   installPlanApproval: Automatic
   name: ibm-infrastructure-automation-operator
   source: ibm-operator-catalog

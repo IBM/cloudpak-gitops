@@ -19,3 +19,4 @@ spec:
   license:
     accept: true
   storageClass: {{.Values.storageclass.rwx}}
+  storageClassLargeBlock: {{.Values.storageclass.rwo}}

@@ -1,8 +1,6 @@
 ---
 repoURL: https://github.com/IBM/cloudpak-gitops
 targetRevision: main
-automation_base_instance_name: ""
-automation_ui_config_instance_name: ""
 cluster_domain: ""
 serviceaccount:
   argocd_application_controller: openshift-gitops-argocd-application-controller
@@ -14,6 +12,4 @@ storageclass:
   rwo: ocs-storagecluster-ceph-rbd
   rwx: ocs-storagecluster-cephfs
 modules:
-  aimgr: true
-  emgr: true
-  ia: false
+  ia: "false"
