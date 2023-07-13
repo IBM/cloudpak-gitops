@@ -1,5 +1,3 @@
-{{- $aimgr := .Values.modules.aimgr }}
-{{- if eq ( default false $aimgr ) true  }}
 ---
 apiVersion: argoproj.io/v1alpha1
 kind: Application
@@ -36,10 +34,6 @@ spec:
           value: ${ARGOCD_APP_NAME}
         - name: argocd_app_namespace
           value: ${ARGOCD_APP_NAMESPACE}
-        - name: automation_base_instance_name
-          value: {{.Values.automation_base_instance_name}}
-        - name: automation_ui_config_instance_name
-          value: {{.Values.metadata.automation_ui_config_instance_name}}
         - name: metadata.argocd_app_namespace
           value: {{.Values.metadata.argocd_app_namespace}}
         - name: repoURL
@@ -68,4 +62,3 @@ status:
       source:
         repoURL: ""
     status: ""
-{{- end }}

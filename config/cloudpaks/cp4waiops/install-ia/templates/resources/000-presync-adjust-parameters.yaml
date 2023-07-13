@@ -23,10 +23,12 @@ spec:
               set -eo pipefail
               set -x
 
+              storage_class_rwo="$(oc get configmap argocd-cp4waiops-config \
+                --namespace "${ARGOCD_NAMESPACE}" -o jsonpath='{.data.storageclass\.rwo}')"
               storage_class_rwx="$(oc get configmap argocd-cp4waiops-config \
                 --namespace "${ARGOCD_NAMESPACE}" -o jsonpath='{.data.storageclass\.rwx}')"
 
-              if [ -z "${storage_class_rwx}" ] ; then
+              if [ -z "${storage_class_rwo}" ] || [ -z "${storage_class_rwx}" ] ; then
                 echo "ERROR: Did not find storage classes for target platform."
                 exit 1
               fi
@@ -51,6 +53,7 @@ spec:
               if [ ${result} -eq 0 ]; then
                   echo "INFO: Patching storage for ${app_name}." \
                   && "${argo_cmd}" app set "${app_name}" \
+                      --helm-set-string storageclass.rwo="${storage_class_rwo}" \
                       --helm-set-string storageclass.rwx="${storage_class_rwx}" \
                   && echo "INFO: ${app_name} successfully updated storage classes." \
                   || result=1

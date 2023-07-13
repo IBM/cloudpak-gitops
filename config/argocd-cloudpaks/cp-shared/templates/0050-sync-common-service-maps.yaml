@@ -54,7 +54,6 @@ spec:
                   - map-to-common-service-namespace: {{.Values.dedicated_cs.namespace_mapping.cp4waiops}}
                     requested-from-namespace:
                     - {{.Values.dedicated_cs.namespace_mapping.cp4waiops}}
-                    - {{.Values.dedicated_cs.namespace_mapping.cp4waiops}}-emgr
               EOF
               else
                 echo "INFO: ConfigMap common-service-maps already exists."

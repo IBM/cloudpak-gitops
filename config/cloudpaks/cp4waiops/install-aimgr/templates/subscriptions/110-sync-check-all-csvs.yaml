@@ -29,23 +29,31 @@ spec:
 
               current_seconds=0
               operation_limit_seconds=$(( $(date +%s) + 2400 ))
-              csv_installing=0
+              csv_installing=1
               while [ ${current_seconds} -lt ${operation_limit_seconds} ]; do
-                if [ $(oc get csv -n ibm-common-services | grep -vc Succeeded) -gt 1 ] || \
-                   [ $(oc get csv -n ${TARGET_NAMESPACE} | grep -vc Succeeded) -gt 1 ]; then
+
+                # Note the exclusion of "ibm-automation-elastic" in the statement below, reflecting an
+                # issue with this operator called out in the Cloud Pak docs:
+                # https://www.ibm.com/docs/en/cloud-paks/cloud-pak-watson-aiops/4.1.0?topic=installation-online-cli#install-cp4waiops
+
+                failing_csvs=$(oc get csv \
+                    -n ${TARGET_NAMESPACE} \
+                    | grep -v ibm-automation-elastic \
+                    | grep -vc Succeeded) || result=1
+                if [ ${result} -eq 1 ] || [ "${failing_csvs}" -gt 1 ]; then
                   csv_installing=1
                   echo "INFO: CSVs still installing."
-                  oc get csv -n ibm-common-services | grep -vc Succeeded
                   oc get csv -n ${TARGET_NAMESPACE} | grep -vc Succeeded
                   sleep 60
                 else
                   csv_installing=0
+                  result=0
                   break
                 fi
                 current_seconds=$(( $(date +%s) ))
               done
 
-              if [ ${csv_installing} -eq 0 ]; then
+              if [ ${result} -eq 0 ] && [ ${csv_installing} -eq 0 ]; then
                 echo "INFO: All CSVs are ready."
               else
                 echo "ERROR: CSVs still not ready."

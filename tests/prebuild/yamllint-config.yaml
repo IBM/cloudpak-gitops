@@ -5,12 +5,6 @@ ignore: |
   config/argocd-cloudpaks/cp4i/templates/0301-cp4i-module-template-app.yaml
   config/argocd-cloudpaks/cp4i/templates/0400-cp4i-client-app.yaml
   config/argocd-cloudpaks/cp4waiops/templates/000-aimgr-namespace.yaml
-  config/argocd-cloudpaks/cp4waiops/templates/020-cloudpaks-aimgr-role.yaml
-  config/argocd-cloudpaks/cp4waiops/templates/020-cloudpaks-emgr-role.yaml
-  config/argocd-cloudpaks/cp4waiops/templates/021-cloudpaks-aimgr-binding.yaml
-  config/argocd-cloudpaks/cp4waiops/templates/021-cloudpaks-emgr-binding.yaml
-  config/argocd-cloudpaks/cp4waiops/templates/110-cp4waiops-aimgr-app.yaml
-  config/argocd-cloudpaks/cp4waiops/templates/120-cp4waiops-emgr-app.yaml
   config/argocd-cloudpaks/cp4waiops/templates/130-cp4waiops-ia-app.yaml
   config/cloudpaks/cp4a/operators/templates/0000-cp4ba-namespace.yaml
   config/cloudpaks/cp4a/operators/templates/0100-operator-group.yaml
@@ -18,7 +12,6 @@ ignore: |
   config/cloudpaks/cp4i/install-prereqs/templates/0000-namespace.yaml
   config/cloudpaks/cp4i/install-prereqs/templates/0100-operator-group.yaml
   config/cloudpaks/cp4s/templates/subscriptions/050-cp4s-operator-group.yaml
-  config/cloudpaks/cp4waiops/install-aimgr/templates/resources/200-ai-manager.yaml
   config/cloudpaks/cp4waiops/install-aimgr/templates/subscriptions/050-operator-group.yaml
   config/rhacm/cloudpaks/templates/placement-argocd.yaml
   config/rhacm/cloudpaks/templates/placement-cloudpaks.yaml

@@ -7,4 +7,5 @@ metadata:
   argocd_namespace: openshift-gitops
   post_install_wait: 2h
 storageclass:
+  rwo: ocs-storagecluster-ceph-rbd
   rwx: ocs-storagecluster-cephfs
