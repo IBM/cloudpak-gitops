@@ -39,7 +39,7 @@ Supported versions:
 | Cloud Pak for Data | [4.6.6](https://www.ibm.com/docs/en/cloud-paks/cp-data/4.6.x?topic=overview) | Online, specialized installation |
 | Cloud Pak for Integration | [2023.2](https://www.ibm.com/docs/en/cloud-paks/cp-integration/2023.2) | Online installation |
 | Cloud Pak for Security | [1.10.12](https://www.ibm.com/docs/en/cloud-paks/cp-security/1.10) | Online installation |
-| Cloud Pak for Watson AIOps | [3.7.2](https://www.ibm.com/docs/en/cloud-paks/cloud-pak-watson-aiops/3.7.2) | Online Installation |
+| Cloud Pak for Watson AIOps | [4.1.0](https://www.ibm.com/docs/en/cloud-paks/cloud-pak-watson-aiops/4.1.0) | Online Installation |
 
 ### Shared cluster
 
