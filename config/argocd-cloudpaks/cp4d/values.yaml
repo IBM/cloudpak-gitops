@@ -6,11 +6,11 @@ serviceaccount:
 metadata:
   argocd_app_namespace: cp4d
   argocd_namespace: openshift-gitops
-  common_services_namespace: cp4d
   operators_namespace: cp4d
+  operands_namespace: cp4d-operands
 
-# https://www.ibm.com/docs/en/cloud-paks/cp-data/4.6.x?topic=information-determining-which-components-install
-components: cpfs,scheduler,cpd_platform,rstudio,wml,ws
+# https://www.ibm.com/docs/en/cloud-paks/cp-data/4.7.x?topic=information-determining-which-components-install
+components: ibm-cert-manager,ibm-licensing,cpfs,cpd_platform,rstudio,wml,ws
 
 storageclass:
   rwo: ocs-storagecluster-ceph-rbd
@@ -18,4 +18,6 @@ storageclass:
 
 iam_integration: true
 
-version: 4.6.6
+image_arch: amd64
+
+version: 4.7.1

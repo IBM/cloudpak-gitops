@@ -1,5 +1,5 @@
 ---
-# https://www.ibm.com/docs/en/cloud-paks/cp-data/4.6.x?topic=installing
+# https://www.ibm.com/docs/en/cloud-paks/cp-data/4.7.x?topic=installing
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -14,18 +14,18 @@ spec:
     spec:
       containers:
         - name: install-olm
-          image: icr.io/cpopen/cpd/olm-utils:latest
+          image: icr.io/cpopen/cpd/olm-utils-v2@sha256:7620c112def44374b9f53a8b5b3ef609be6d3a76fdd48b06f48e13ea3498a8f7
           env:
-            - name: PROJECT_CPFS_OPS
-              value: {{.Values.metadata.common_services_namespace}}
-            - name: PROJECT_CPD_OPS
+            - name: PROJECT_CPD_INST_OPERATORS
               value: {{.Values.metadata.operators_namespace}}
-            - name: PROJECT_CPD_INSTANCE
-              value: {{.Values.metadata.argocd_app_namespace}}
+            - name: PROJECT_CPD_INST_OPERANDS
+              value: {{.Values.metadata.operands_namespace}}
             - name: VERSION
               value: {{.Values.version}}
             - name: COMPONENTS
               value: {{.Values.components}}
+            - name: CPD_CLI_MANAGE_WORKSPACE
+              value: /tmp
           command:
             - /bin/bash
             - -c
@@ -35,44 +35,48 @@ spec:
 
               result=0
 
-              # https://www.ibm.com/docs/en/cloud-paks/cp-data/4.6.x?topic=cluster-creating-custom-sccs-services
+              # https://www.ibm.com/docs/en/cloud-paks/cp-data/4.7.x?topic=services-creating-informix-scc
               echo "INFO: Creating custom security context constraints for services."
-              # wkc only
-              if [[ ${COMPONENTS} =~ wkc ]]; then
-                  bin/apply-scc \
-                      --cpd_instance_ns=${PROJECT_CPD_INSTANCE} \
-                      --components=wkc \
-                  || {
-                      echo "ERROR: Failed to set SCC for WKC."
-                      exit 1
-                  }
-              fi
               if [[ ${COMPONENTS} =~ informix ]]; then
                   bin/apply-scc \
-                      --cpd_instance_ns=${PROJECT_CPD_INSTANCE} \
+                      --cpd_instance_ns=${PROJECT_CPD_INST_OPERANDS} \
                       --components=informix \
                   || {
                       echo "ERROR: Failed to set SCC for Informix."
-                      exit 1
+                      result=1
                   }
               fi
 
-              # https://www.ibm.com/docs/en/cloud-paks/cp-data/4.6.x?topic=si-creating-olm-objects
-              echo "INFO: Creating OLM objects for a specialized installation."
-              bin/apply-olm apply-olm \
+              # https://www.ibm.com/docs/en/cloud-paks/cp-data/4.7.x?topic=data-installing-cloud-pak-foundational-services
+              echo "INFO: Installing foundational services" \
+              && bin/authorize-instance-topology \
+                  --cpd_operator_ns=${PROJECT_CPD_INST_OPERATORS:?} \
+                  --cpd_instance_ns=${PROJECT_CPD_INST_OPERANDS:?} \
+              && bin/setup-instance-topology \
+                  --release=${VERSION:?} \
+                  --cpd_operator_ns=${PROJECT_CPD_INST_OPERATORS:?} \
+                  --cpd_instance_ns=${PROJECT_CPD_INST_OPERANDS:?} \
+                  --license_acceptance=true \
+              && bin/get-license \
+                  --release=${VERSION} \
+                  --license-type=SE \
+              && echo "INFO: Creating OLM objects for a specialized installation." \
+              && bin/apply-olm apply-olm \
                   --release=${VERSION} \
                   --components=${COMPONENTS} \
-                  --cs_ns=${PROJECT_CPFS_OPS} \
-                  --cpd_operator_ns=${PROJECT_CPD_OPS} \
-              && bin/get-olm-artifacts \
-                  --subscription_ns=${PROJECT_CPFS_OPS}  \
-              && bin/get-olm-artifacts \
-                  --subscription_ns=${PROJECT_CPD_OPS} \
-              && echo "INFO: OLM resources applied." \
-              || {
-                  echo "ERROR: Failed to apply OLM resources."
-                  result=1
-              }
+                  --cpd_operator_ns=${PROJECT_CPD_INST_OPERATORS} \
+              || result=1
+
+              # https://www.ibm.com/docs/en/cloud-paks/cp-data/4.7.x?topic=data-specifying-privileges-that-db2u-runs
+              oc apply -f - <<EOF
+              apiVersion: v1
+              data:
+                DB2U_RUN_WITH_LIMITED_PRIVS: "false"
+              kind: ConfigMap
+              metadata:
+                name: db2u-product-cm
+                namespace: ${PROJECT_CPD_INST_OPERATORS}
+              EOF
 
               exit ${result}
 

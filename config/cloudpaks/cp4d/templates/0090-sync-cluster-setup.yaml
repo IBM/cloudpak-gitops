@@ -1,5 +1,5 @@
 ---
-# https://www.ibm.com/docs/en/cloud-paks/cp-data/4.6.x?topic=information-setting-up-installation-environment-variables
+# https://www.ibm.com/docs/en/cloud-paks/cp-data/4.7.x?topic=information-setting-up-installation-environment-variables
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -13,10 +13,21 @@ spec:
     spec:
       containers:
         - name: configure-cluster
-          image: icr.io/cpopen/cpd/olm-utils:latest
+          # Image associated with CPD CLI v13.0.1 @ https://github.com/IBM/cpd-cli/releases/tag/v13.0.1
+          image: icr.io/cpopen/cpd/olm-utils-v2@sha256:7620c112def44374b9f53a8b5b3ef609be6d3a76fdd48b06f48e13ea3498a8f7
           env:
+            - name: PROJECT_CERT_MANAGER
+              value: ibm-cert-manager
+            - name: PROJECT_LICENSE_SERVICE
+              value: ibm-licensing
+            - name: PROJECT_SCHEDULING_SERVICE
+              value: cpd-scheduler
+            - name: VERSION
+              value: {{.Values.version}}
             - name: COMPONENTS
               value: {{.Values.components}}
+            - name: IMAGE_ARCH
+              value: {{.Values.image_arch}}
           command:
             - /bin/bash
             - -c
@@ -25,6 +36,34 @@ spec:
               set -x
 
               result=0
+
+              # https://www.ibm.com/docs/en/cloud-paks/cp-data/4.7.x?topic=cluster-installing-shared-components
+              bin/apply-cluster-components \
+                  --release=${VERSION:?} \
+                  --license_acceptance=true \
+                  --cert_manager_ns=${PROJECT_CERT_MANAGER:?} \
+                  --licensing_ns=${PROJECT_LICENSE_SERVICE:?} \
+              && echo "INFO: Cert Manager and Licensing service installed." \
+              && bin/apply-scheduler \
+                     --release=${VERSION} \
+                     --license_acceptance=true \
+                     --scheduler_ns=${PROJECT_SCHEDULING_SERVICE:?} \
+              && echo "INFO: Scheduling service installed." \
+              || result=1
+
+              if [[ ${COMPONENTS:?} =~ cognos_analytics ]] \
+                  || [[ ${COMPONENTS} =~ dv ]] \
+                  || [[ ${COMPONENTS} =~ db2 ]] \
+                  || [[ ${COMPONENTS} =~ bigsql ]] \
+                  || [[ ${COMPONENTS} =~ watson_discovery ]] \
+                  || [[ ${COMPONENTS} =~ wkc ]] \
+                  || [[ ${COMPONENTS} =~ ws ]] \
+                  || [[ ${COMPONENTS} =~ wml_accelerator ]]; then
+                  echo "INFO: Must update CRI-O container settings depending on the target env."
+              else
+                  echo "INFO: None of the components to be installed require crio-changes"
+                  exit 0
+              fi
 
               OPENSHIFT_TYPE=self-managed
               platform=$(oc get Infrastructure cluster  -o jsonpath={.status.platform})
@@ -46,23 +85,75 @@ spec:
                       OPENSHIFT_TYPE=self-managed
               esac
 
+              ocp_version=$(oc get ClusterVersion version -o jsonpath='{.status.desired.version}' | cut -d "." -f 1,2)
+              if [ -z "${ocp_version}" ]; then
+                  echo "ERROR: Unable to determine cluster version for ${cluster_name}"
+                  exit 1
+              fi
+
               hypershift_deployment=$(oc get Infrastructure cluster \
                 -o jsonpath='{.metadata.labels.hypershift\.openshift\.io/managed}')
 
-              # https://www.ibm.com/docs/en/cloud-paks/cp-data/4.6.x?topic=settings-changing-cri-o-container
-              if [ "${OPENSHIFT_TYPE}" != "roks" ] && [ -z "${hypershift_deployment}" ]; then
-                  if [[ ${COMPONENTS} =~ cognos_analytics ]] \
-                        || [[ ${COMPONENTS} =~ dv ]] \
-                        || [[ ${COMPONENTS} =~ db2 ]] \
-                        || [[ ${COMPONENTS} =~ bigsql ]] \
-                        || [[ ${COMPONENTS} =~ watson_discovery ]] \
-                        || [[ ${COMPONENTS} =~ wkc ]] \
-                        || [[ ${COMPONENTS} =~ ws ]] \
-                        || [[ ${COMPONENTS} =~ wml_accelerator ]]; then
-                      echo "INFO: Changing CRI-O container settings"
-                      bin/apply-crio --openshift-type=${OPENSHIFT_TYPE} --extra-vars="pid_limit=16384" \
-                      || result=1
-                  fi
+              # https://www.ibm.com/docs/en/cloud-paks/cp-data/4.7.x?topic=settings-changing-cri-o-container
+              crio="none"
+              if [ -n "${hypershift_deployment}" ]; then
+                  crio="none"
+              elif [ "${OPENSHIFT_TYPE}" == "roks" ]; then
+                  crio="none"
+              elif [ "${platform}" == "Azure" ]; then
+                  crio="azure"
+              elif [ "${OPENSHIFT_TYPE}" == "self-managed" ] && [ "${ocp_version}" == "4.10" ]; then
+                  crio="pid"
+              elif [ "${OPENSHIFT_TYPE}" == "self-managed" ] && [ "${ocp_version}" == "4.12" ]; then
+                  crio="kubelet"
+              fi
+
+              if [ "${crio}" == "pid" ]; then
+                  echo "INFO: Changing CRI-O container settings"
+                  bin/apply-crio --openshift-type=${OPENSHIFT_TYPE} \
+                  || result=1
+              elif [ "${crio}" == "kubelet" ]; then
+                  oc label machineconfigpool worker custom-crio=pid-limit --overwrite \
+                  && oc apply -f - << EOF
+              apiVersion: machineconfiguration.openshift.io/v1
+              kind: KubeletConfig
+              metadata:
+                name: cpd-crio-kubeletconfig
+              spec:
+                kubeletConfig:
+                  podPidsLimit: 16384
+                machineConfigPoolSelector:
+                  matchLabels:
+                    custom-crio: pid-limit
+              EOF
+                  oc get kubeletconfig.machineconfiguration.openshift.io/cpd-crio-kubeletconfig -o yaml
+
+                  oc wait kubeletconfig.machineconfiguration.openshift.io/cpd-crio-kubeletconfig \
+                      --for=condition=Success=true \
+                      --timeout=20s \
+                  || result=1
+              elif [ "${crio}" == "azure" ]; then
+                  oc apply -f - << EOF
+              apiVersion: machineconfiguration.openshift.io/v1
+              kind: ContainerRuntimeConfig
+              metadata:
+                name: new-large-pidlimit
+              spec:
+                containerRuntimeConfig:
+                  pidsLimit: 16384
+                machineConfigPoolSelector:
+                  matchExpressions:
+                  - key: pools.operator.machineconfiguration.openshift.io/worker
+                    operator: Exists
+              EOF
+                  oc get no -o name \
+                      | grep compute \
+                      | awk '{system("oc debug " $1 " -- bash -lc \"chroot /host sudo crio-status config | grep pids_limit\" ")}'
+
+                  oc wait ContainerRuntimeConfig.machineconfiguration.openshift.io/new-large-pidlimit \
+                      --for=condition=Success=true \
+                      --timeout=20s \
+                  || result=1
               fi
 
               # Not attempting to set the IBM entitlement key because it is
