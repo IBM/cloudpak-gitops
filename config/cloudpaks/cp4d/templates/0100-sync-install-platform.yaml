@@ -1,5 +1,5 @@
 ---
-# https://www.ibm.com/docs/en/cloud-paks/cp-data/4.6.x?topic=installing
+# https://www.ibm.com/docs/en/cloud-paks/cp-data/4.7.x?topic=installing
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -14,14 +14,10 @@ spec:
     spec:
       containers:
         - name: install-components
-          image: icr.io/cpopen/cpd/olm-utils:latest
+          image: icr.io/cpopen/cpd/olm-utils-v2@sha256:7620c112def44374b9f53a8b5b3ef609be6d3a76fdd48b06f48e13ea3498a8f7
           env:
-            - name: PROJECT_CPFS_OPS
-              value: {{.Values.metadata.common_services_namespace}}
-            - name: PROJECT_CPD_OPS
-              value: {{.Values.metadata.operators_namespace}}
-            - name: PROJECT_CPD_INSTANCE
-              value: {{.Values.metadata.argocd_app_namespace}}
+            - name: PROJECT_CPD_INST_OPERANDS
+              value: {{.Values.metadata.operands_namespace}}
             - name: STG_CLASS_BLOCK
               value: {{.Values.storageclass.rwo}}
             - name: STG_CLASS_FILE
@@ -39,22 +35,17 @@ spec:
 
               result=0
 
-              # https://www.ibm.com/docs/en/cloud-paks/cp-data/4.6.x?topic=si-installing-components
-              echo "INFO: Installing components in a specialized installation."
-              bin/setup-instance-ns \
-                  --cpd_instance_ns=${PROJECT_CPD_INSTANCE} \
-                  --cpd_operator_ns=${PROJECT_CPD_OPS} \
-                  --cs_ns=${PROJECT_CPFS_OPS} \
+              # https://www.ibm.com/docs/en/cloud-paks/cp-data/4.7.x?topic=data-installing-cloud-pak
+              echo "INFO: Installing components in a specialized installation." \
               && bin/apply-cr \
-                  --components=${COMPONENTS} \
+                  --components=${COMPONENTS:?} \
                   --release=${VERSION} \
-                  --cs_ns=${PROJECT_CPFS_OPS} \
-                  --cpd_instance_ns=${PROJECT_CPD_INSTANCE} \
-                  --block_storage_class=${STG_CLASS_BLOCK} \
-                  --file_storage_class=${STG_CLASS_FILE} \
+                  --cpd_instance_ns=${PROJECT_CPD_INST_OPERANDS:?} \
+                  --block_storage_class=${STG_CLASS_BLOCK:?} \
+                  --file_storage_class=${STG_CLASS_FILE:?} \
                   --license_acceptance=true \
               && bin/get-cr-status \
-                  --cpd_instance_ns=${PROJECT_CPD_INSTANCE} \
+                  --cpd_instance_ns=${PROJECT_CPD_INST_OPERANDS} \
               && echo "INFO: CP4D installation complete." \
               || {
                   echo "ERROR: CP4D installation failed."

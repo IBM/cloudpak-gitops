@@ -1,26 +1,23 @@
 ---
-# https://www.ibm.com/docs/en/cloud-paks/cp-data/4.6.x?topic=environment-customizing-securing-route-platform
+# https://www.ibm.com/docs/en/cloud-paks/cp-data/4.7.x?topic=environment-customizing-securing-route-platform
 apiVersion: batch/v1
 kind: Job
 metadata:
   annotations:
     argocd.argoproj.io/hook: PostSync
     argocd.argoproj.io/sync-wave: "401"
-  name: post-cp4d-adjust-certs
+  name: post-cp4d-adjust-certsf
   namespace: openshift-gitops
 spec:
   template:
     spec:
       containers:
         - name: config
-          # CP4D 4.6 image
-          image: icr.io/cpopen/cpd/olm-utils@sha256:2517fc08d78a3ecd8500cb71adfd85da613cf82028b9e34f25e2cf13930602fa
+          image: icr.io/cpopen/cpd/olm-utils-v2@sha256:7620c112def44374b9f53a8b5b3ef609be6d3a76fdd48b06f48e13ea3498a8f7
           imagePullPolicy: IfNotPresent
           env:
-            - name: ARGOCD_NAMESPACE
-              value: "openshift-gitops"
-            - name: TARGET_NAMESPACE
-              value: "{{.Values.metadata.argocd_app_namespace}}"
+            - name: PROJECT_CPD_INST_OPERANDS
+              value: {{.Values.metadata.operands_namespace}}
           command:
             - /bin/sh
             - -c
@@ -30,15 +27,15 @@ spec:
 
               export KUBECONFIG=/tmp/kubeconfig
               api_url=$(oc get Infrastructure cluster -o jsonpath='{.status.apiServerURL}')
-              oc login "${api_url}" --token="$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)" \
+              oc login "${api_url}" --token="$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)" --insecure-skip-tls-verify \
               || {
                   echo "WARNING: Unable to configure external certificate."
                   exit 0
               }
 
               secret_found=0
-              oc get secret cp4d-custom-tls-secret \
-                  -n "${TARGET_NAMESPACE}" 2> /dev/null \
+              oc get secret cpd-tls-secret \
+                  -n "${PROJECT_CPD_INST_OPERANDS}" 2> /dev/null \
               && secret_found=1 \
               || secret_found=0
 
@@ -59,24 +56,24 @@ spec:
                       --confirm \
                   && sed -n `sed -n '/END CERTIFICATE/=' tls.crt | head -1`',$p' tls.crt | tail -n +2 > ca.crt \
                   && sed -i '/END/q' tls.crt \
-                  && oc delete secret cp4d-custom-tls-secret \
-                         -n "${TARGET_NAMESPACE}" \
+                  && oc delete secret cpd-tls-secret \
+                         -n "${PROJECT_CPD_INST_OPERANDS}" \
                         --ignore-not-found=true \
-                  && oc create secret generic cp4d-custom-tls-secret \
+                  && oc create secret generic cpd-tls-secret \
                         --from-file=tls.crt=tls.crt \
                         --from-file=tls.key=tls.key \
                         --from-file=ca.crt=ca.crt \
-                         -n "${TARGET_NAMESPACE}" \
+                         -n "${PROJECT_CPD_INST_OPERANDS}" \
                   && oc get route -l component=ibm-nginx \
-                        -n "${TARGET_NAMESPACE}" \
+                        -n "${PROJECT_CPD_INST_OPERANDS}" \
                         -o 'jsonpath={.items[0].spec.host}{" "}{.items[0].spec.tls.termination}{" "}{.items[0].metadata.name}' \
                   && oc get route -l component=ibm-nginx \
-                        -n "${TARGET_NAMESPACE}" \
+                        -n "${PROJECT_CPD_INST_OPERANDS}" \
                   && sed -i "/bin\/bash/a set -x" bin/setup-route \
                   && bin/setup-route \
-                      --cpd_instance_ns="${TARGET_NAMESPACE}" \
+                      --cpd_instance_ns="${PROJECT_CPD_INST_OPERANDS}" \
                       --route_type=passthrough \
-                      --route_secret=cp4d-custom-tls-secret \
+                      --route_secret=cpd-tls-secret \
                   && echo "INFO: Configured CPD route." \
                   || result=1
 
@@ -84,16 +81,16 @@ spec:
                       echo "WARNING: Failed to configure CPD route. Attempting to recover." \
                       && ocp_domain=$(oc get ingress.config.openshift.io cluster -o jsonpath={.spec.domain}) \
                       && bin/setup-route \
-                          --cpd_instance_ns="${TARGET_NAMESPACE}" \
+                          --cpd_instance_ns="${PROJECT_CPD_INST_OPERANDS}" \
                           --route_type=passthrough \
-                          --route_secret=cp4d-custom-tls-secret \
-                          --custom_hostname=cpd-${TARGET_NAMESPACE}.${ocp_domain} \
+                          --route_secret=cpd-tls-secret \
+                          --custom_hostname=cpd-${PROJECT_CPD_INST_OPERANDS}.${ocp_domain} \
                       && result=0 \
                       && echo "INFO: Configured CPD route on second attempt." \
                       || {
                           echo "ERROR: External secret not set."
-                          oc delete secret cp4d-custom-tls-secret \
-                              -n "${TARGET_NAMESPACE}" \
+                          oc delete secret cpd-tls-secret \
+                              -n "${PROJECT_CPD_INST_OPERANDS}" \
                               --ignore-not-found=true
                           result=1
                       }

@@ -1,5 +1,5 @@
 ---
-# https://www.ibm.com/docs/en/cloud-paks/cp-data/4.6.x?topic=environment-integrating-iam-service
+# https://www.ibm.com/docs/en/cloud-paks/cp-data/4.7.x?topic=manage-setup-iam-integration
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -13,12 +13,10 @@ spec:
     spec:
       containers:
         - name: install-olm
-          image: icr.io/cpopen/cpd/olm-utils:latest
+          image: icr.io/cpopen/cpd/olm-utils-v2@sha256:7620c112def44374b9f53a8b5b3ef609be6d3a76fdd48b06f48e13ea3498a8f7
           env:
-            - name: PROJECT_CPFS_OPS
-              value: {{.Values.metadata.common_services_namespace}}
-            - name: PROJECT_CPD_INSTANCE
-              value: {{.Values.metadata.argocd_app_namespace}}
+            - name: PROJECT_CPD_INST_OPERANDS
+              value: {{.Values.metadata.operands_namespace}}
             - name: IAM_INTEGRATION
               value: "{{.Values.iam_integration}}"
           command:
@@ -30,9 +28,8 @@ spec:
 
               result=0
 
-              # https://www.ibm.com/docs/en/cloud-paks/cp-data/4.6.x?topic=cluster-creating-custom-sccs-services
               iam_enabled=$(oc get zenservice lite-cr \
-                    -n "${PROJECT_CPD_INSTANCE}" \
+                    -n "${PROJECT_CPD_INST_OPERANDS}" \
                     -o jsonpath='{.spec.iamIntegration}')
               if [ "${iam_enabled}" == "${IAM_INTEGRATION}" ]; then
                   echo "INFO: IAM integration is already configured to ${IAM_INTEGRATION}."
@@ -42,12 +39,12 @@ spec:
               echo "INFO: Setting IAM integration to ${IAM_INTEGRATION}."
               bin/setup-iam-integration \
                   --enable="${IAM_INTEGRATION}" \
-                  --cpd_instance_ns="${PROJECT_CPD_INSTANCE}" \
+                  --cpd_instance_ns="${PROJECT_CPD_INST_OPERANDS}" \
               result=1
 
               echo "INFO: IAM integration status" \
               && oc get zenservice lite-cr \
-                    -n "${PROJECT_CPD_INSTANCE}" \
+                    -n "${PROJECT_CPD_INST_OPERANDS}" \
                     -o jsonpath='{.spec.iamIntegration}'
 
               exit ${result}

@@ -8,7 +8,6 @@ ignore: |
   config/argocd-cloudpaks/cp4waiops/templates/130-cp4waiops-ia-app.yaml
   config/cloudpaks/cp4a/operators/templates/0000-cp4ba-namespace.yaml
   config/cloudpaks/cp4a/operators/templates/0100-operator-group.yaml
-  config/cloudpaks/cp4d/templates/0000-operators-namespace.yaml
   config/cloudpaks/cp4i/install-prereqs/templates/0000-namespace.yaml
   config/cloudpaks/cp4i/install-prereqs/templates/0100-operator-group.yaml
   config/cloudpaks/cp4s/templates/subscriptions/050-cp4s-operator-group.yaml

@@ -1,5 +1,4 @@
 ---
-# https://www.ibm.com/docs/en/cloud-paks/cp-data/4.6.x
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -29,10 +28,12 @@ spec:
           value: "{{.Values.iam_integration}}"
         - name: metadata.argocd_app_namespace
           value: {{.Values.metadata.argocd_app_namespace}}
-        - name: metadata.common_services_namespace
-          value: {{.Values.metadata.common_services_namespace}}
+        - name: metadata.image_arch
+          value: {{.Values.metadata.image_arch}}
         - name: metadata.operators_namespace
           value: {{.Values.metadata.operators_namespace}}
+        - name: metadata.operands_namespace
+          value: {{.Values.metadata.operands_namespace}}
         - name: repoURL
           value: ${ARGOCD_APP_SOURCE_REPO_URL}
         - name: serviceaccount.argocd_application_controller
