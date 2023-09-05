@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
         - name: install-olm
-          image: icr.io/cpopen/cpd/olm-utils-v2@sha256:7620c112def44374b9f53a8b5b3ef609be6d3a76fdd48b06f48e13ea3498a8f7
+          image: "icr.io/cpopen/cpd/olm-utils-v2:{{.Values.version}}"
           env:
             - name: PROJECT_CPD_INST_OPERANDS
               value: {{.Values.metadata.operands_namespace}}
