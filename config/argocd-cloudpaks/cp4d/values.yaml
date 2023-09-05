@@ -20,4 +20,4 @@ iam_integration: true
 
 image_arch: amd64
 
-version: 4.7.1
+version: 4.7.2
