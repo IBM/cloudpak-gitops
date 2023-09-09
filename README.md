@@ -39,7 +39,7 @@ Supported versions:
 | Cloud Pak for Data | [4.7.2](https://www.ibm.com/docs/en/cloud-paks/cp-data/4.7.x?topic=overview) | Online, specialized installation |
 | Cloud Pak for Integration | [2023.2](https://www.ibm.com/docs/en/cloud-paks/cp-integration/2023.2) | Online installation |
 | Cloud Pak for Security | [1.10.12](https://www.ibm.com/docs/en/cloud-paks/cp-security/1.10) | Online installation |
-| Cloud Pak for Watson AIOps | [4.1.0](https://www.ibm.com/docs/en/cloud-paks/cloud-pak-watson-aiops/4.1.0) | Online Installation |
+| Cloud Pak for Watson AIOps | [4.1.2](https://www.ibm.com/docs/en/cloud-paks/cloud-pak-watson-aiops/4.1.2) | Starter Installation |
 
 ### Shared cluster
 
@@ -51,7 +51,7 @@ Note that if you want to enable this feature and customize the target namespaces
 
 ### GitOps
 
-GitOps is a declarative way to implement continuous deployment for cloud-native applications. The Red Hat® OpenShift® Container Platform offers the [OpenShift GitOps operator](https://docs.openshift.com/container-platform/4.7/cicd/gitops/understanding-openshift-gitops.html), which manages the entire lifecycle for [Argo CD](https://argoproj.github.io/argo-cd/) and its components.
+GitOps is a declarative way to implement continuous deployment for cloud-native applications. The Red Hat® OpenShift® Container Platform offers the [OpenShift GitOps operator](https://docs.openshift.com/container-platform/4.13/cicd/gitops/understanding-openshift-gitops.html), which manages the entire lifecycle for [Argo CD](https://argoproj.github.io/argo-cd/) and its components.
 
 ### Governance Policies
 
