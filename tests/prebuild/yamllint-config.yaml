@@ -10,6 +10,7 @@ ignore: |
   config/cloudpaks/cp4a/operators/templates/0100-operator-group.yaml
   config/cloudpaks/cp4i/install-prereqs/templates/0000-namespace.yaml
   config/cloudpaks/cp4i/install-prereqs/templates/0100-operator-group.yaml
+  config/cloudpaks/cp4s/templates/resources/200-cp4s-threat-mgmt.yaml
   config/cloudpaks/cp4s/templates/subscriptions/050-cp4s-operator-group.yaml
   config/cloudpaks/cp4waiops/install-aimgr/templates/subscriptions/050-operator-group.yaml
   config/rhacm/cloudpaks/templates/placement-argocd.yaml

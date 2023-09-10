@@ -123,10 +123,12 @@ spec:
               oc get configmap "${config_map_name}" \
                   --namespace "${ARGOCD_NAMESPACE}" > /dev/null 2>&1 \
               && oc patch configmap "${config_map_name}" \
-                  --patch "{\"data\":{\"cluster_domain\":\"${ocp_domain}\", \"roks_authentication\":\"${cp4s_roks_auth}\", \"serviceaccount.argocd_application_controller\":\"{{.Values.serviceaccount.argocd_application_controller}}\", \"storageclass.rwo\":\"${storage_class_rwo}\" }}" \
+                  --patch "{\"data\":{\"cluster_domain\":\"${ocp_domain}\", \"dedicated_cs_enabled\":\"{{.Values.dedicated_cs.enabled}}\", \"dedicated_cs_namespace\":\"{{.Values.dedicated_cs.control_namespace}}\", \"roks_authentication\":\"${cp4s_roks_auth}\", \"serviceaccount.argocd_application_controller\":\"{{.Values.serviceaccount.argocd_application_controller}}\", \"storageclass.rwo\":\"${storage_class_rwo}\" }}" \
                   --namespace "${ARGOCD_NAMESPACE}" \
               || oc create configmap "${config_map_name}" \
                   --from-literal=cluster_domain="${ocp_domain}" \
+                  --from-literal=dedicated_cs_enabled="{{.Values.dedicated_cs.enabled}}" \
+                  --from-literal=dedicated_cs_namespace="{{.Values.dedicated_cs.enabled}}" \
                   --from-literal=roks_authentication="${cp4s_roks_auth}" \
                   --from-literal=serviceaccount.argocd_application_controller="{{.Values.serviceaccount.argocd_application_controller}}" \
                   --from-literal=storageclass.rwo="${storage_class_rwo}"

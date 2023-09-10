@@ -4,7 +4,7 @@ kind: Job
 metadata:
   annotations:
     argocd.argoproj.io/hook: Sync
-    argocd.argoproj.io/sync-wave: "220"
+    argocd.argoproj.io/sync-wave: "200"
   name: cp4s-openldap
   namespace: {{.Values.metadata.argocd_namespace}}
 spec:
@@ -54,7 +54,7 @@ spec:
                     --inplace \
                     --partial \
                     --append \
-                    --progress $pod_name:/opt/bin/linux/cpctl ./cpctl \
+                    --progress ${pod_name:?}:/opt/bin/linux/cpctl ./cpctl \
               && chmod +x ./cpctl \
               || result=1
 
@@ -79,4 +79,4 @@ spec:
 
       restartPolicy: Never
       serviceAccountName: {{.Values.serviceaccount.ibm_cloudpaks_installer}}
-  backoffLimit: 2
+  backoffLimit: 12
