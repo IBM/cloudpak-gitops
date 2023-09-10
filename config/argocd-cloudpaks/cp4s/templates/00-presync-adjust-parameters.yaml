@@ -46,6 +46,11 @@ spec:
               roks_authentication=$(oc get configmap argocd-cp4s-config \
                   --namespace "${ARGOCD_NAMESPACE}" -o jsonpath='{.data.roks_authentication}')
 
+              dedicated_cs_enabled=$(oc get configmap argocd-cp4s-config \
+                  --namespace "${ARGOCD_NAMESPACE}" -o jsonpath='{.data.dedicated_cs_enabled}')
+              dedicated_cs_namespace=$(oc get configmap argocd-cp4s-config \
+                  --namespace "${ARGOCD_NAMESPACE}" -o jsonpath='{.data.dedicated_cs_namespace}')
+
               echo "INFO: Install Argo CLI."
               # Install it from cluster, not from Internet, so airgap scenarios still work
               argo_route=openshift-gitops-server
@@ -66,6 +71,8 @@ spec:
                   app_name=cp4s-app
                   echo "INFO: Patching storage for ${app_name}." \
                   && "${argo_cmd}" app set "${app_name}" \
+                      --helm-set-string dedicated_cs.enabled="${dedicated_cs_enabled}" \
+                      --helm-set-string dedicated_cs.namespace="${dedicated_cs_namespace}" \
                       --helm-set-string cluster_domain="${cluster_domain}" \
                       --helm-set-string roks_authentication="${roks_authentication}" \
                       --helm-set-string storageclass.rwo="${storage_class_rwo}" \

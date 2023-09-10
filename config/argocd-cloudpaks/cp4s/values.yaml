@@ -9,5 +9,8 @@ serviceaccount:
 metadata:
   argocd_app_namespace: cp4s
   argocd_namespace: openshift-gitops
+dedicated_cs:
+  control_namespace: cs-control
+  enabled: false
 storageclass:
   rwo: ocs-storagecluster-ceph-rbd

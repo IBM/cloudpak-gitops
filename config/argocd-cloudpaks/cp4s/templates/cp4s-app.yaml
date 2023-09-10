@@ -27,6 +27,10 @@ spec:
           value: {{.Values.admin_user}}
         - name: cluster_domain
           value: {{.Values.cluster_domain}}
+        - name: dedicated_cs.control_namespace
+          value: "{{.Values.dedicated_cs.control_namespace}}"
+        - name: dedicated_cs.enabled
+          value: "{{.Values.dedicated_cs.enabled}}"
         - name: metadata.argocd_app_namespace
           value: {{.Values.metadata.argocd_app_namespace}}
         - name: metadata.operators_namespace
