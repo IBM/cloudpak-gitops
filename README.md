@@ -35,7 +35,7 @@ Supported versions:
 
 | Cloud Pak | Version | Installation mode |
 | ----------|---------|-------------------|
-| Cloud Pak for Business Automation | [22.0.2](https://www.ibm.com/docs/en/cloud-paks/cp-biz-automation/22.0.2) | Multi-pattern starter deployment |
+| Cloud Pak for Business Automation | [23.0.1](https://www.ibm.com/docs/en/cloud-paks/cp-biz-automation/23.0.1) | Multi-pattern starter deployment |
 | Cloud Pak for Data | [4.7.2](https://www.ibm.com/docs/en/cloud-paks/cp-data/4.7.x?topic=overview) | Online, specialized installation |
 | Cloud Pak for Integration | [2023.2](https://www.ibm.com/docs/en/cloud-paks/cp-integration/2023.2) | Online installation |
 | Cloud Pak for Security | [1.10.12](https://www.ibm.com/docs/en/cloud-paks/cp-security/1.10) | Online installation |

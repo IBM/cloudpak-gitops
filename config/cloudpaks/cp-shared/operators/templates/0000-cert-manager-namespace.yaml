@@ -1,0 +1,8 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  creationTimestamp: null
+  name: {{.Values.metadata.cert_manager_namespace}}
+spec: {}
+status: {}

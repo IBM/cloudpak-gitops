@@ -39,9 +39,6 @@ spec:
                 common-service-maps.yaml: |
                   controlNamespace: {{.Values.dedicated_cs.control_namespace}}
                   namespaceMapping:
-                  - map-to-common-service-namespace: {{.Values.dedicated_cs.namespace_mapping.cp4a}}
-                    requested-from-namespace:
-                    - {{.Values.dedicated_cs.namespace_mapping.cp4a}}
                   - map-to-common-service-namespace: {{.Values.dedicated_cs.namespace_mapping.cp4d}}
                     requested-from-namespace:
                     - {{.Values.dedicated_cs.namespace_mapping.cp4d}}

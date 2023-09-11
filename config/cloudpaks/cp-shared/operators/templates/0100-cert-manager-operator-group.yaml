@@ -1,0 +1,11 @@
+---
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: "100"
+  creationTimestamp: null
+  name: ibm-cert-manager
+  namespace: {{.Values.metadata.cert_manager_namespace}}
+spec:
+  upgradeStrategy: Default

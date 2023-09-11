@@ -11,10 +11,10 @@ metadata:
     argocd.argoproj.io/sync-wave: "201"
   namespace: {{.Values.argocd_app_namespace}}
 spec:
-  appVersion: 22.0.2
+  appVersion: 23.0.1
   olm_deployment_type: Starter
   olm_ibm_license: true
-  olm_starter_application: false
+  olm_starter_application: true
   olm_starter_content: false
   olm_starter_decisions: true
   olm_starter_decisions_ads: false
@@ -26,6 +26,7 @@ spec:
   olm_production_decisions: false
   olm_production_content: false
   olm_production_workflow: false
+  olm_production_workflow_process_service: false
   initialize_configuration:
     ic_ldap_creation:
       ic_ldap_admins_groups_name:
@@ -95,6 +96,7 @@ spec:
       bai: false
     application:
       app_designer: false
+      ae_data_persistence: false
     content:
       bai: false
       cmis: false
@@ -108,8 +110,12 @@ spec:
       decisionCenter: false
       decisionRunner: false
       decisionServerRuntime: false
+    wfps_authoring:
+      bai: false
+      pfs: false
     workfow_authoring:
       bai: false
+      pfs: false
     workfow_runtime:
       bai: false
   olm_starter_option:
@@ -145,7 +151,7 @@ spec:
       database_port: ''
       database_servername: ''
       dc_database_ssl_enabled: true
-      dc_database_type: db2
+      dc_database_type: postgresql
       dc_hadr_max_retries_for_client_reroute: 3
       dc_hadr_retry_interval_for_client_reroute: 15
       dc_hadr_standby_ip: ''
@@ -158,7 +164,7 @@ spec:
       dc_common_database_name: ''
       dc_common_database_port: ''
       dc_common_ssl_enabled: true
-      dc_database_type: db2
+      dc_database_type: postgresql
       dc_ssl_secret_name: ''
     dc_icn_datasource:
       database_name: ''
@@ -292,7 +298,12 @@ spec:
     database_precheck: true
     dc_ssl_enabled: true
   shared_configuration:
+    sc_iam:
+      default_admin_username: ''
     trusted_certificate_list: []
+    sc_common_service:
+      operator_namespace: ''
+      services_namespace: ''
     storage_configuration:
       sc_block_storage_classname: {{.Values.storageclass.block}}
       sc_dynamic_storage_classname: {{.Values.storageclass.gold}}
@@ -301,7 +312,7 @@ spec:
       sc_slow_file_storage_classname: ''
     encryption_key_secret: ''
     external_tls_certificate_secret: ''
-    olm_sc_content_initialization: true
+    olm_sc_content_initialization: false
     olm_sc_content_verification: false
     root_ca_secret: icp4a-root-ca
     sc_deployment_baw_license: non-production
