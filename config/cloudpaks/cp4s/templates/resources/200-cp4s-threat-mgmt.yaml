@@ -15,13 +15,16 @@ spec:
     storageClass: {{.Values.storageclass.rwo}}
   extendedDeploymentConfiguration:
     airgapInstall: false
+    clusterProxy: false
     backupStorageClass: {{.Values.storageclass.rwo}}
     backupStorageSize: ""
     imagePullPolicy: IfNotPresent
     repository: cp.icr.io/cp/cp4s
     repositoryType: entitled
     roksAuthentication: {{.Values.roks_authentication}}
+{{ if eq ( default "false" .Values.dedicated_cs.enabled ) "true" }}
     CSNamespace: "{{.Values.metadata.argocd_app_namespace}}-cs"
+{{ end }}
   threatManagementCapabilities:
     deployDRC: true
     deployRiskManager: true
