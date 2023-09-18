@@ -1,7 +1,6 @@
 ---
 metadata:
   argocd_namespace: openshift-gitops
-  cert_manager_namespace: ibm-cert-manager
 serviceaccount:
   argocd_application_controller: openshift-gitops-argocd-application-controller
 online_catalog_source_priority: -1

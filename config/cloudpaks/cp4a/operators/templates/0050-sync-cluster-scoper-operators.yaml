@@ -1,0 +1,83 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: sync-cluster-scoper-operators
+  annotations:
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/sync-wave: "50"
+  namespace: openshift-gitops
+spec:
+  template:
+    spec:
+      containers:
+        - name: config
+          image: quay.io/openshift/origin-cli:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: ARGOCD_NAMESPACE
+              value: "openshift-gitops"
+            - name: IBM_CERT_MANAGER
+              value: {{.Values.metadata.cert_manager_namespace}}
+            - name: IBM_CERT_MANAGER_CHANNEL
+              value: {{.Values.metadata.cert_manager_channel}}
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -eo pipefail
+              set -x
+
+              result=0
+              ibm_cert_manager_count=$(oc get Subscription.operators.coreos.com \
+                    -l operators.coreos.com/ibm-cert-manager-operator.ibm-cert-manager \
+                    -A \
+                    -o name | wc -l || result=1)
+              if [ "${result}" == 0 ]; then
+                  if [ "${ibm_cert_manager_count}" == "0" ]; then
+                      echo "INFO: Installing IBM Cert Manager."
+                      cat << EOF > oc apply -f -
+              ---
+              apiVersion: operators.coreos.com/v1
+              kind: OperatorGroup
+              metadata:
+                name: ibm-cert-manager
+                namespace: ${IBM_CERT_MANAGER:?}
+              spec:
+                upgradeStrategy: Default
+              ---
+              apiVersion: operators.coreos.com/v1alpha1
+              kind: Subscription
+              metadata:
+                name: ibm-cert-manager-operator
+                namespace: ${IBM_CERT_MANAGER:?}
+              spec:
+                channel: ${IBM_CERT_MANAGER_CHANNEL:?}
+                installPlanApproval: Automatic
+                name: ibm-cert-manager-operator
+                source: ibm-operator-catalog
+                sourceNamespace: openshift-marketplace
+              EOF
+                      oc wait Subscription.operators.coreos.com ibm-cert-manager-operator -n ${IBM_CERT_MANAGER:?} --for=CatalogSourcesUnhealthy=False \
+                      && oc wait Subscription.operators.coreos.com ibm-cert-manager-operator -n ${IBM_CERT_MANAGER:?} --for=jsonpath='state'="AtLatestKnown" \
+                      && echo "INFO: Successfully install IBM Cert Manager." \
+                      || result=1
+                  else
+                      echo "INFO: IBM Cert Manager already installed."
+                      oc get Subscription.operators.coreos.com \
+                          -l operators.coreos.com/ibm-cert-manager-operator.ibm-cert-manager \
+                          -A
+                  fi
+              else
+                  echo "ERROR: Unable to ascertain status of cert managers in the cluster."
+              fi
+
+              if [ "${result}" -eq 1 ] ; then
+                echo "ERROR: Unable to locate a running IBM Cert Manager and to install one afterwards."
+              fi
+
+              exit "${result}"
+
+      restartPolicy: Never
+      serviceAccountName: {{.Values.serviceaccount.ibm_cloudpaks_installer}}
+  backoffLimit: 2

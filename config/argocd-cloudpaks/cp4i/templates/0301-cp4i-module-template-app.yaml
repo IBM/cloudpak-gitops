@@ -7,7 +7,7 @@
 {{- $targetRevision := .Values.targetRevision -}}
 {{- range $module_name, $module_enabled := .Values.modules }}
 {{- if not (eq $module_name "client") }}
-{{- if eq ( default false $module_enabled ) true  }}
+{{- if eq ( default "false" $module_enabled | toString ) "true" }}
 ---
 apiVersion: argoproj.io/v1alpha1
 kind: Application

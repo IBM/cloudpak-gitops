@@ -47,70 +47,78 @@ spec:
 
               api_url=$(oc get Infrastructure cluster  -o jsonpath={.status.apiServerURL})
 
-              storage_class_rwo=$(oc get StorageClasses ocs-storagecluster-ceph-rbd -o name 2> /dev/null | cut -d "/" -f 2) || true
-              if [ -n "${storage_class_rwo}" ]; then
-                  echo "INFO: Cluster has ODF installed, using ODF storage classes."
-              else
-                storage_class_rwo=$(oc get StorageClasses rook-ceph-block -o name 2> /dev/null | cut -d "/" -f 2) || true
-                if [ -n "${storage_class_rwo}" ]; then
-                  echo "INFO: Cluster has Ceph installed, using Ceph storage classes."
-                fi
-              fi
-
-              # NetApp/Trident support
-              if [ -z "${storage_class_rwo}" ]; then
-                  storage_class_rwo=$(oc get storageclass \
-                        -o=custom-columns='NAME:metadata.name,PROVISIONER:provisioner,BACKEND-TYPE:parameters.backendType' \
-                    | grep "csi.trident.netapp.io.*ontap-san" \
-                    | head -n 1 \
-                    | cut -d " " -f 1) || true
-                  # If the cluster does not have the dedicated block storage class, the NFS
-                  # driver can address most use cases with the exception of "block" volume
-                  # mode, which is not needed for Cloud Paks
+              storage_class_rwo="${STORAGE_CLASS_OVERRIDE_RWO}"
+              storage_class_rwx="${STORAGE_CLASS_OVERRIDE_RWX}"
+              if [ -n "${storage_class_rwx}" ]; then
                   if [ -z "${storage_class_rwo}" ]; then
-                    storage_class_rwo=$(oc get storageclass \
-                        -o=custom-columns='NAME:metadata.name,PROVISIONER:provisioner,BACKEND-TYPE:parameters.backendType' \
-                    | grep "csi.trident.netapp.io.*ontap-nas" \
-                    | head -n 1 \
-                    | cut -d " " -f 1) || true
+                      storage_class_rwo="${storage_class_rwx}"
                   fi
+              else
+                  storage_class_rwo=$(oc get StorageClasses ocs-storagecluster-ceph-rbd -o name 2> /dev/null | cut -d "/" -f 2) || true
                   if [ -n "${storage_class_rwo}" ]; then
-                      echo "INFO: Cluster has ONTAP installed, using ONTAP storage class."
-                  fi
-              fi
-
-              if [ -z "${storage_class_rwo}" ]; then
-                if [[ "${api_url}" == *fyre.ibm.com* ]]; then
-                  storage_class_rwo="{{.Values.storageclass.rwo.fyre}}"
-                else
-                    platform=$(oc get Infrastructure cluster  -o jsonpath={.status.platform})
-                    if [ "${platform}" == "AWS" ]; then
-                        ebs=$(oc get StorageClasses | grep ebs.csi.aws.com | head -n 1 | cut -d " " -f 1) || true
-                        if [ -z "${ebs}" ]; then
-                            ebs=$(oc get StorageClasses | grep kubernetes.io/aws-ebs | cut -d " " -f 1) || true
-                        fi
-                        if [ -n "${ebs}" ]; then
-                            storage_class_rwo="${ebs}"
-                        else
-                            storage_class_rwo="{{.Values.storageclass.rwo.aws}}"
-                        fi
-                    elif [ "${platform}" == "Azure" ]; then
-                        if oc get StorageClass managed-premium 2> /dev/null; then
-                            storage_class_rwo=managed-premium
-                        elif oc get StorageClass managed-csi 2> /dev/null; then
-                            storage_class_rwo=managed-csi
-                        else
-                            storage_class_rwo="{{.Values.storageclass.rwo.azure}}"
-                        fi
-                    elif [ "${platform}" == "IBMCloud" ]; then
-                      vpc_class=$(oc get StorageClass | grep -c "ibmc-vpc" || result=0)
-                      if [ ${vpc_class} -gt 0 ]; then
-                          storage_class_rwo="{{.Values.storageclass.rwo.roksgen2}}"
-                      else
-                          storage_class_rwo="{{.Values.storageclass.rwo.roks}}"
+                      echo "INFO: Cluster has ODF installed, using ODF storage classes."
+                  else
+                      storage_class_rwo=$(oc get StorageClasses rook-ceph-block -o name 2> /dev/null | cut -d "/" -f 2) || true
+                      if [ -n "${storage_class_rwo}" ]; then
+                          echo "INFO: Cluster has Ceph installed, using Ceph storage classes."
                       fi
-                    fi
-                fi
+                  fi
+
+                  # NetApp/Trident support
+                  if [ -z "${storage_class_rwo}" ]; then
+                      storage_class_rwo=$(oc get storageclass \
+                            -o=custom-columns='NAME:metadata.name,PROVISIONER:provisioner,BACKEND-TYPE:parameters.backendType' \
+                        | grep "csi.trident.netapp.io.*ontap-san" \
+                        | head -n 1 \
+                        | cut -d " " -f 1) || true
+                      # If the cluster does not have the dedicated block storage class, the NFS
+                      # driver can address most use cases with the exception of "block" volume
+                      # mode, which is not needed for Cloud Paks
+                      if [ -z "${storage_class_rwo}" ]; then
+                          storage_class_rwo=$(oc get storageclass \
+                              -o=custom-columns='NAME:metadata.name,PROVISIONER:provisioner,BACKEND-TYPE:parameters.backendType' \
+                          | grep "csi.trident.netapp.io.*ontap-nas" \
+                          | head -n 1 \
+                          | cut -d " " -f 1) || true
+                      fi
+                      if [ -n "${storage_class_rwo}" ]; then
+                          echo "INFO: Cluster has ONTAP installed, using ONTAP storage class."
+                      fi
+                  fi
+
+                  if [ -z "${storage_class_rwo}" ]; then
+                      if [[ "${api_url}" == *fyre.ibm.com* ]]; then
+                          storage_class_rwo="{{.Values.storageclass.rwo.fyre}}"
+                      else
+                          platform=$(oc get Infrastructure cluster  -o jsonpath={.status.platform})
+                          if [ "${platform}" == "AWS" ]; then
+                              ebs=$(oc get StorageClasses | grep ebs.csi.aws.com | head -n 1 | cut -d " " -f 1) || true
+                              if [ -z "${ebs}" ]; then
+                                  ebs=$(oc get StorageClasses | grep kubernetes.io/aws-ebs | cut -d " " -f 1) || true
+                              fi
+                              if [ -n "${ebs}" ]; then
+                                  storage_class_rwo="${ebs}"
+                              else
+                                  storage_class_rwo="{{.Values.storageclass.rwo.aws}}"
+                              fi
+                          elif [ "${platform}" == "Azure" ]; then
+                              if oc get StorageClass managed-premium 2> /dev/null; then
+                                  storage_class_rwo=managed-premium
+                              elif oc get StorageClass managed-csi 2> /dev/null; then
+                                  storage_class_rwo=managed-csi
+                              else
+                                  storage_class_rwo="{{.Values.storageclass.rwo.azure}}"
+                              fi
+                          elif [ "${platform}" == "IBMCloud" ]; then
+                              vpc_class=$(oc get StorageClass | grep -c "ibmc-vpc" || result=0)
+                              if [ ${vpc_class} -gt 0 ]; then
+                                  storage_class_rwo="{{.Values.storageclass.rwo.roksgen2}}"
+                              else
+                                  storage_class_rwo="{{.Values.storageclass.rwo.roks}}"
+                              fi
+                          fi
+                      fi
+                  fi
               fi
 
               if [ -z "${storage_class_rwo}" ]; then

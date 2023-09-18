@@ -11,6 +11,6 @@ storageclass:
   rwo: ocs-storagecluster-ceph-rbd
   rwx: ocs-storagecluster-cephfs
 modules:
-  apic: true
-  mq: true
-  client: false
+  apic: "true"
+  mq: "true"
+  client: "false"
