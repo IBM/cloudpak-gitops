@@ -19,12 +19,14 @@ dedicated_cs:
 online_catalog_source_priority: -1
 storageclass:
   rwo:
+    override:
     aws: gp2
     azure: ocs-storagecluster-ceph-rbd
     fyre: rook-ceph-block
     roks: ibmc-block-gold
     roksgen2: ocs-storagecluster-ceph-rbd
   rwx:
+    override:
     aws: ocs-storagecluster-cephfs
     azure: ocs-storagecluster-cephfs
     fyre: rook-cephfs

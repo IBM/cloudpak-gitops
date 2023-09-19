@@ -43,6 +43,10 @@ spec:
           value: "{{.Values.dedicated_cs.namespace_mapping.cp4waiops}}"
         - name: online_catalog_source_priority
           value: "{{.Values.online_catalog_source_priority}}"
+        - name: storageclass.rwo.override
+          value: "{{.Values.storageclass.rwo.override}}"
+        - name: storageclass.rwx.override
+          value: "{{.Values.storageclass.rwx.override}}"
         - name: repoURL
           value: ${ARGOCD_APP_SOURCE_REPO_URL}
         - name: serviceaccount.argocd_application_controller
