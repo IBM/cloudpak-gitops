@@ -29,6 +29,10 @@ spec:
           value: ${ARGOCD_APP_SOURCE_REPO_URL}
         - name: serviceaccount.argocd_application_controller
           value: {{.Values.serviceaccount.argocd_application_controller}}
+        - name: storageclass.rwo.override
+          value: "{{.Values.storageclass.rwo.override}}"
+        - name: storageclass.rwx.override
+          value: "{{.Values.storageclass.rwx.override}}"
         - name: targetRevision
           value: ${ARGOCD_APP_SOURCE_TARGET_REVISION}
     path: config/cloudpaks/cp-shared/operators

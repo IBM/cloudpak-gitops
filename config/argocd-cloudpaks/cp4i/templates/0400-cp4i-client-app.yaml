@@ -1,5 +1,5 @@
-{{- $client := .Values.modules.client }}
-{{- if eq ( default false $client ) true  }}
+{{- $client := .Values.modules.client | toString }}
+{{- if eq ( default "false" $client ) "true" }}
 ---
 apiVersion: argoproj.io/v1alpha1
 kind: Application
