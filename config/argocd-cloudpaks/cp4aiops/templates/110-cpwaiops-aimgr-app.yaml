@@ -3,22 +3,29 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   creationTimestamp: null
-  name: cp4waiops-app
+  name: cp4aiops-aimgr
   namespace: openshift-gitops
   annotations:
-    argocd.argoproj.io/sync-wave: "100"
+    argocd.argoproj.io/sync-wave: "110"
 spec:
   destination:
-    namespace: "{{.Values.metadata.argocd_app_namespace}}"
+    namespace: {{.Values.metadata.argocd_app_namespace}}
     server: https://kubernetes.default.svc
   ignoreDifferences:
     - group: argoproj.io
       jsonPointers:
-        - /spec/source/helm/parameters
         - /spec/source/repoURL
         - /spec/source/targetRevision
         - /status
       kind: Application
+    - group: noi.ibm.com
+      jsonPointers:
+        - /spec/clusterDomain
+      kind: noi
+    - group: v1
+      jsonPointers:
+        - /metadata/labels
+      kind: Namespace
   project: default
   source:
     helm:
@@ -27,12 +34,8 @@ spec:
           value: ${ARGOCD_APP_NAME}
         - name: argocd_app_namespace
           value: ${ARGOCD_APP_NAMESPACE}
-        - name: cluster_domain
-          value: "{{.Values.cluster_domain}}"
         - name: metadata.argocd_app_namespace
           value: {{.Values.metadata.argocd_app_namespace}}
-        - name: modules.ia
-          value: "{{.Values.modules.ia}}"
         - name: repoURL
           value: ${ARGOCD_APP_SOURCE_REPO_URL}
         - name: serviceaccount.argocd_application_controller
@@ -43,7 +46,7 @@ spec:
           value: {{.Values.storageclass.rwx}}
         - name: targetRevision
           value: ${ARGOCD_APP_SOURCE_TARGET_REVISION}
-    path: config/argocd-cloudpaks/cp4waiops
+    path: config/cloudpaks/cp4aiops/install-aimgr
     repoURL: {{.Values.repoURL}}
     targetRevision: {{.Values.targetRevision}}
   syncPolicy:

@@ -5,7 +5,7 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "21"
   creationTimestamp: null
-  name: argocd-cp4waiops-role
+  name: argocd-cp4aiops-role
   namespace: "{{.Values.metadata.argocd_app_namespace}}"
 rules:
   - apiGroups: ["orchestrator.aiops.ibm.com"]

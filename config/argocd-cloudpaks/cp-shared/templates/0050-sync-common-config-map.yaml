@@ -136,7 +136,7 @@ spec:
                 exit
               fi
 
-              for cloudpak in cp4d cp4i cp4waiops
+              for cloudpak in cp4d cp4i cp4aiops cp4waiops
               do
                   echo "INFO: Creating or patching the RHACM configmap"
                   config_map_name=argocd-${cloudpak}-config

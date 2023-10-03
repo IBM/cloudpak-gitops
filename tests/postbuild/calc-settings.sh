@@ -132,7 +132,7 @@ cd "${WORKDIR}"
 
 branch_delta_output_file="${WORKDIR}/diff.txt"
 extract_branch_delta "${branch_delta_output_file}"
-for cloudpak in cp4a cp4d cp4i cp4waiops cp4s
+for cloudpak in cp4a cp4d cp4i cp4aiops cp4waiops cp4s
 do
     if grep "/${cloudpak}/" "${branch_delta_output_file}"; then
         labels="${labels},${cloudpak}:${cloudpak}"

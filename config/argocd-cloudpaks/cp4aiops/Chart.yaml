@@ -1,7 +1,7 @@
 ---
 apiVersion: v2
-name: icp4waiops
-description: Cloud Pak for Watson AIOps
+name: icp4aiops
+description: Cloud Pak for AIOps
 
 # A chart can be either an 'application' or a 'library' chart.
 #

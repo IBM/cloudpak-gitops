@@ -5,12 +5,12 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "21"
   creationTimestamp: null
-  name: argocd-cp4waiops-aimgr-binding
+  name: argocd-cp4aiops-aimgr-binding
   namespace: "{{.Values.metadata.argocd_app_namespace}}"
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: argocd-cp4waiops-role
+  name: argocd-cp4aiops-role
 subjects:
   - kind: ServiceAccount
     name: "{{.Values.serviceaccount.argocd_application_controller}}"

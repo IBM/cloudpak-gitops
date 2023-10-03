@@ -15,7 +15,7 @@ dedicated_cs:
     cp4d: cp4d
     cp4i: cp4i
     cp4s: cp4s
-    cp4waiops: cp4waiops
+    cp4aiops: cp4aiops
 online_catalog_source_priority: -1
 storageclass:
   rwo:

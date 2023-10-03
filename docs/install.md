@@ -221,7 +221,7 @@ After completing the list of activities listed in the previous sections, you can
     | dedicated_cs.namespace_mapping.cp4d | cp4d |
     | dedicated_cs.namespace_mapping.cp4i | cp4i |
     | dedicated_cs.namespace_mapping.cp4s | cp4s |
-    | dedicated_cs.namespace_mapping.cp4waiops | cp4waiops |
+    | dedicated_cs.namespace_mapping.cp4aiops | cp4aiops |
 
 1. After filling out the form details, click the "Create" button
 
@@ -235,7 +235,7 @@ After completing the list of activities listed in the previous sections, you can
     | Data | cp4d-app | config/argocd-cloudpaks/cp4d | cp4d |
     | Integration | cp4i-app | config/argocd-cloudpaks/cp4i | cp4i |
     | Security | cp4s-app | config/argocd-cloudpaks/cp4s | cp4s |
-    | Watson AIOps | cp4waiops-app | config/argocd-cloudpaks/cp4waiops | cp4waiops |
+    | AIOps | cp4aiops-app | config/argocd-cloudpaks/cp4aiops | cp4aiops |
 
     For all other fields, use the following values:
 
@@ -318,12 +318,13 @@ After completing the list of activities listed in the previous sections, you can
    # If you want to override the default target namespace for 
    # one or more Cloud Paks, you need to adjust the values below
    # to indicate the desired target namespace.
-   # dedicated_cs.enabled=true
+   # dedicated_cs_enabled=true
+   dedicated_cs_enabled=false
    cp4a_namespace=cp4a
    cp4d_namespace=cp4d
    cp4i_namespace=cp4i
    cp4s_namespace=cp4s
-   cp4waiops_namespace=cp4waiops
+   cp4aiops_namespace=cp4aiops
 
    argocd app create cp-shared-app \
          --project default \
@@ -333,12 +334,12 @@ After completing the list of activities listed in the previous sections, you can
          --path config/argocd-cloudpaks/cp-shared \
          --helm-set-string argocd_app_namespace="${cp_namespace}" \
          --helm-set-string metadata.argocd_app_namespace="${cp_namespace}" \
-         --helm-set-string dedicated_cs.enabled="${dedicated_cs.enabled:-false}" \
+         --helm-set-string dedicated_cs.enabled="${dedicated_cs_enabled:-false}" \
          --helm-set-string dedicated_cs.namespace_mapping.cp4a="${cp4a_namespace}" \
          --helm-set-string dedicated_cs.namespace_mapping.cp4d="${cp4d_namespace}" \
          --helm-set-string dedicated_cs.namespace_mapping.cp4i="${cp4i_namespace}" \
          --helm-set-string dedicated_cs.namespace_mapping.cp4s="${cp4s_namespace}" \
-         --helm-set-string dedicated_cs.namespace_mapping.cp4waiops="${cp4waiops_namespace}" \
+         --helm-set-string dedicated_cs.namespace_mapping.cp4aiops="${cp4aiops_namespace}" \
          --sync-policy automated \
          --revision ${gitops_branch:?} \
          --upsert
@@ -349,7 +350,7 @@ After completing the list of activities listed in the previous sections, you can
    ```sh
    # appname=<< choose a value from the "Application Name" column in the 
    # table of Cloud Paks above, such as cp4a-app, cp4i-app, 
-   # cp4waiops-app, cp4d-app, etc >>
+   # cp4aiops-app, cp4d-app, etc >>
    cp=cp4i
 
    # Note that if you want to use a target namespace that is not the
@@ -390,7 +391,7 @@ After completing the list of activities listed in the previous sections, you can
    argocd app wait "${app_name}" \
          --sync \
          --health \
-         --operations \
+         --operation \
          --timeout 3600
    ```
 

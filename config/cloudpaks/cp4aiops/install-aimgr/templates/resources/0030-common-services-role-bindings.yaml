@@ -5,12 +5,12 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "30"
   creationTimestamp: null
-  name: common-services-cp4waiops-binding
+  name: common-services-cp4aiops-binding
   namespace: ibm-common-services
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: common-services-cp4waiops-role
+  name: common-services-cp4aiops-role
 subjects:
   - kind: ServiceAccount
     name: {{.Values.serviceaccount.ibm_cloudpaks_installer}}
@@ -22,12 +22,12 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "30"
   creationTimestamp: null
-  name: common-services-cp4waiops-binding
+  name: common-services-cp4aiops-binding
   namespace: {{.Values.metadata.argocd_app_namespace}}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: common-services-cp4waiops-role
+  name: common-services-cp4aiops-role
 subjects:
   - kind: ServiceAccount
     name: {{.Values.serviceaccount.ibm_cloudpaks_installer}}
