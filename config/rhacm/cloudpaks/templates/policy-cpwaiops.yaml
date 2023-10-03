@@ -2,7 +2,7 @@
 apiVersion: policy.open-cluster-management.io/v1
 kind: Policy
 metadata:
-  name: openshift-gitops-cloudpaks-cp4waiops
+  name: openshift-gitops-cloudpaks-cp4aiops
   namespace: policy
   annotations:
     argocd.argoproj.io/compare-options: IgnoreExtraneous
@@ -19,7 +19,7 @@ spec:
         apiVersion: policy.open-cluster-management.io/v1
         kind: ConfigurationPolicy
         metadata:
-          name: openshift-gitops-cloudpaks-cp4waiops
+          name: openshift-gitops-cloudpaks-cp4aiops
         spec:
           remediationAction: enforce
           severity: medium
@@ -34,13 +34,13 @@ spec:
                 apiVersion: argoproj.io/v1alpha1
                 kind: Application
                 metadata:
-                  name: cp4waiops-app
+                  name: cp4aiops-app
                   # Look up used to delay the application of the policy
                   # until this secret is created
                   namespace: '{{ "{{ (lookup \"v1\" \"Secret\" \"openshift-gitops\" \"ibm-entitlement-key\").metadata.namespace }}" }}'
                 spec:
                   destination:
-                    namespace: '{{ "{{ fromClusterClaim \"cp4waiops\" }}" }}'
+                    namespace: '{{ "{{ fromClusterClaim \"cp4aiops\" }}" }}'
                     server: https://kubernetes.default.svc
                   project: default
                   source:
@@ -51,20 +51,20 @@ spec:
                         - name: argocd_app_namespace
                           value: ${ARGOCD_APP_NAMESPACE}
                         - name: cluster_domain
-                          value: '{{ "{{ fromConfigMap \"openshift-gitops\" \"argocd-cp4waiops-config\" \"cluster_domain\" }}" }}'
+                          value: '{{ "{{ fromConfigMap \"openshift-gitops\" \"argocd-cp4aiops-config\" \"cluster_domain\" }}" }}'
                         - name: metadata.argocd_app_namespace
-                          value: '{{ "{{ fromClusterClaim \"cp4waiops\" }}" }}'
+                          value: '{{ "{{ fromClusterClaim \"cp4aiops\" }}" }}'
                         - name: repoURL
                           value: ${ARGOCD_APP_SOURCE_REPO_URL}
                         - name: serviceaccount.argocd_application_controller
-                          value: '{{ "{{ fromConfigMap \"openshift-gitops\" \"argocd-cp4waiops-config\" \"serviceaccount.argocd_application_controller\" }}" }}'
+                          value: '{{ "{{ fromConfigMap \"openshift-gitops\" \"argocd-cp4aiops-config\" \"serviceaccount.argocd_application_controller\" }}" }}'
                         - name: storageclass.rwo
-                          value: '{{ "{{ fromConfigMap \"openshift-gitops\" \"argocd-cp4waiops-config\" \"storageclass.rwo\" }}" }}'
+                          value: '{{ "{{ fromConfigMap \"openshift-gitops\" \"argocd-cp4aiops-config\" \"storageclass.rwo\" }}" }}'
                         - name: storageclass.rwx
-                          value: '{{ "{{ fromConfigMap \"openshift-gitops\" \"argocd-cp4waiops-config\" \"storageclass.rwx\" }}" }}'
+                          value: '{{ "{{ fromConfigMap \"openshift-gitops\" \"argocd-cp4aiops-config\" \"storageclass.rwx\" }}" }}'
                         - name: targetRevision
                           value: ${ARGOCD_APP_SOURCE_TARGET_REVISION}
-                    path: config/argocd-cloudpaks/cp4waiops
+                    path: config/argocd-cloudpaks/cp4aiops
                     repoURL: {{.Values.repoURL}}
                     targetRevision: '{{ "{{ fromClusterClaim \"gitops-branch\" }}" }}'
                   syncPolicy:

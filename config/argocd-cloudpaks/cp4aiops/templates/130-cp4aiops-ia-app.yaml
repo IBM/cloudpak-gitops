@@ -5,7 +5,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   creationTimestamp: null
-  name: cp4waiops-ia
+  name: cp4aiops-ia
   namespace: openshift-gitops
   annotations:
     argocd.argoproj.io/sync-wave: "130"
@@ -44,7 +44,7 @@ spec:
           value: {{.Values.storageclass.rwx}}
         - name: targetRevision
           value: ${ARGOCD_APP_SOURCE_TARGET_REVISION}
-    path: config/cloudpaks/cp4waiops/install-ia
+    path: config/cloudpaks/cp4aiops/install-ia
     repoURL: {{.Values.repoURL}}
     targetRevision: {{.Values.targetRevision}}
   syncPolicy:

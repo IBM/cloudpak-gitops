@@ -1,4 +1,4 @@
-{{- range tuple "cp4a" "cp4waiops" "cp4d" "cp4i" "cp4s" }}
+{{- range tuple "cp4a" "cp4aiops" "cp4d" "cp4i" "cp4s" }}
 ---
 apiVersion: policy.open-cluster-management.io/v1
 kind: PlacementBinding

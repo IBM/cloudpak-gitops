@@ -4,7 +4,7 @@ kind: Job
 metadata:
   annotations:
     argocd.argoproj.io/hook: PreSync
-  name: pre-cp4waiops-adjust-parameters
+  name: pre-cp4aiops-adjust-parameters
   namespace: openshift-gitops
 spec:
   template:
@@ -25,9 +25,9 @@ spec:
               set -eo pipefail
               set -x
 
-              storage_class_rwo="$(oc get configmap argocd-cp4waiops-config \
+              storage_class_rwo="$(oc get configmap argocd-cp4aiops-config \
                 --namespace "${ARGOCD_NAMESPACE}" -o jsonpath='{.data.storageclass\.rwo}')"
-              storage_class_rwx="$(oc get configmap argocd-cp4waiops-config \
+              storage_class_rwx="$(oc get configmap argocd-cp4aiops-config \
                 --namespace "${ARGOCD_NAMESPACE}" -o jsonpath='{.data.storageclass\.rwx}')"
 
               if [ -z "${storage_class_rwo}" ] || [ -z "${storage_class_rwx}" ] ; then
@@ -35,7 +35,7 @@ spec:
                 exit 1
               fi
 
-               cluster_domain=$(oc get configmap argocd-cp4waiops-config \
+               cluster_domain=$(oc get configmap argocd-cp4aiops-config \
                   --namespace "${ARGOCD_NAMESPACE}" -o jsonpath='{.data.cluster_domain}')
 
               echo "INFO: Install Argo CLI."
@@ -55,7 +55,7 @@ spec:
               || result=1
 
               if [ ${result} -eq 0 ]; then
-                  for app_name in cp4waiops-app cp4waiops-aimgr; do
+                  for app_name in cp4aiops-app cp4aiops-aimgr; do
                       if [ -n "${storage_class_rwo}" ] && [ -n "${storage_class_rwx}" ]; then
                           echo "INFO: Patching storage for ${app_name}." \
                           && "${argo_cmd}" app set "${app_name}" \
@@ -68,7 +68,7 @@ spec:
                   done
               fi
 
-              for app_name in cp4waiops-app cp4waiops-aimgr; do
+              for app_name in cp4aiops-app cp4aiops-aimgr; do
                   echo "INFO: Application ${app_name} current parameters:"
                   "${argo_cmd}" app get "${app_name}" --show-params
               done

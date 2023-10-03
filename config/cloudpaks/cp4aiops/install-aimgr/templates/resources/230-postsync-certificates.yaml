@@ -7,7 +7,7 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "230"
     argocd.argoproj.io/hook: Sync
-  name: post-cp4waiops-adjust-certs
+  name: post-cp4aiops-adjust-certs
   namespace: openshift-gitops
 spec:
   template:

@@ -4,7 +4,7 @@ kind: Job
 metadata:
   annotations:
     argocd.argoproj.io/hook: PreSync
-  name: pre-cp4waiops-ia-adjust-parameters
+  name: pre-cp4aiops-ia-adjust-parameters
   namespace: openshift-gitops
 spec:
   template:
@@ -23,9 +23,9 @@ spec:
               set -eo pipefail
               set -x
 
-              storage_class_rwo="$(oc get configmap argocd-cp4waiops-config \
+              storage_class_rwo="$(oc get configmap argocd-cp4aiops-config \
                 --namespace "${ARGOCD_NAMESPACE}" -o jsonpath='{.data.storageclass\.rwo}')"
-              storage_class_rwx="$(oc get configmap argocd-cp4waiops-config \
+              storage_class_rwx="$(oc get configmap argocd-cp4aiops-config \
                 --namespace "${ARGOCD_NAMESPACE}" -o jsonpath='{.data.storageclass\.rwx}')"
 
               if [ -z "${storage_class_rwo}" ] || [ -z "${storage_class_rwx}" ] ; then
@@ -49,7 +49,7 @@ spec:
               && "${argo_cmd}" login "${argo_url}" --username admin --password "${argo_pwd}" --insecure \
               || result=1
 
-              app_name=cp4waiops-ia
+              app_name=cp4aiops-ia
               if [ ${result} -eq 0 ]; then
                   echo "INFO: Patching storage for ${app_name}." \
                   && "${argo_cmd}" app set "${app_name}" \
