@@ -136,7 +136,7 @@ spec:
               || oc create configmap "${config_map_name}" \
                   --from-literal=cluster_domain="${ocp_domain}" \
                   --from-literal=dedicated_cs_enabled="{{.Values.dedicated_cs.enabled}}" \
-                  --from-literal=dedicated_cs_namespace="{{.Values.dedicated_cs.enabled}}" \
+                  --from-literal=dedicated_cs_namespace="{{.Values.dedicated_cs.control_namespace}}" \
                   --from-literal=roks_authentication="${cp4s_roks_auth}" \
                   --from-literal=serviceaccount.argocd_application_controller="{{.Values.serviceaccount.argocd_application_controller}}" \
                   --from-literal=storageclass.rwo="${storage_class_rwo}"

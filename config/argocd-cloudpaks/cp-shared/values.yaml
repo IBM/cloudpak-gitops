@@ -11,11 +11,8 @@ dedicated_cs:
   control_namespace: cs-control
   enabled: false
   namespace_mapping:
-    cp4a: cp4a
-    cp4d: cp4d
     cp4i: cp4i
     cp4s: cp4s
-    cp4aiops: cp4aiops
 online_catalog_source_priority: -1
 storageclass:
   rwo:

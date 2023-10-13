@@ -211,21 +211,19 @@ After completing the list of activities listed in the previous sections, you can
     | Revision | HEAD |
     | Cluster URL | <https://kubernetes.default.svc> |
 
-    **Optional**: If you want to deploy a Cloud Pak to a non-default namespace, you must override the default
-    value for the Cloud Paks, using the parameters below:
+    **Optional**: If you want to deploy Cloud Pak for Integration or Cloud Pak for Security to a non-default namespace, you must override the default value for the Cloud Paks, using the parameters below:
 
     | Parameter | (Default) Value |
     | --------- | --------------- |
     | dedicated_cs.enabled | true |
-    | dedicated_cs.namespace_mapping.cp4a | cp4a |
-    | dedicated_cs.namespace_mapping.cp4d | cp4d |
     | dedicated_cs.namespace_mapping.cp4i | cp4i |
     | dedicated_cs.namespace_mapping.cp4s | cp4s |
-    | dedicated_cs.namespace_mapping.cp4aiops | cp4aiops |
 
-1. After filling out the form details, click the "Create" button
+    Note that Cloud Pak for Data and Cloud Pak for Business Automation do not have this setting - because they enable dedicated Foundation Service namespace by default. Cloud Pak for AIOps does not have this setting either, because it does not support dedicated Foundation Service namespaces.
 
-1. (add actual Cloud Pak) Click on the "New App+" button again and fill out the form with values matching the Cloud Pak of your choice, according to the table below:
+2. After filling out the form details, click the "Create" button
+
+3. (add actual Cloud Pak) Click on the "New App+" button again and fill out the form with values matching the Cloud Pak of your choice, according to the table below:
 
     Note that if you want to deploy a Cloud Pak to a non-default namespace, you need to make sure you pass the same namespace values used in the optional parameter values for the `cp-shared` application.
 
@@ -248,13 +246,13 @@ After completing the list of activities listed in the previous sections, you can
     | Revision | HEAD |
     | Cluster URL | <https://kubernetes.default.svc> |
 
-1. After filling out the form details, click the "Create" button
+4. After filling out the form details, click the "Create" button
 
-1. Under "Parameters," set the values for the fields `storageclass.rwo` and `storageclass.rwx` with the appropriate storage classes. For OpenShift Container Storage, the values will be `ocs-storagecluster-ceph-rbd` and `ocs-storagecluster-cephfs`, respectively.
+5. Under "Parameters," set the values for the fields `storageclass.rwo` and `storageclass.rwx` with the appropriate storage classes. For OpenShift Container Storage, the values will be `ocs-storagecluster-ceph-rbd` and `ocs-storagecluster-cephfs`, respectively.
 
-1. After filling out the form details, click the "Create" button
+6. After filling out the form details, click the "Create" button
 
-1. Wait for the synchronization to complete.
+7. Wait for the synchronization to complete.
 
 ### Using a terminal
 
@@ -335,11 +333,8 @@ After completing the list of activities listed in the previous sections, you can
          --helm-set-string argocd_app_namespace="${cp_namespace}" \
          --helm-set-string metadata.argocd_app_namespace="${cp_namespace}" \
          --helm-set-string dedicated_cs.enabled="${dedicated_cs_enabled:-false}" \
-         --helm-set-string dedicated_cs.namespace_mapping.cp4a="${cp4a_namespace}" \
-         --helm-set-string dedicated_cs.namespace_mapping.cp4d="${cp4d_namespace}" \
          --helm-set-string dedicated_cs.namespace_mapping.cp4i="${cp4i_namespace}" \
          --helm-set-string dedicated_cs.namespace_mapping.cp4s="${cp4s_namespace}" \
-         --helm-set-string dedicated_cs.namespace_mapping.cp4aiops="${cp4aiops_namespace}" \
          --sync-policy automated \
          --revision ${gitops_branch:?} \
          --upsert
