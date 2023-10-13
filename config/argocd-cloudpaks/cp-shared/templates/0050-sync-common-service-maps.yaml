@@ -39,18 +39,12 @@ spec:
                 common-service-maps.yaml: |
                   controlNamespace: {{.Values.dedicated_cs.control_namespace}}
                   namespaceMapping:
-                  - map-to-common-service-namespace: {{.Values.dedicated_cs.namespace_mapping.cp4d}}
-                    requested-from-namespace:
-                    - {{.Values.dedicated_cs.namespace_mapping.cp4d}}
                   - map-to-common-service-namespace: {{.Values.dedicated_cs.namespace_mapping.cp4i}}
                     requested-from-namespace:
                     - {{.Values.dedicated_cs.namespace_mapping.cp4i}}
                   - map-to-common-service-namespace: {{.Values.dedicated_cs.namespace_mapping.cp4s}}-cs
                     requested-from-namespace:
                     - {{.Values.dedicated_cs.namespace_mapping.cp4s}}
-                  - map-to-common-service-namespace: {{.Values.dedicated_cs.namespace_mapping.cp4aiops}}
-                    requested-from-namespace:
-                    - {{.Values.dedicated_cs.namespace_mapping.cp4aiops}}
               EOF
               else
                 echo "INFO: ConfigMap common-service-maps already exists."

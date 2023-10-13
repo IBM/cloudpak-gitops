@@ -22,7 +22,7 @@ spec:
     repository: cp.icr.io/cp/cp4s
     repositoryType: entitled
     roksAuthentication: {{.Values.roks_authentication}}
-{{ if eq ( default "false" .Values.dedicated_cs.enabled ) "true" }}
+{{ if eq (.Values.dedicated_cs.enabled  | toString) "true" }}
     CSNamespace: "{{.Values.metadata.argocd_app_namespace}}-cs"
 {{ end }}
   threatManagementCapabilities:
