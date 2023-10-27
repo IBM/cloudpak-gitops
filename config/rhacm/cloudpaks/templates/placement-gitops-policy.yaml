@@ -1,0 +1,36 @@
+{{- $argocd_namespace := .Values.metadata.argocd_namespace -}}
+{{- range tuple "cp4a" "cp4aiops" "cp4d" "cp4i" "cp4s" }}
+---
+apiVersion: apps.open-cluster-management.io/v1
+kind: PlacementRule
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: "200"
+  name: placement-openshift-gitops-entitlement-key-{{.}}
+  namespace: "{{ $argocd_namespace }}"
+spec:
+  clusterConditions:
+    - status: 'True'
+      type: ManagedClusterConditionAvailable
+  clusterSelector:
+    matchExpressions:
+      - key: {{.}}
+        operator: Exists
+        values: []
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: "300"
+  name: binding-openshift-gitops-entitlement-key-{{.}}
+  namespace: "{{ $argocd_namespace }}"
+placementRef:
+  name: placement-openshift-gitops-entitlement-key-{{.}}
+  kind: PlacementRule
+  apiGroup: apps.open-cluster-management.io
+subjects:
+  - name: cloudpak-entitlement-key
+    kind: Policy
+    apiGroup: policy.open-cluster-management.io
+{{- end }}

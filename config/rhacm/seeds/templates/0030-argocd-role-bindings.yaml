@@ -23,6 +23,23 @@ metadata:
     argocd.argoproj.io/sync-wave: "30"
   creationTimestamp: null
   name: argocd-rhacm-binding
+  namespace: "{{.Values.metadata.argocd_namespace}}"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: argocd-rhacm-role
+subjects:
+  - kind: ServiceAccount
+    name: "{{.Values.serviceaccount.argocd_application_controller}}"
+    namespace: "{{.Values.metadata.argocd_namespace}}"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: "30"
+  creationTimestamp: null
+  name: argocd-rhacm-binding
   namespace: "{{.Values.metadata.policy_namespace}}"
 roleRef:
   apiGroup: rbac.authorization.k8s.io

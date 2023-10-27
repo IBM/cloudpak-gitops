@@ -9,7 +9,7 @@ metadata:
   namespace: {{.Values.metadata.argocd_namespace}}
 spec:
   destination:
-    namespace: open-cluster-management
+    namespace: {{.Values.metadata.argocd_namespace}}
     server: https://kubernetes.default.svc
   ignoreDifferences:
     - group: argoproj.io

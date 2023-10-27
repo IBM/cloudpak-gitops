@@ -26,7 +26,7 @@
 
 ## Prerequisites
 
-- An OpenShift Container Platform cluster, version 4.8 or later.
+- An OpenShift Container Platform cluster, version 4.12 or later.
 
   The applications were tested on both managed and self-managed deployments.
 
@@ -61,7 +61,7 @@
    ```sh
    oc version --client
 
-   # Client Version: 4.10.60
+   # Client Version: 4.12.47
    ```
 
    Ideally, the client's minor version should be at most one iteration behind the server version. Most commands here are pretty basic and will work with more significant differences, but keep that in mind if you see errors about unrecognized commands and parameters.
@@ -155,7 +155,7 @@ oc create secret docker-registry ibm-entitlement-key \
         --docker-server=cp.icr.io \
         --docker-username=cp \
         --docker-password="${IBM_ENTITLEMENT_KEY:?}" \
-        --docker-email="non-existent-replace-with0-yours@email.com" \
+        --docker-email="non-existent-replace-with-yours@email.com" \
         --namespace=openshift-gitops
 ```
 
@@ -380,7 +380,7 @@ After completing the list of activities listed in the previous sections, you can
    argocd app list -l app.kubernetes.io/instance=${app_name}
    ```
 
-1. You can also use the ArgoCD command-line interface to wait for the application to be synchronized and healthy:
+1. You can also use the Argo CD command-line interface to wait for the application to be synchronized and healthy:
 
    ```sh
    argocd app wait "${app_name}" \
