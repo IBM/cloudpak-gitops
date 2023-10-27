@@ -5,8 +5,12 @@
 - [Red Hat Advanced Cluster Management for Kubernetes](#red-hat-advanced-cluster-management-for-kubernetes)
   - [Contents](#contents)
   - [Overview](#overview)
+  - [Prerequisites](#prerequisites)
   - [Installation](#installation)
-    - [Install RHACM on OCP cluster via Argo](#install-rhacm-on-ocp-cluster-via-argo)
+    - [Install the OpenShift GitOps operator](#install-the-openshift-gitops-operator)
+    - [Install RHACM on OCP cluster via Argo CD](#install-rhacm-on-ocp-cluster-via-argo-cd)
+  - [Obtain an entitlement key](#obtain-an-entitlement-key)
+  - [Update the pull secret in the openshift-gitops namespace](#update-the-pull-secret-in-the-openshift-gitops-namespace)
   - [Using the policies](#using-the-policies)
     - [Policies](#policies)
     - [Label your clusters](#label-your-clusters)
@@ -23,10 +27,29 @@ Red Hat Advanced Cluster Management for Kubernetes (referred to as RHACM through
 
 This repository contains governance policies and placement rules for Argo CD itself and the Argo CD Application resources representing the Cloud Paks.
 
+---
+
+## Prerequisites
+
+- An OpenShift Container Platform cluster, version 4.12 or later.
+
+  The applications were tested on both managed and self-managed deployments.
+
+- Adequate worker node capacity in the cluster for RHACM to be installed.
+
+  Refer to the [RHACM documentation](https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/2.8/html/install/installing#sizing-your-cluster) to determine the required capacity for the cluster.
+
+- [An entitlement key to the IBM Entitled Registry](#obtain-an-entitlement-key). This key is required in the RHACM cluster so it can be copied over to the managed clusters when a cluster matches a policy to install a Cloud Pak.
+
+---
+
 ## Installation
 
+### Install the OpenShift GitOps operator
 
-### Install RHACM on OCP cluster via Argo
+Follow the instructions in the [Red Hat OpenShift GitOps Installation page](https://docs.openshift.com/gitops/1.8/installing_gitops/installing-openshift-gitops.html) with special care to **use the `gitops-1.8` subscription channel instead of `latest`** (at least, until issue [#289](https://github.com/IBM/cloudpak-gitops/issues/289) is addressed.)
+
+### Install RHACM on OCP cluster via Argo CD
 
 These steps assume you logged in to the OCP server with the `oc` command-line interface:
 
@@ -71,6 +94,44 @@ These steps assume you logged in to the OCP server with the `oc` command-line in
          --health
    ```
 
+## Obtain an entitlement key
+
+If you don't already have an entitlement key to the IBM Entitled Registry, obtain your key using the following instructions:
+
+1. Go to the [Container software library](https://myibm.ibm.com/products-services/containerlibrary).
+
+1. Click the "Copy key."
+
+1. Copy the entitlement key to a safe place to update the cluster's global pull secret.
+
+1. (Optional) Verify the validity of the key by logging in to the IBM Entitled Registry using a container tool:
+
+   ```sh
+   export IBM_ENTITLEMENT_KEY=the key from the previous steps
+   podman login cp.icr.io --username cp --password "${IBM_ENTITLEMENT_KEY:?}"
+   ```
+
+---
+
+## Update the pull secret in the openshift-gitops namespace
+
+Global pull secrets require granting too much privilege to the OpenShift GitOps service account, so we have started transitioning to the definition of pull secrets at a namespace level.
+
+The Application resources are transitioning to use `PreSync` hooks to copy the entitlement key from a `Secret` named `ibm-entitlement-key` in the `openshift-gitops` namespace, so issue the following command to create that secret:
+
+```sh
+# Note that if you just created the OpenShift GitOps operator
+# the namespace may not be ready yet, so you may need to wait 
+# a minute or two
+oc create secret docker-registry ibm-entitlement-key \
+        --docker-server=cp.icr.io \
+        --docker-username=cp \
+        --docker-password="${IBM_ENTITLEMENT_KEY:?}" \
+        --docker-email="non-existent-replace-with-yours@email.com" \
+        --namespace=openshift-gitops
+```
+
+---
 
 ## Using the policies
 
@@ -96,32 +157,32 @@ Labels:
 - `gitops-branch` + `cp4i`: Placement for Cloud Pak for Integration.
 - `gitops-branch` + `cp4s`: Placement for Cloud Pak for Security.
 - `gitops-branch` + `cp4aiops`: Placement for Cloud Pak for AIOps.
-- `gitops-remote` + `true`: Assign cluster to the `gitops-cluster` cluster-set, registering it to the [GitOps Cluster](https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/2.7/html/applications/managing-applications#gitops-config).
+- `gitops-remote` + `true`: Assign cluster to the `gitops-cluster` cluster-set, registering it to the [GitOps Cluster](https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/2.8/html/applications/managing-applications#gitops-config).
 
 Values for each label:
 
 - `gitops-branch`: Branch of this repo for the Argo applications. Unless you are developing and testing on a new branch, use the default value `main`.
-- cp4a: Namespace for deploying the Cloud Pak. Unless you want multiple Cloud Paks in different namespaces of the cluster, use the default value `ibm-cloudpaks`.
-- `cp4aiops`: Namespace for deploying the Cloud Pak. Unless you want multiple Cloud Paks in different namespaces of the cluster, use the default value `ibm-cloudpaks`.
-- `cp4d`: Namespace for deploying the Cloud Pak. As of release 4.0.6, and as a product limitation, do not use the same namespace as other Cloud Paks if installing  Cloud Pak for Data to the same cluster.
-- `cp4i`: Namespace for deploying the Cloud Pak. Unless you want multiple Cloud Paks in different namespaces of the cluster, use the default value `ibm-cloudpaks`.
-- `cp4s`: Namespace for deploying the Cloud Pak. Unless you want multiple Cloud Paks in different namespaces of the cluster, use the default value `ibm-cloudpaks`.
+- cp4a: Namespace for deploying the Cloud Pak.
+- `cp4aiops`: Namespace for deploying the Cloud Pak.
+- `cp4d`: Namespace for deploying the Cloud Pak.
+- `cp4i`: Namespace for deploying the Cloud Pak.
+- `cp4s`: Namespace for deploying the Cloud Pak.
 
 ### Examples
 
-Labeling an OCP cluster with `gitops-branch=main` and `cp4i=ibm-cloudpaks` deploys the following policies to a target cluster:
+Labeling an OCP cluster with `gitops-branch=main` and `cp4i=cp4ins` deploys the following policies to a target cluster:
 
 - `openshift-gitops-installed`
 - `openshift-gitops-argo-app`
 - `openshift-gitops-cloudpaks-cp-shared`
 - `openshift-gitops-cloudpaks-cp4i`
 
-Labeling an OCP cluster with `gitops-branch=main` and `cp4i=ibm-cloudpaks` deploys the following policies to a target cluster:
+Labeling an OCP cluster with `gitops-branch=main` and `cp4i=cp4ins` deploys the following policies to a target cluster:
 
 - `openshift-gitops-installed`: The latest version of the OpenShift GitOps operator.
 - `openshift-gitops-argo-app`: The Argo configuration is pulled from the `main` branch of this repository.
-`openshift-gitops-cloudpaks-cp-shared`: The Argo configuration is pulled from this repository's `main` branch.
-- `openshift-gitops-cloudpaks-cp4i`: The Cloud Pak is deployed to the namespace `ibm-cloudpaks`
+- `openshift-gitops-cloudpaks-cp-shared`: The Argo configuration is pulled from this repository's `main` branch.
+- `openshift-gitops-cloudpaks-cp4i`: The Cloud Pak is deployed to the namespace `cp4ins`
 
 ## The "rhacm-users" group
 
@@ -137,6 +198,7 @@ Once you have the respective users added to the cluster, you can add them to the
 oc adm groups add-users rhacm-users "${username:?}"
 ```
 
+---
 
 ## Contributing
 
@@ -145,6 +207,8 @@ If you used the approach where OpenShift GitOps is not installed in the same ser
 If using OpenShift GitOps installed in the RHACM server, you need to modify the settings of the Argo application to reference a fork of this repository instead of using the default reference to this repository.
 
 The instructions for that setup are documented in the [CONTRIBUTING.md](../CONTRIBUTING.md) page, where you need to ensure you use the `rhacm-app` application name as the parameter for the `argocd app set` commands.
+
+---
 
 ## References
 
