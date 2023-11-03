@@ -8,7 +8,9 @@
   - [Prerequisites](#prerequisites)
   - [Installation](#installation)
     - [Install the OpenShift GitOps operator](#install-the-openshift-gitops-operator)
-    - [Install RHACM on OCP cluster via Argo CD](#install-rhacm-on-ocp-cluster-via-argo-cd)
+    - [Configure the ArgoCD CLI](#configure-the-argocd-cli)
+    - [(Optional) Install the argo-app application](#optional-install-the-argo-app-application)
+    - [Install RHACM on an OCP cluster via Argo CD](#install-rhacm-on-an-ocp-cluster-via-argo-cd)
   - [Obtain an entitlement key](#obtain-an-entitlement-key)
   - [Update the pull secret in the openshift-gitops namespace](#update-the-pull-secret-in-the-openshift-gitops-namespace)
   - [Using the policies](#using-the-policies)
@@ -25,7 +27,7 @@
 
 Red Hat Advanced Cluster Management for Kubernetes (referred to as RHACM throughout the rest of this page) provides end-to-end management visibility and control to manage your Kubernetes environment.
 
-This repository contains governance policies and placement rules for Argo CD itself and the Argo CD Application resources representing the Cloud Paks.
+This repository contains governance policies and placement rules for Argo CD and the Argo CD Application resources representing the Cloud Paks.
 
 ---
 
@@ -39,7 +41,7 @@ This repository contains governance policies and placement rules for Argo CD its
 
   Refer to the [RHACM documentation](https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/2.8/html/install/installing#sizing-your-cluster) to determine the required capacity for the cluster.
 
-- [An entitlement key to the IBM Entitled Registry](#obtain-an-entitlement-key). This key is required in the RHACM cluster so it can be copied over to the managed clusters when a cluster matches a policy to install a Cloud Pak.
+- [An entitlement key to the IBM Entitled Registry](#obtain-an-entitlement-key). This key is required in the RHACM cluster to be copied to the managed clusters when a cluster matches a policy to install a Cloud Pak.
 
 ---
 
@@ -47,17 +49,50 @@ This repository contains governance policies and placement rules for Argo CD its
 
 ### Install the OpenShift GitOps operator
 
-Follow the instructions in the [Red Hat OpenShift GitOps Installation page](https://docs.openshift.com/gitops/1.8/installing_gitops/installing-openshift-gitops.html) with special care to **use the `gitops-1.8` subscription channel instead of `latest`** (at least, until issue [#289](https://github.com/IBM/cloudpak-gitops/issues/289) is addressed.)
+This section contains a simple shortcut, but you can choose to follow the instructions in the [Red Hat OpenShift GitOps Installation page](https://docs.openshift.com/gitops/1.8/installing_gitops/installing-openshift-gitops.html) instead, with special care to **use the `gitops-1.8` subscription channel instead of `latest`** (at least, until issue [#289](https://github.com/IBM/cloudpak-gitops/issues/289) is addressed.)
 
-### Install RHACM on OCP cluster via Argo CD
+The shortcut in case you choose to eschew the official instructions:
 
-These steps assume you logged in to the OCP server with the `oc` command-line interface:
+1. [Log in to the OpenShift CLI](https://docs.openshift.com/container-platform/4.7/cli_reference/openshift_cli/getting-started-cli.html#cli-logging-in_cli-developer-commands)
+
+1. Create the `Subscription` resource for the operator:
+
+   ```sh
+   cat << EOF | oc apply -f -
+   ---
+   apiVersion: operators.coreos.com/v1alpha1
+   kind: Subscription
+   metadata:
+      name: openshift-gitops-operator
+      namespace: openshift-operators
+   spec:
+      channel: gitops-1.8
+      installPlanApproval: Automatic
+      name: openshift-gitops-operator
+      source: redhat-operators
+      sourceNamespace: openshift-marketplace
+   EOF
+   ```
+
+   Wait until the ArgoCD instance appears as ready in the `openshift-gitops` namespace.
+
+   ```sh
+    oc wait ArgoCD openshift-gitops \
+        -n openshift-gitops \
+        --for=jsonpath='{.status.phase}'=Available \
+        --timeout=600s
+   ```
+
+### Configure the ArgoCD CLI
 
 1. [Install the Argo CD command-line interface](https://argoproj.github.io/argo-cd/cli_installation/)
 
 1. Log in to the Argo CD server
 
    ```sh
+   gitops_url=https://github.com/IBM/cloudpak-gitops
+   gitops_branch=main
+
    argo_pwd=$(oc get secret openshift-gitops-cluster \
                -n openshift-gitops \
                -o jsonpath='{.data.admin\.password}' | base64 -d ; echo ) \
@@ -69,13 +104,47 @@ These steps assume you logged in to the OCP server with the `oc` command-line in
          --password "${argo_pwd}"
    ```
 
+### (Optional) Install the argo-app application
+
+This repository contains an optimized configuration for the default ArgoCD instance.
+
+That configuration has custom health checks for RHACM resources, which allows ArgoCD to monitor the health of resources such as the MultiCluster engine resource.
+
+Consider adding this application to your cluster if your organization does not have another preference for the default configuration of the ArgoCD instance.
+
+1. This step assumes you still have the shell variables assigned from previous actions:
+
+   ```sh
+   argocd proj create argocd-control-plane \
+         --dest "https://kubernetes.default.svc,openshift-gitops" \
+         --src ${gitops_url:?} \
+         --upsert \
+   && argocd app create argo-app \
+         --project argocd-control-plane \
+         --dest-namespace openshift-gitops \
+         --dest-server https://kubernetes.default.svc \
+         --repo ${gitops_url:?} \
+         --path config/argocd \
+         --helm-set-string targetRevision="${gitops_branch}" \
+         --revision ${gitops_branch:?} \
+         --sync-policy automated \
+         --upsert \
+   && argocd app wait argo-app
+   ```
+
+### Install RHACM on an OCP cluster via Argo CD
+
+These steps assume you logged in to the OCP server with the `oc` command-line interface:
+
 1. Add the Argo application:
 
    ```sh
-   gitops_url=https://github.com/IBM/cloudpak-gitops
-   gitops_branch=main
    argocd proj create rhacm-control-plane \
+         --dest "https://kubernetes.default.svc,openshift-gitops" \
          --dest "https://kubernetes.default.svc,open-cluster-management" \
+         --allow-cluster-resource Namespace \
+         --allow-namespaced-resource argoproj.io/Application \
+         --allow-namespaced-resource argoproj.io/AppProject \
          --src ${gitops_url:?} \
          --upsert \
    && argocd app create rhacm-app \
@@ -93,6 +162,10 @@ These steps assume you logged in to the OCP server with the `oc` command-line in
          --sync \
          --health
    ```
+
+Note that if you did not follow the optional step of installing the `argo-app` application, the Argo CD instance may not be able to assess the health of the `MultiClusterHub` resource.
+
+Without that check, Argo CD will not wait until the resource is ready and may generate transient messages complaining about synchronization errors and retries until the cluster hub is fully available.
 
 ## Obtain an entitlement key
 
@@ -162,7 +235,7 @@ Labels:
 Values for each label:
 
 - `gitops-branch`: Branch of this repo for the Argo applications. Unless you are developing and testing on a new branch, use the default value `main`.
-- cp4a: Namespace for deploying the Cloud Pak.
+- `cp4a`: Namespace for deploying the Cloud Pak.
 - `cp4aiops`: Namespace for deploying the Cloud Pak.
 - `cp4d`: Namespace for deploying the Cloud Pak.
 - `cp4i`: Namespace for deploying the Cloud Pak.
@@ -188,11 +261,11 @@ Labeling an OCP cluster with `gitops-branch=main` and `cp4i=cp4ins` deploys the 
 
 The repository creates the roles and role bindings for a "rhacm-users" user group.
 
-Users in that group will be granted permission to manage clusters in the "default" cluster set, but WITHOUT the permission to manage cloud credentials. That arrangement is ideal for environments where a set of people manages the clusters but not necessarily the underlying cloud accounts.
+Users in that group will be granted permission to manage clusters in the "default" cluster set but WITHOUT the permission to manage cloud credentials. That arrangement is ideal for environments where a set of people manages the clusters but not necessarily the underlying cloud accounts.
 
 Refer to OpenShift's [documentation](https://docs.openshift.com/container-platform/4.11/post_installation_configuration/preparing-for-users.html) for more information on user management, such as configuring identity providers and adding users to the Openshift cluster
 
-Once you have the respective users added to the cluster, you can add them to the group via OCP console using the "Add users" option in the panel for the user group (under "User Management" -> "Groups" in the left navigation bar) or using the following command from a terminal window:
+Once you have the respective users added to the cluster, you can add them to the group via the OCP console using the "Add users" option in the panel for the user group (under "User Management" -> "Groups" in the left navigation bar) or using the following command from a terminal window:
 
 ```sh
 oc adm groups add-users rhacm-users "${username:?}"

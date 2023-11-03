@@ -5,12 +5,10 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "10"
   creationTimestamp: null
-  labels:
-    control-plane: rhacm
   name: argocd-control-plane
   namespace: openshift-gitops
 spec:
-  description: Configurations for the cluster hosting RHACM
+  description: Configurations for the cluster hosting ArgoCD
   destinations:
     - name: 'in-cluster'
       namespace: 'openshift-gitops'
