@@ -89,6 +89,15 @@
    EOF
    ```
 
+   Wait until the ArgoCD instance appears as ready in the `openshift-gitops` namespace.
+
+   ```sh
+    oc wait ArgoCD openshift-gitops \
+        -n openshift-gitops \
+        --for=jsonpath='{.status.phase}'=Available \
+        --timeout=600s
+   ```
+
 ---
 
 ## Obtain an entitlement key
@@ -305,8 +314,9 @@ After completing the list of activities listed in the previous sections, you can
          --helm-set-string targetRevision="${gitops_branch}" \
          --revision ${gitops_branch:?} \
          --sync-policy automated \
-         --upsert 
-    ```
+         --upsert \
+   && argocd app wait argo-app
+   ```
 
 1. Add the `cp-shared` application. (this step assumes you still have the shell variables assigned from previous steps) :
 

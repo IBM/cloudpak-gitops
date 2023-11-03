@@ -3,7 +3,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: AppProject
 metadata:
   annotations:
-    argocd.argoproj.io/sync-wave: "300"
+    argocd.argoproj.io/sync-wave: "000"
   creationTimestamp: null
   labels:
     control-plane: rhacm
@@ -24,7 +24,7 @@ spec:
   description: Configurations for the cluster hosting RHACM
   destinations:
     - name: in-cluster
-      namespace: 'openshift-gitops'
+      namespace: '{{ .Values.metadata.argocd_namespace }}'
       server: https://kubernetes.default.svc
     - namespace: 'policy'
       server: '*'
@@ -37,6 +37,8 @@ spec:
   namespaceResourceWhitelist:
     - group: argoproj.io
       kind: Application
+    - group: argoproj.io
+      kind: AppProject
     - group: apps.open-cluster-management.io
       kind: '*'
     - group: cluster.open-cluster-management.io
