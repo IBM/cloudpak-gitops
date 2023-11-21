@@ -49,13 +49,13 @@ This repository contains governance policies and placement rules for Argo CD and
 
 ### Install the OpenShift GitOps operator
 
-This section contains a simple shortcut, but you can choose to follow the instructions in the [Red Hat OpenShift GitOps Installation page](https://docs.openshift.com/gitops/1.8/installing_gitops/installing-openshift-gitops.html) instead, with special care to **use the `gitops-1.8` subscription channel instead of `latest`** (at least, until issue [#289](https://github.com/IBM/cloudpak-gitops/issues/289) is addressed.)
+This section contains a simple shortcut, but you can choose to follow the instructions in the [Red Hat OpenShift GitOps Installation page](https://docs.openshift.com/gitops/1.10/installing_gitops/installing-openshift-gitops.html) instead, with special care to **use a release at or above `gitops-1.8`**.) These instructions were validated with the OpenShift GitOps 1.10 release.
 
 The shortcut in case you choose to eschew the official instructions:
 
 1. [Log in to the OpenShift CLI](https://docs.openshift.com/container-platform/4.7/cli_reference/openshift_cli/getting-started-cli.html#cli-logging-in_cli-developer-commands)
 
-1. Create the `Subscription` resource for the operator:
+2. Create the `Subscription` resource for the operator:
 
    ```sh
    cat << EOF | oc apply -f -
@@ -66,7 +66,7 @@ The shortcut in case you choose to eschew the official instructions:
       name: openshift-gitops-operator
       namespace: openshift-operators
    spec:
-      channel: gitops-1.8
+      channel: gitops-1.10
       installPlanApproval: Automatic
       name: openshift-gitops-operator
       source: redhat-operators

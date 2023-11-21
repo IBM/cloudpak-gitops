@@ -254,7 +254,7 @@ function add_argo_cd_app() {
     local result=0
 
     while [ ! "$(oc get namespace "${GITOPS_NAMESPACE}" -o jsonpath="{.status.phase}")" == "Active" ] ||
-          [ "$(oc get configmap/argocd-cm --namespace ${GITOPS_NAMESPACE}  | wc -l)" -eq 0 ];
+          [ "$(oc get configmap/argocd-cm --namespace "${GITOPS_NAMESPACE}" | wc -l)" -eq 0 ];
     do
         log "INFO: Waiting for the ${GITOPS_NAMESPACE} namespace to be deployed."
         sleep 60
@@ -514,16 +514,20 @@ function setup_gitops_server() {
 
     log "INFO: Applied GitOps operators."
     local current_seconds=0
-    local operation_limit_seconds=$(( $(date +%s) + 7200 ))
+    local operation_limit_seconds=$(( $(date +%s) + 3600 ))
     result=1
     while [ ${current_seconds} -lt ${operation_limit_seconds} ]; do
-        if [[ "$(oc get csv -l "operators.coreos.com/openshift-gitops-operator.openshift-operators=""" -n openshift-operators | grep -c Succeeded)" -gt 0 ]]; then 
+        oc wait csv \
+            -l "operators.coreos.com/openshift-gitops-operator.openshift-gitops-operator=""" \
+            -n openshift-gitops-operator \
+            --for=jsonpath='{.status.phase}'=Succeeded \
+            --timeout 120s \
+        && {
             log "INFO: GitOps CSVs in Succeeded state."
             result=0
             break
-        fi
+        }
         log "INFO: Waiting for GitOps CSVs to be ready."
-        sleep 20
         current_seconds=$(( $(date +%s) ))
     done
 
@@ -553,7 +557,7 @@ function setup_gitops_server() {
 
     if [ "${result}" -eq 1 ]; then
         log "ERROR: GitOps operators or instances could not be added to the cluster."
-        oc get csv -n openshift-operators
+        oc get csv -n openshift-gitops-operator
     fi
 
     set_argo_branch "${gitops_branch}" || \

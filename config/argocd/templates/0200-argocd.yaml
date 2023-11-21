@@ -1,5 +1,5 @@
 ---
-apiVersion: argoproj.io/v1alpha1
+apiVersion: argoproj.io/v1beta1
 kind: ArgoCD
 metadata:
   annotations:
@@ -27,15 +27,6 @@ spec:
         cpu: 250m
         memory: 1Gi
     sharding: {}
-  dex:
-    openShiftOAuth: true
-    resources:
-      limits:
-        cpu: 500m
-        memory: 256Mi
-      requests:
-        cpu: 250m
-        memory: 128Mi
   grafana:
     enabled: false
     ingress:
@@ -86,9 +77,10 @@ spec:
       requests:
         cpu: 250m
         memory: 256Mi
-  resourceCustomizations: |
-    argoproj.io/Application:
-      health.lua: |
+  resourceHealthChecks:
+    - group: argoproj.io
+      kind: Application
+      check: |
         hs = {}
         hs.status = "Progressing"
         hs.message = ""
@@ -101,8 +93,9 @@ spec:
           end
         end
         return hs
-    multicluster.odf.openshift.io/MirrorPeer:
-      health.lua: |
+    - group: multicluster.odf.openshift.io
+      kind: MirrorPeer
+      check: |
         hs = {}
         hs.status = "Progressing"
         hs.message = "Unknown"
@@ -121,8 +114,9 @@ spec:
         end
 
         return hs
-    ocs.openshift.io/StorageCluster:
-      health.lua: |
+    - group: ocs.openshift.io
+      kind: StorageCluster
+      check: |
         hs = {}
         if obj.status ~= nil then
           if obj.status.conditions ~= nil then
@@ -143,8 +137,9 @@ spec:
 
         hs.status = "Progressing"
         return hs
-    odf.openshift.io/StorageSystem:
-      health.lua: |
+    - group: odf.openshift.io
+      kind: StorageSystem
+      check: |
         hs = {}
         if obj.status ~= nil then
           if obj.status.conditions ~= nil then
@@ -170,8 +165,9 @@ spec:
 
         hs.status = "Progressing"
         return hs
-    ramendr.openshift.io/DRPlacementControl:
-      health.lua: |
+    - group: ramendr.openshift.io
+      kind: DRPlacementControl
+      check: |
         hs = {}
 
         if obj.status ~= nil then
@@ -188,8 +184,9 @@ spec:
 
         hs.status = "Progressing"
         return hs
-    ramendr.openshift.io/DRPolicy:
-      health.lua: |
+    - group: ramendr.openshift.io
+      kind: DRPolicy
+      check: |
         hs = {}
 
         if obj.status ~= nil then
@@ -211,8 +208,9 @@ spec:
 
         hs.status = "Progressing"
         return hs
-    operator.open-cluster-management.io/MultiClusterHub:
-      health.lua: |
+    - group: operator.open-cluster-management.io
+      kind: MultiClusterHub
+      check: |
         hs = {}
         hs.status = "Progressing"
         hs.message = "Unknown"
@@ -231,8 +229,9 @@ spec:
         end
 
         return hs
-    submarineraddon.open-cluster-management.io/SubmarinerConfig:
-      health.lua: |
+    - group: submarineraddon.open-cluster-management.io
+      kind: SubmarinerConfig
+      check: |
         hs = {}
 
         if obj.status ~= nil then
@@ -250,8 +249,9 @@ spec:
         hs.status = "Progressing"
         return hs
 
-    hive.openshift.io/ClusterDeployment:
-      health.lua: |
+    - group: hive.openshift.io
+      kind: ClusterDeployment
+      check: |
         hs = {}
 
         if obj.status ~= nil then
@@ -278,8 +278,9 @@ spec:
 
         hs.status = "Progressing"
         return hs
-    cluster.open-cluster-management.io/ManagedCluster:
-      health.lua: |
+    - group: cluster.open-cluster-management.io
+      kind: ManagedCluster
+      check: |
         hs = {}
 
         if obj.status ~= nil then
@@ -301,8 +302,9 @@ spec:
 
         hs.status = "Progressing"
         return hs
-    core.automation.ibm.com/Cartridge:
-      health.lua: |
+    - group: core.automation.ibm.com
+      kind: Cartridge
+      check: |
         hs = {}
 
         generation = obj.metadata.generation
@@ -325,8 +327,9 @@ spec:
 
         hs.status = "Progressing"
         return hs
-    apiconnect.ibm.com/APIConnectCluster:
-      health.lua: |
+    - group: apiconnect.ibm.com
+      kind: APIConnectCluster
+      check: |
         hs = {}
 
         generation = obj.metadata.generation
@@ -358,8 +361,9 @@ spec:
 
         hs.status = "Progressing"
         return hs
-    datapower.ibm.com/DataPowerService:
-      health.lua: |
+    - group: datapower.ibm.com
+      kind: DataPowerService
+      check: |
         hs = {}
         if obj.status ~= nil then
           if obj.status.phase ~= nil then
@@ -376,8 +380,9 @@ spec:
         hs.status = "Progressing"
         hs.message = "Unknown"
         return hs
-    icp4a.ibm.com/ICP4ACluster:
-      health.lua: |
+    - group: icp4a.ibm.com
+      kind: ICP4ACluster
+      check: |
         hs = {}
 
         generation = obj.metadata.generation
@@ -421,8 +426,9 @@ spec:
 
         hs.status = "Progressing"
         return hs
-    integration.ibm.com/PlatformNavigator:
-      health.lua: |
+    - group: integration.ibm.com
+      kind: PlatformNavigator
+      check: |
         hs = {}
 
         generation = obj.metadata.generation
@@ -445,63 +451,9 @@ spec:
 
         hs.status = "Progressing"
         return hs
-    operators.coreos.com/CatalogSource:
-      health.lua: |
-        hs = {}
-        if obj.status ~= nil then
-          if obj.status.connectionState ~= nil then
-            if obj.status.connectionState.lastObservedState ~= nil then
-              if obj.status.connectionState.lastObservedState == "READY" then
-                hs.status = "Healthy"
-                return hs
-              end
-            end
-          end
-        end
-
-        hs.status = "Progressing"
-        hs.message = "Unknown"
-        return hs
-    operators.coreos.com/InstallPlan:
-      health.lua: |
-        hs = {}
-        if obj.status ~= nil then
-          if obj.status.phase ~= nil then
-            hs.message = obj.status.phase
-            if obj.status.phase == "Complete" then
-              hs.status = "Healthy"
-            else
-              hs.status = "Progressing"
-            end
-            return hs
-          end
-        end
-
-        hs.status = "Progressing"
-        hs.message = "Unknown"
-        return hs
-    operators.coreos.com/Subscription:
-      health.lua: |
-        hs = {}
-        if obj.status ~= nil then
-          if obj.status.installedCSV ~= nil then
-            hs.status = "Healthy"
-            hs.message = "CSV Installed"
-            if obj.status.state ~= nil then
-              hs.message = obj.status.state
-            end
-            return hs
-          end
-        end
-
-        hs.status = "Progressing"
-        hs.message = "Unknown"
-        if obj.status.state ~= nil then
-          hs.message = obj.status.state
-        end
-        return hs
-    mq.ibm.com/QueueManager:
-      health.lua: |
+    - group: mq.ibm.com
+      kind: QueueManager
+      check: |
         hs = {}
         if obj.status ~= nil then
           if obj.status.phase ~= nil then
@@ -518,8 +470,9 @@ spec:
         hs.status = "Progressing"
         hs.message = "Unknown"
         return hs
-    orchestrator.aiops.ibm.com/Installation:
-      health.lua: |
+    - group: orchestrator.aiops.ibm.com
+      kind: Installation
+      check: |
         hs = {}
         if obj.status ~= nil then
           if obj.status.phase ~= nil then
@@ -539,8 +492,9 @@ spec:
         hs.status = "Progressing"
         hs.message = "Unknown"
         return hs
-    aiops.ibm.com/IAConfig:
-      health.lua: |
+    - group: aiops.ibm.com
+      kind: IAConfig
+      check: |
         hs = {}
         if obj.status ~= nil then
           if obj.status.phase ~= nil then
@@ -560,8 +514,9 @@ spec:
         hs.status = "Progressing"
         hs.message = "Unknown"
         return hs
-    noi.ibm.com/NOI:
-      health.lua: |
+    - group: noi.ibm.com
+      kind: NOI
+      check: |
         hs = {}
         if obj.status ~= nil then
           if obj.status.phase ~= nil then
@@ -580,8 +535,9 @@ spec:
         hs.status = "Progressing"
         hs.message = "Unknown"
         return hs
-    cpd.ibm.com/Ibmcpd:
-      health.lua: |
+    - group: cpd.ibm.com
+      kind: Ibmcpd
+      check: |
         hs = {}
         if obj.status ~= nil then
           if obj.status.controlPlaneStatus ~= nil then
@@ -601,8 +557,9 @@ spec:
         hs.status = "Progressing"
         hs.message = "Unknown"
         return hs
-    db2u.databases.ibm.com/DvService:
-      health.lua: |
+    - group: db2u.databases.ibm.com
+      kind: DvService
+      check: |
         hs = {}
         if obj.status ~= nil then
           if obj.status.reconcileStatus ~= nil then
@@ -622,8 +579,9 @@ spec:
         hs.status = "Progressing"
         hs.message = "Unknown"
         return hs
-    rstudio.cpd.ibm.com/RStudioAddon:
-      health.lua: |
+    - group: rstudio.cpd.ibm.com
+      kind: RStudioAddon
+      check: |
         hs = {}
         if obj.status ~= nil then
           if obj.status.rstudioStatus ~= nil then
@@ -643,8 +601,9 @@ spec:
         hs.status = "Progressing"
         hs.message = "Unknown"
         return hs
-    wkc.cpd.ibm.com/WKC:
-      health.lua: |
+    - group: wkc.cpd.ibm.com
+      kind: WKC
+      check: |
         hs = {}
         if obj.status ~= nil then
           if obj.status.wkcStatus ~= nil then
@@ -664,8 +623,9 @@ spec:
         hs.status = "Progressing"
         hs.message = "Unknown"
         return hs
-    wml.cpd.ibm.com/WmlBase:
-      health.lua: |
+    - group: wml.cpd.ibm.com
+      kind: WmlBase
+      check: |
         hs = {}
         if obj.status ~= nil then
           if obj.status.wmlStatus ~= nil then
@@ -685,8 +645,9 @@ spec:
         hs.status = "Progressing"
         hs.message = "Unknown"
         return hs
-    wos.cpd.ibm.com/WOService:
-      health.lua: |
+    - group: wos.cpd.ibm.com
+      kind: WOService
+      check: |
         hs = {}
         if obj.status ~= nil then
           if obj.status.wosStatus ~= nil then
@@ -706,8 +667,9 @@ spec:
         hs.status = "Progressing"
         hs.message = "Unknown"
         return hs
-    ws.cpd.ibm.com/WS:
-      health.lua: |
+    - group: ws.cpd.ibm.com
+      kind: WS
+      check: |
         hs = {}
         if obj.status ~= nil then
           if obj.status.wsStatus ~= nil then
@@ -727,8 +689,9 @@ spec:
         hs.status = "Progressing"
         hs.message = "Unknown"
         return hs
-    isc.ibm.com/CP4SThreatManagement:
-      health.lua: |
+    - group: isc.ibm.com
+      kind: CP4SThreatManagement
+      check: |
         hs = {}
         hs.status = "Progressing"
 
@@ -792,5 +755,9 @@ spec:
       enabled: true
     service:
       type: ""
+  sso:
+    provider: dex
+    dex:
+      openShiftOAuth: true
   tls:
     ca: {}
