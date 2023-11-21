@@ -89,11 +89,8 @@ function check_install_oc() {
         oc_version=$(oc version | grep "Client Version" | cut -d ":" -f 2 | tr -d " ")
         if [ "${oc_version}" == "" ] ||
            [[ ${oc_version} == "3."* ]] ||
-           [[ ${oc_version} == "4.1"* ]] ||
-           [[ ${oc_version} == "4.2"* ]] ||
-           [[ ${oc_version} == "4.3"* ]] ||
-           [[ ${oc_version} == "4.4"* ]]; then
-            log "INFO: OpenShift client is older than 4.5." 
+           [[ ${oc_version} == 4\.[1-9].* ]]; then
+            log "INFO: OpenShift client is older than 4.10." 
             install=1
         fi
     fi
