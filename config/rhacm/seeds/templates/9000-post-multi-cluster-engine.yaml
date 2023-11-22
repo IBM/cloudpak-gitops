@@ -1,4 +1,4 @@
-# https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/2.8/html-single/clusters/index#hosting-service-cluster-configure-aws
+# https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/2.9/html-single/clusters/index#hosting-service-cluster-configure-aws
 ---
 apiVersion: batch/v1
 kind: Job

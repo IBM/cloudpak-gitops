@@ -1,5 +1,3 @@
-{{- $hypershift := .Values.spec.components.hypershift_preview }}
-{{- if eq ( default false $hypershift ) true  }}
 ---
 apiVersion: v1
 kind: Namespace
@@ -7,4 +5,3 @@ metadata:
   labels:
     argocd.argoproj.io/managed-by: {{.Values.metadata.argocd_namespace}}
   name: multicluster-engine
-{{- end }}

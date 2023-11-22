@@ -39,7 +39,7 @@ This repository contains governance policies and placement rules for Argo CD and
 
 - Adequate worker node capacity in the cluster for RHACM to be installed.
 
-  Refer to the [RHACM documentation](https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/2.8/html/install/installing#sizing-your-cluster) to determine the required capacity for the cluster.
+  Refer to the [RHACM documentation](https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/2.9/html/install/installing#sizing-your-cluster) to determine the required capacity for the cluster.
 
 - [An entitlement key to the IBM Entitled Registry](#obtain-an-entitlement-key). This key is required in the RHACM cluster to be copied to the managed clusters when a cluster matches a policy to install a Cloud Pak.
 
@@ -51,36 +51,49 @@ This repository contains governance policies and placement rules for Argo CD and
 
 This section contains a simple shortcut, but you can choose to follow the instructions in the [Red Hat OpenShift GitOps Installation page](https://docs.openshift.com/gitops/1.10/installing_gitops/installing-openshift-gitops.html) instead, with special care to **use a release at or above `gitops-1.8`**.) These instructions were validated with the OpenShift GitOps 1.10 release.
 
-The shortcut in case you choose to eschew the official instructions:
+The shortcut in case you choose to skip the official instructions:
 
-1. [Log in to the OpenShift CLI](https://docs.openshift.com/container-platform/4.7/cli_reference/openshift_cli/getting-started-cli.html#cli-logging-in_cli-developer-commands)
+1. [Log in to the OpenShift CLI](https://docs.openshift.com/container-platform/4.14/cli_reference/openshift_cli/getting-started-cli.html#cli-logging-in_cli-developer-commands)
 
 2. Create the `Subscription` resource for the operator:
 
    ```sh
    cat << EOF | oc apply -f -
    ---
+   apiVersion: v1
+   kind: Namespace
+   metadata:
+     name: openshift-gitops-operator
+   ---
+   apiVersion: operators.coreos.com/v1
+   kind: OperatorGroup
+   metadata:
+     name: openshift-gitops-operator
+     namespace: openshift-gitops-operator
+   spec:
+     upgradeStrategy: Default
+   ---
    apiVersion: operators.coreos.com/v1alpha1
    kind: Subscription
    metadata:
-      name: openshift-gitops-operator
-      namespace: openshift-operators
+     name: openshift-gitops-operator
+     namespace: openshift-gitops-operator
    spec:
-      channel: gitops-1.10
-      installPlanApproval: Automatic
-      name: openshift-gitops-operator
-      source: redhat-operators
-      sourceNamespace: openshift-marketplace
+     channel: gitops-1.10
+     installPlanApproval: Automatic
+     name: openshift-gitops-operator
+     source: redhat-operators
+     sourceNamespace: openshift-marketplace
    EOF
    ```
 
    Wait until the ArgoCD instance appears as ready in the `openshift-gitops` namespace.
 
    ```sh
-    oc wait ArgoCD openshift-gitops \
-        -n openshift-gitops \
-        --for=jsonpath='{.status.phase}'=Available \
-        --timeout=600s
+   oc wait ArgoCD openshift-gitops \
+       -n openshift-gitops \
+       --for=jsonpath='{.status.phase}'=Available \
+       --timeout=600s
    ```
 
 ### Configure the ArgoCD CLI
@@ -230,7 +243,7 @@ Labels:
 - `gitops-branch` + `cp4i`: Placement for Cloud Pak for Integration.
 - `gitops-branch` + `cp4s`: Placement for Cloud Pak for Security.
 - `gitops-branch` + `cp4aiops`: Placement for Cloud Pak for AIOps.
-- `gitops-remote` + `true`: Assign cluster to the `gitops-cluster` cluster-set, registering it to the [GitOps Cluster](https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/2.8/html/applications/managing-applications#gitops-config).
+- `gitops-remote` + `true`: Assign cluster to the `gitops-cluster` cluster-set, registering it to the [GitOps Cluster](https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/2.9/html/applications/managing-applications#gitops-config).
 
 Values for each label:
 
