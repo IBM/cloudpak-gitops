@@ -1,6 +1,6 @@
 # Creates a ManagedClusterSetBinding to the openshift-gitops project
 ---
-apiVersion: cluster.open-cluster-management.io/v1beta1
+apiVersion: cluster.open-cluster-management.io/v1beta2
 kind: ManagedClusterSetBinding
 metadata:
   annotations:

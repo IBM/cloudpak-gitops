@@ -66,9 +66,9 @@
 
    Ideally, the client's minor version should be at most one iteration behind the server version. Most commands here are pretty basic and will work with more significant differences, but keep that in mind if you see errors about unrecognized commands and parameters.
 
-   If you do not have the CLI installed, follow [these instructions](https://docs.openshift.com/container-platform/4.7/cli_reference/openshift_cli/getting-started-cli.html).
+   If you do not have the CLI installed, follow [these instructions](https://docs.openshift.com/container-platform/4.14/cli_reference/openshift_cli/getting-started-cli.html).
 
-1. [Login to the OpenShift CLI](https://docs.openshift.com/container-platform/4.7/cli_reference/openshift_cli/getting-started-cli.html#cli-logging-in_cli-developer-commands)
+1. [Login to the OpenShift CLI](https://docs.openshift.com/container-platform/4.14/cli_reference/openshift_cli/getting-started-cli.html#cli-logging-in_cli-developer-commands)
 
 1. Create the `Subscription` resource for the operator:
 
