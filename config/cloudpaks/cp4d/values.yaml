@@ -8,7 +8,6 @@ metadata:
   operators_namespace: cp4d
   operands_namespace: cp4d
 
-# https://www.ibm.com/docs/en/cloud-paks/cp-data/4.7.x?topic=information-determining-which-components-install
 components: "set in parent app"
 
 storageclass:

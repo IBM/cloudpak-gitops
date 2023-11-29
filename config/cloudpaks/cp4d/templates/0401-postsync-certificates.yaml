@@ -1,5 +1,5 @@
 ---
-# https://www.ibm.com/docs/en/cloud-paks/cp-data/4.7.x?topic=environment-customizing-securing-route-platform
+# https://www.ibm.com/docs/en/cloud-paks/cp-data/4.8.x?topic=environment-customizing-securing-route-platform
 apiVersion: batch/v1
 kind: Job
 metadata:

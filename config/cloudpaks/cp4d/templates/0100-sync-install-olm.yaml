@@ -1,5 +1,5 @@
 ---
-# https://www.ibm.com/docs/en/cloud-paks/cp-data/4.7.x?topic=installing
+# https://www.ibm.com/docs/en/cloud-paks/cp-data/4.8.x?topic=installing
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -20,6 +20,8 @@ spec:
               value: {{.Values.metadata.operators_namespace}}
             - name: PROJECT_CPD_INST_OPERANDS
               value: {{.Values.metadata.operands_namespace}}
+            - name: STG_CLASS_BLOCK
+              value: {{.Values.storageclass.rwo}}
             - name: VERSION
               value: {{.Values.version}}
             - name: COMPONENTS
@@ -35,7 +37,15 @@ spec:
 
               result=0
 
-              # https://www.ibm.com/docs/en/cloud-paks/cp-data/4.7.x?topic=services-creating-informix-scc
+              export KUBECONFIG=/tmp/kubeconfig
+              api_url=$(oc get Infrastructure cluster -o jsonpath='{.status.apiServerURL}')
+              oc login "${api_url}" --token="$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)" --insecure-skip-tls-verify \
+              || {
+                  echo "WARNING: Unable to login to the cluster."
+                  exit 1
+              }
+
+              # https://www.ibm.com/docs/en/cloud-paks/cp-data/4.8.x?topic=services-creating-informix-scc
               echo "INFO: Creating custom security context constraints for services."
               if [[ ${COMPONENTS} =~ informix ]]; then
                   bin/apply-scc \
@@ -47,7 +57,7 @@ spec:
                   }
               fi
 
-              # https://www.ibm.com/docs/en/cloud-paks/cp-data/4.7.x?topic=data-installing-cloud-pak-foundational-services
+              # https://www.ibm.com/docs/en/cloud-paks/cp-data/4.8.x?topic=data-installing-cloud-pak-foundational-services
               echo "INFO: Installing foundational services" \
               && bin/authorize-instance-topology \
                   --cpd_operator_ns=${PROJECT_CPD_INST_OPERATORS:?} \
@@ -57,6 +67,7 @@ spec:
                   --cpd_operator_ns=${PROJECT_CPD_INST_OPERATORS:?} \
                   --cpd_instance_ns=${PROJECT_CPD_INST_OPERANDS:?} \
                   --license_acceptance=true \
+                  --block_storage_class=${STG_CLASS_BLOCK} \
               && bin/get-license \
                   --release=${VERSION} \
                   --license-type=SE \
@@ -67,7 +78,7 @@ spec:
                   --cpd_operator_ns=${PROJECT_CPD_INST_OPERATORS} \
               || result=1
 
-              # https://www.ibm.com/docs/en/cloud-paks/cp-data/4.7.x?topic=data-specifying-privileges-that-db2u-runs
+              # https://www.ibm.com/docs/en/cloud-paks/cp-data/4.8.x?topic=data-specifying-privileges-that-db2u-runs
               oc apply -f - <<EOF
               apiVersion: v1
               data:

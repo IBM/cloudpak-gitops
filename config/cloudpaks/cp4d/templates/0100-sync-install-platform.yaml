@@ -1,5 +1,5 @@
 ---
-# https://www.ibm.com/docs/en/cloud-paks/cp-data/4.7.x?topic=installing
+# https://www.ibm.com/docs/en/cloud-paks/cp-data/4.8.x?topic=installing
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -35,7 +35,7 @@ spec:
 
               result=0
 
-              # https://www.ibm.com/docs/en/cloud-paks/cp-data/4.7.x?topic=data-installing-cloud-pak
+              # https://www.ibm.com/docs/en/cloud-paks/cp-data/4.8.x?topic=data-installing-cloud-pak
               echo "INFO: Installing components in a specialized installation." \
               && bin/apply-cr \
                   --components=${COMPONENTS:?} \
