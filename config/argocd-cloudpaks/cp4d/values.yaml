@@ -9,7 +9,7 @@ metadata:
   operators_namespace: cp4d
   operands_namespace: cp4d-operands
 
-# https://www.ibm.com/docs/en/cloud-paks/cp-data/4.7.x?topic=information-determining-which-components-install
+# https://www.ibm.com/docs/en/cloud-paks/cp-data/4.8.x?topic=information-determining-which-components-install
 components: ibm-cert-manager,ibm-licensing,cpfs,cpd_platform,rstudio,wml,ws
 
 storageclass:
@@ -20,4 +20,4 @@ iam_integration: true
 
 image_arch: amd64
 
-version: 4.7.2
+version: 4.8.0

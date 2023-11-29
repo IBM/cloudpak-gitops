@@ -412,7 +412,7 @@ This repository allows some light customizations to enable its reuse for demonst
 
 #### Cloud Pak for Data
 
-The main Argo Application for the Cloud Pak (`config/argocd-cloudpaks/cp4d`) has a parameter named `components`, which contains a comma-separated list of components names matching the values in the [product documentation](https://www.ibm.com/docs/en/cloud-paks/cp-data/4.7.x?topic=information-determining-which-components-install).
+The main Argo Application for the Cloud Pak (`config/argocd-cloudpaks/cp4d`) has a parameter named `components`, which contains a comma-separated list of components names matching the values in the [product documentation](https://www.ibm.com/docs/en/cloud-paks/cp-data/4.8.x?topic=information-determining-which-components-install).
 
 Alter the values in this array with the element names found in the product documentation (e.g., `wml` for Watson Machine Learning) to define the list of components installed in the target cluster.
 

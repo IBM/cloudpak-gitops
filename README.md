@@ -4,7 +4,6 @@
 
 - [IBM Cloud Paks - GitOps Demo](#ibm-cloud-paks---gitops-demo)
   - [Contents](#contents)
-  - [Overview](#overview)
     - [IBM Cloud Paks](#ibm-cloud-paks)
     - [Shared cluster](#shared-cluster)
     - [GitOps](#gitops)
@@ -14,10 +13,6 @@
     - [Individual clusters](#individual-clusters)
     - [Fleet of clusters with governance](#fleet-of-clusters-with-governance)
   - [Contributing](#contributing)
-
----
-
-## Overview
 
 This repository contains Argo CD `Application` resources representing sample deployments of IBM Cloud Paks, and, as such, they are meant for inclusion in an Argo CD cluster. Different Cloud Paks are represented with different `Application` resources and grouped by a resource label tied to each Cloud Pak.
 
@@ -36,7 +31,7 @@ Supported versions:
 | Cloud Pak | Version | Installation mode |
 | ----------|---------|-------------------|
 | Cloud Pak for Business Automation | [23.0.1](https://www.ibm.com/docs/en/cloud-paks/cp-biz-automation/23.0.1) | Multi-pattern starter deployment |
-| Cloud Pak for Data | [4.7.2](https://www.ibm.com/docs/en/cloud-paks/cp-data/4.7.x?topic=overview) | Online, specialized installation |
+| Cloud Pak for Data | [4.8.0](https://www.ibm.com/docs/en/cloud-paks/cp-data/4.8.x?topic=overview) | Online, specialized installation |
 | Cloud Pak for Integration | [2023.2](https://www.ibm.com/docs/en/cloud-paks/cp-integration/2023.2) | Online installation |
 | Cloud Pak for Security | [1.10.15](https://www.ibm.com/docs/en/cloud-paks/cp-security/1.10) | Online installation |
 | Cloud Pak for AIOps\* | [4.2.1](https://www.ibm.com/docs/en/cloud-paks/cloud-pak-watson-aiops/4.2.1) | Starter Installation |

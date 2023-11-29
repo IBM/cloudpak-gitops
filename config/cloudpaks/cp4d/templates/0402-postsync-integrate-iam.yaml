@@ -1,5 +1,5 @@
 ---
-# https://www.ibm.com/docs/en/cloud-paks/cp-data/4.7.x?topic=manage-setup-iam-integration
+# https://www.ibm.com/docs/en/cloud-paks/cp-data/4.8.x?topic=manage-setup-iam-integration
 apiVersion: batch/v1
 kind: Job
 metadata:
