@@ -10,4 +10,4 @@ metadata:
 rhacm_users_group: rhacm-users
 spec:
   components:
-    hypershift_preview: false
+    hypershift: false

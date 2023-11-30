@@ -29,8 +29,8 @@ spec:
           value: ${ARGOCD_APP_SOURCE_REPO_URL}
         - name: serviceaccount.argocd_application_controller
           value: {{.Values.serviceaccount.argocd_application_controller}}
-        - name: spec.components.hypershift_preview
-          value: "{{.Values.spec.components.hypershift_preview}}"
+        - name: spec.components.hypershift
+          value: "{{.Values.spec.components.hypershift}}"
         - name: targetRevision
           value: {{.Values.targetRevision}}
     path: config/rhacm/seeds
