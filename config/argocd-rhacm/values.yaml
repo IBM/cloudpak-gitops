@@ -8,4 +8,4 @@ serviceaccount:
   argocd_application_controller: openshift-gitops-argocd-application-controller
 spec:
   components:
-    hypershift_preview: false
+    hypershift: false

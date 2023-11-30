@@ -16,8 +16,8 @@ spec:
           image: quay.io/openshift/origin-cli:latest
           imagePullPolicy: IfNotPresent
           env:
-            - name: HYPERSHIFT_PREVIEW
-              value: "{{.Values.spec.components.hypershift_preview}}"
+            - name: HYPERSHIFT
+              value: "{{.Values.spec.components.hypershift}}"
           command:
             - /bin/sh
             - -c
@@ -25,7 +25,9 @@ spec:
               set -eo pipefail
               set -x
 
-              oc patch mce multiclusterengine --type=merge -p "{\"spec\":{\"overrides\":{\"components\":[{\"name\":\"hypershift-preview\",\"enabled\": ${HYPERSHIFT_PREVIEW}}]}}}"
+              oc patch mce multiclusterengine \
+                  --type=merge \
+                  -p "{\"spec\":{\"overrides\":{\"components\":[{\"name\":\"hypershift\",\"enabled\": ${HYPERSHIFT}},{\"name\":\"hypershift-local-hosting\",\"enabled\": ${HYPERSHIFT}}]}}}"
 
       restartPolicy: Never
       serviceAccountName: {{.Values.serviceaccount.argocd_application_controller}}

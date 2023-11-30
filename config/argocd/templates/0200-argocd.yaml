@@ -219,7 +219,7 @@ spec:
           if obj.status.phase ~= nil then
             if obj.status.phase == "Running" then
               hs.status = "Healthy"
-            elseif obj.status.phase == "Installing" then
+            elseif obj.status.phase == "Installing" or obj.status.phase == "Pending" then
               hs.status = "Progressing"
             else
               hs.status = "Degraded"
