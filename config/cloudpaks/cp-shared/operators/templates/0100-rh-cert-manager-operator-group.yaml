@@ -1,0 +1,15 @@
+{{- $red_hat_cert_manager := .Values.red_hat_cert_manager | toString }}
+{{- if eq ( default "false" $red_hat_cert_manager ) "true" }}
+---
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: "100"
+  name: cert-manager-operator
+  namespace: cert-manager-operator
+spec:
+  targetNamespaces:
+    - cert-manager-operator
+  upgradeStrategy: Default
+{{- end }}

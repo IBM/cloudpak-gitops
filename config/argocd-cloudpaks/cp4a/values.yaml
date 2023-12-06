@@ -6,6 +6,7 @@ serviceaccount:
 metadata:
   argocd_app_namespace: cp4a
   argocd_namespace: openshift-gitops
+red_hat_cert_manager: false
 spec:
   shared_configuration:
     sc_deployment_platform: ROKS

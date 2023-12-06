@@ -323,16 +323,23 @@ After completing the list of activities listed in the previous sections, you can
    ```sh
    cp_namespace=ibm-cloudpaks
 
+   # Switch to true if you want to use Red Hat Cert Manager instead of 
+   # IBM Cert Manager.
+   #
+   # ** This is only supported for CP4BA and CP4D **
+   #
+   red_hat_cert_manager=false
+
    # If you want to override the default target namespace for 
    # one or more Cloud Paks, you need to adjust the values below
    # to indicate the desired target namespace.
-   # dedicated_cs_enabled=true
+   #
+   # This setting only affects CP4I and CP4S
+   #
    dedicated_cs_enabled=false
-   cp4a_namespace=cp4a
-   cp4d_namespace=cp4d
+
    cp4i_namespace=cp4i
    cp4s_namespace=cp4s
-   cp4aiops_namespace=cp4aiops
 
    argocd app create cp-shared-app \
          --project default \
@@ -342,20 +349,21 @@ After completing the list of activities listed in the previous sections, you can
          --path config/argocd-cloudpaks/cp-shared \
          --helm-set-string argocd_app_namespace="${cp_namespace}" \
          --helm-set-string metadata.argocd_app_namespace="${cp_namespace}" \
+         --helm-set-string red_hat_cert_manager="${red_hat_cert_manager:-false}" \
          --helm-set-string dedicated_cs.enabled="${dedicated_cs_enabled:-false}" \
-         --helm-set-string dedicated_cs.namespace_mapping.cp4i="${cp4i_namespace}" \
-         --helm-set-string dedicated_cs.namespace_mapping.cp4s="${cp4s_namespace}" \
-         --sync-policy automated \
+         --helm-set-string dedicated_cs.namespace_mapping.cp4i="${cp4i_namespace:-cp4i}" \
+         --helm-set-string dedicated_cs.namespace_mapping.cp4s="${cp4s_namespace:-cp4s}" \
+         --helm-set-string targetRevision="${gitops_branch:?}" \
          --revision ${gitops_branch:?} \
+         --sync-policy automated \
          --upsert
    ```
 
 1. Add the respective Cloud Pak application (this step assumes you still have shell variables assigned from previous steps) :
 
    ```sh
-   # appname=<< choose a value from the "Application Name" column in the 
-   # table of Cloud Paks above, such as cp4a-app, cp4i-app, 
-   # cp4aiops-app, cp4d-app, etc >>
+   # Choose a value from the "Application Name" column in the 
+   # table of Cloud Paks above, such as cp4a, cp4i, or cp4d
    cp=cp4i
 
    # Note that if you want to use a target namespace that is not the
@@ -366,7 +374,7 @@ After completing the list of activities listed in the previous sections, you can
    app_name=${cp}-app
    # app_path=<< choose the respective value from the "path name." 
    # column in the table of Cloud Paks above, such as 
-   # config/argocd-cloudpaks/cp4i/cp4a, config/argocd-cloudpaks/cp4i, 
+   # config/argocd-cloudpaks/cp4a, config/argocd-cloudpaks/cp4i, 
    # etc
    app_path=config/argocd-cloudpaks/${cp}
 
@@ -374,7 +382,7 @@ After completing the list of activities listed in the previous sections, you can
          --project default \
          --dest-namespace openshift-gitops \
          --dest-server https://kubernetes.default.svc \
-         --helm-set-string metadata.argocd_app_namespace="${cp_namespace}" \
+         --helm-set-string metadata.argocd_app_namespace="${cp_namespace:?}" \
          --helm-set-string repoURL=${gitops_url:?} \
          --helm-set-string targetRevision="${gitops_branch}" \
          --path "${app_path}" \

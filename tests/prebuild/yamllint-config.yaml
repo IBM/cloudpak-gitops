@@ -6,7 +6,11 @@ ignore: |
   config/argocd-cloudpaks/cp4i/templates/0400-cp4i-client-app.yaml
   config/argocd-cloudpaks/cp4aiops/templates/000-aimgr-namespace.yaml
   config/argocd-cloudpaks/cp4aiops/templates/130-cp4aiops-ia-app.yaml
+  config/cloudpaks/cp-shared/operators/templates/0000-rh-cert-manager-namespace.yaml
+  config/cloudpaks/cp-shared/operators/templates/0100-rh-cert-manager-operator-group.yaml
+  config/cloudpaks/cp-shared/operators/templates/0110-rh-cert-manager-subscription.yaml
   config/cloudpaks/cp4a/operators/templates/0000-cp4ba-namespace.yaml
+  config/cloudpaks/cp4a/operators/templates/0050-sync-cluster-scoped-operators.yaml
   config/cloudpaks/cp4a/operators/templates/0100-operator-group.yaml
   config/cloudpaks/cp4i/install-prereqs/templates/0000-namespace.yaml
   config/cloudpaks/cp4i/install-prereqs/templates/0100-operator-group.yaml

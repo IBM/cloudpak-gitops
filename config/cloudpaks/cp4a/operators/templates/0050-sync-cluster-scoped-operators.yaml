@@ -1,8 +1,10 @@
+{{- $red_hat_cert_manager := .Values.red_hat_cert_manager | toString }}
+{{- if eq ( default "false" $red_hat_cert_manager ) "false" }}
 ---
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: sync-cluster-scoper-operators
+  name: sync-cluster-scoped-operators
   annotations:
     argocd.argoproj.io/hook: Sync
     argocd.argoproj.io/sync-wave: "50"
@@ -17,7 +19,7 @@ spec:
           env:
             - name: ARGOCD_NAMESPACE
               value: "openshift-gitops"
-            - name: IBM_CERT_MANAGER
+            - name: IBM_CERT_MANAGER_NAMESPACE
               value: {{.Values.metadata.cert_manager_namespace}}
             - name: IBM_CERT_MANAGER_CHANNEL
               value: {{.Values.metadata.cert_manager_channel}}
@@ -41,13 +43,13 @@ spec:
               kind: Namespace
               apiVersion: v1
               metadata:
-                  name: ${IBM_CERT_MANAGER:?}
+                  name: ${IBM_CERT_MANAGER_NAMESPACE:?}
               ---
               apiVersion: operators.coreos.com/v1
               kind: OperatorGroup
               metadata:
                 name: ibm-cert-manager
-                namespace: ${IBM_CERT_MANAGER:?}
+                namespace: ${IBM_CERT_MANAGER_NAMESPACE:?}
               spec:
                 upgradeStrategy: Default
               ---
@@ -55,7 +57,7 @@ spec:
               kind: Subscription
               metadata:
                 name: ibm-cert-manager-operator
-                namespace: ${IBM_CERT_MANAGER:?}
+                namespace: ${IBM_CERT_MANAGER_NAMESPACE:?}
               spec:
                 channel: ${IBM_CERT_MANAGER_CHANNEL:?}
                 installPlanApproval: Automatic
@@ -63,8 +65,8 @@ spec:
                 source: ibm-operator-catalog
                 sourceNamespace: openshift-marketplace
               EOF
-                      oc wait Subscription.operators.coreos.com ibm-cert-manager-operator -n ${IBM_CERT_MANAGER:?} --for=CatalogSourcesUnhealthy=False \
-                      && oc wait Subscription.operators.coreos.com ibm-cert-manager-operator -n ${IBM_CERT_MANAGER:?} --for=jsonpath='state'="AtLatestKnown" \
+                      oc wait Subscription.operators.coreos.com ibm-cert-manager-operator -n ${IBM_CERT_MANAGER_NAMESPACE:?} --for=CatalogSourcesUnhealthy=False \
+                      && oc wait Subscription.operators.coreos.com ibm-cert-manager-operator -n ${IBM_CERT_MANAGER_NAMESPACE:?} --for=jsonpath='state'="AtLatestKnown" \
                       && echo "INFO: Successfully installed IBM Cert Manager." \
                       || result=1
                   else
@@ -86,3 +88,4 @@ spec:
       restartPolicy: Never
       serviceAccountName: {{.Values.serviceaccount.argocd_application_controller}}
   backoffLimit: 2
+{{- end}}
