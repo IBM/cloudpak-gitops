@@ -157,9 +157,10 @@ spec:
               oc get configmap "${config_map_name}" \
                   --namespace "${ARGOCD_NAMESPACE}" > /dev/null 2>&1 \
               && oc patch configmap "${config_map_name}" \
-                  --patch "{\"data\":{\"serviceaccount.argocd_application_controller\":\"{{.Values.serviceaccount.argocd_application_controller}}\", \"shared_configuration.sc_deployment_platform\":\"${cp4a_platform}\", \"storageclass.gold\":\"${storage_class_gold}\", \"storageclass.silver\":\"${storage_class_silver}\", \"storageclass.bronze\":\"${storage_class_bronze}\", \"storageclass.block\":\"${storage_class_rwo}\" }}" \
+                  --patch "{\"data\":{\"red_hat_cert_manager\":\"{{.Values.red_hat_cert_manager}}\", \"serviceaccount.argocd_application_controller\":\"{{.Values.serviceaccount.argocd_application_controller}}\", \"shared_configuration.sc_deployment_platform\":\"${cp4a_platform}\", \"storageclass.gold\":\"${storage_class_gold}\", \"storageclass.silver\":\"${storage_class_silver}\", \"storageclass.bronze\":\"${storage_class_bronze}\", \"storageclass.block\":\"${storage_class_rwo}\" }}" \
                   --namespace "${ARGOCD_NAMESPACE}" \
               || oc create configmap "${config_map_name}" \
+                  --from-literal=red_hat_cert_manager="${red_hat_cert_manager}" \
                   --from-literal=serviceaccount.argocd_application_controller="{{.Values.serviceaccount.argocd_application_controller}}" \
                   --from-literal=shared_configuration.sc_deployment_platform="${cp4a_platform}" \
                   --from-literal=storageclass.gold="${storage_class_gold}" \

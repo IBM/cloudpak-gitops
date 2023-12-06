@@ -25,6 +25,8 @@ spec:
       parameters:
         - name: online_catalog_source_priority
           value: "{{.Values.online_catalog_source_priority}}"
+        - name: red_hat_cert_manager
+          value: "{{.Values.red_hat_cert_manager | toString}}"
         - name: repoURL
           value: ${ARGOCD_APP_SOURCE_REPO_URL}
         - name: serviceaccount.argocd_application_controller

@@ -1,0 +1,10 @@
+{{- $red_hat_cert_manager := .Values.red_hat_cert_manager | toString }}
+{{- if eq ( default "false" $red_hat_cert_manager ) "true" }}
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cert-manager-operator
+spec: {}
+status: {}
+{{- end }}

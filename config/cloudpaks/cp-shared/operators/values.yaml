@@ -1,4 +1,5 @@
 ---
+red_hat_cert_manager: false
 metadata:
   argocd_namespace: openshift-gitops
 serviceaccount:

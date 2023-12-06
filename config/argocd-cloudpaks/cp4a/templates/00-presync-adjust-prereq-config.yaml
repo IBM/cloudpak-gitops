@@ -2,7 +2,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: cp4a-adjust-ocp-platform
+  name: cp4a-adjust-prereq-config
   annotations:
     argocd.argoproj.io/hook: PreSync
   namespace: openshift-gitops
@@ -13,32 +13,29 @@ spec:
         - name: config
           image: quay.io/openshift/origin-cli:latest
           imagePullPolicy: IfNotPresent
-          resources:
-            requests:
-              memory: "64Mi"
-              cpu: "250m"
-            limits:
-              memory: "128Mi"
-              cpu: "300m"
           env:
             - name: ARGOCD_APP_NAME
               value: cp4a-app
             - name: ARGOCD_NAMESPACE
-              value: openshift-gitops
+              value: "{{.Values.metadata.argocd_namespace}}"
           command:
             - /bin/sh
             - -c
             - |
               set -eo pipefail
               set -x
+
+              red_hat_cert_manager=$(oc get configmap argocd-cp4a-config \
+                  --namespace "${ARGOCD_NAMESPACE}" -o jsonpath='{.data.red_hat_cert_manager}')
+
               # https://www.ibm.com/docs/en/cloud-paks/cp-biz-automation/21.0.x?topic=deployment-installing-capabilities-in-operator-hub
               platform=$(oc get configmap argocd-cp4a-config \
                   --namespace "${ARGOCD_NAMESPACE}" -o jsonpath='{.data.shared_configuration\.sc_deployment_platform}')
 
               echo "INFO: Install Argo CLI."
               # Install it from cluster, not from Internet, so airgap scenarios still work
-              argo_route=openshift-gitops-server
-              argo_secret=openshift-gitops-cluster
+              argo_route="${ARGOCD_NAMESPACE}-server"
+              argo_secret="${ARGOCD_NAMESPACE}-cluster"
 
               export HOME=/tmp
               argo_cmd="${HOME}/argocd"
@@ -50,6 +47,7 @@ spec:
               && argo_pwd=$(oc get secret ${argo_secret} -n ${ARGOCD_NAMESPACE} -ojsonpath='{.data.admin\.password}' | base64 -d ; echo ) \
               && "${argo_cmd}" login "${argo_url}" --username admin --password "${argo_pwd}" --insecure \
               && "${argo_cmd}" app set "${ARGOCD_APP_NAME}" \
+                  --helm-set-string red_hat_cert_manager="${red_hat_cert_manager}" \
                   --helm-set-string spec.shared_configuration.sc_deployment_platform="${platform}" \
               && echo "INFO: ${ARGOCD_APP_NAME} successfully updated OCP platform." \
               || result=1

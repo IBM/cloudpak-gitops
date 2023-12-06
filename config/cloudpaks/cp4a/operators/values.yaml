@@ -2,7 +2,7 @@
 metadata:
   argocd_app_namespace: ibm-cloudpaks
   cert_manager_namespace: ibm-cert-manager
-  cert_manager_channel: v4.1
+  cert_manager_channel: v4.2
 serviceaccount:
   argocd_application_controller: openshift-gitops-argocd-application-controller
 storageclass:
