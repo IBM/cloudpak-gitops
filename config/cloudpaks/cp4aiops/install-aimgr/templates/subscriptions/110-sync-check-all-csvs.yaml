@@ -32,13 +32,8 @@ spec:
               csv_installing=1
               while [ ${current_seconds} -lt ${operation_limit_seconds} ]; do
 
-                # Note the exclusion of "ibm-automation-elastic" in the statement below, reflecting an
-                # issue with this operator called out in the Cloud Pak docs:
-                # https://www.ibm.com/docs/en/cloud-paks/cloud-pak-aiops/4.2.0?topic=installation-online-cli#install-cp4aiops
-
                 failing_csvs=$(oc get csv \
                     -n ${TARGET_NAMESPACE} \
-                    | grep -v ibm-automation-elastic \
                     | grep -vc Succeeded) || result=1
                 if [ ${result} -eq 1 ] || [ "${failing_csvs}" -gt 1 ]; then
                   csv_installing=1
