@@ -93,6 +93,7 @@ source "${scriptdir}/common.sh"
 #
 # Clean up at end of task
 #
+# shellcheck disable=SC2317
 cleanRun() {
     cd "${original_dir}"
     if [ -n "${WORKDIR}" ]; then
@@ -139,7 +140,9 @@ function create_secrets() {
         --docker-username="${CP_ICR_IO_USERID}" \
         --docker-password="${CP_ICR_IO_PASSWORD}" \
         --docker-email="${registry_email}" \
-        --namespace="${GITOPS_NAMESPACE}"
+        --namespace="${GITOPS_NAMESPACE}" \
+        --dry-run='client' \
+        -o yaml | oc apply -f -
 
     cat <<EOF | oc apply -f -
 ---
@@ -522,17 +525,21 @@ function setup_gitops_server() {
             -n openshift-gitops-operator \
             --for=jsonpath='{.status.phase}'=Succeeded \
             --timeout 120s \
+        && oc wait ArgoCD openshift-gitops \
+            -n openshift-gitops \
+            --for=jsonpath='{.status.phase}'=Available \
+            --timeout 120s \
         && {
-            log "INFO: GitOps CSVs in Succeeded state."
+            log "INFO: GitOps installation ready."
             result=0
             break
         }
-        log "INFO: Waiting for GitOps CSVs to be ready."
+        log "INFO: Waiting for GitOps installation to be ready."
         current_seconds=$(( $(date +%s) ))
     done
 
     if [ "${result}" -eq 1 ]; then
-        log "WARNING: Timed out waiting for GitOps operators to be ready."
+        log "WARNING: Timed out waiting for GitOps installation to be ready."
     fi
 
     create_secrets "${github_pat}" || \
