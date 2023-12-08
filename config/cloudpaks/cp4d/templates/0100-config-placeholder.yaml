@@ -9,4 +9,9 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: gitops-cp4d-dummy
-  namespace: {{.Values.metadata.operators_namespace}}
+  namespace: {{.Values.metadata.operands_namespace}}
+data:
+  components: {{.Values.components}}
+  stg_class_block: {{.Values.storageclass.rwo}}
+  stg_class_file: {{.Values.storageclass.rwx}}
+  version: {{.Values.version}}
