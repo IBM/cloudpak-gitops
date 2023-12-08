@@ -1,0 +1,15 @@
+# This is not actually used by CP4BA.
+#
+# ArgoCD cannot recognize changes to the content
+# of sync hooks (such as an env variable for a container)
+# so this config map contains the env variables
+# referenced in sync hooks to ensure ArgoCD realizes
+# a relevant config value has changed.
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gitops-cp4a-dummy
+  namespace: {{.Values.metadata.argocd_app_namespace}}
+data:
+  red_hat_cert_manager: "{{.Values.red_hat_cert_manager}}"
