@@ -1,0 +1,72 @@
+---
+# https://www.ibm.com/support/pages/node/7087504
+apiVersion: batch/v1
+kind: Job
+metadata:
+  annotations:
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+    argocd.argoproj.io/sync-wave: "101"
+  name: sync-cp4d-install-zen-workaround
+  namespace: {{.Values.metadata.argocd_namespace}}
+spec:
+  template:
+    spec:
+      containers:
+        - name: patch-zen-database
+          image: "icr.io/cpopen/cpd/olm-utils-v2:{{.Values.version}}"
+          env:
+            - name: COMPONENTS
+              value: {{.Values.components}}
+            - name: PROJECT_CPD_INST_OPERANDS
+              value: {{.Values.metadata.operands_namespace}}
+          command:
+            - /bin/bash
+            - -c
+            - |
+              set -eo pipefail
+              set -x
+
+              patch_needed=0
+              if [[ ${COMPONENTS:?} =~ cognos_analytics ]] \
+                  || [[ ${COMPONENTS} =~ db2 ]] \
+                  || [[ ${COMPONENTS} =~ bigsql ]] \
+                  || [[ ${COMPONENTS} =~ wkc ]] \
+                  || [[ ${COMPONENTS} =~ wml_accelerator ]]; then
+                  patch_needed=1
+              fi
+
+              if [ ${patch_needed} -eq 0 ]; then
+                  exit 0
+              fi
+
+              result=1
+
+              while [ ${result} -eq 1 ] && [ ${SECONDS} -lt 7200 ]
+              do
+                  oc get deployment zen-databases \
+                      -n ${PROJECT_CPD_INST_OPERANDS} \
+                  && result=0 \
+                  || {
+                      echo "INFO: Waiting on Zen database deployment to patch it"
+                      sleep 60
+                  }
+              done
+
+              if [ ${result} -eq 0 ]; then
+                  oc patch deployment zen-databases \
+                      -n ${PROJECT_CPD_INST_OPERANDS} \
+                      --type='json' \
+                      -p='[{"op": "add", "path": "/spec/template/spec/containers/0/env/-", "value": {"name": "npm_config_cache", "value": "/tmp"}}]' \
+                  || {
+                      echo "ERROR: CP4D installation failed."
+                      result=1
+                  }
+              fi
+
+              exit ${result}
+
+      restartPolicy: Never
+      serviceAccountName: {{.Values.serviceaccount.argocd_application_controller}}
+
+  backoffLimit: 2
