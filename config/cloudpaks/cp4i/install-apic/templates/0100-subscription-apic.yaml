@@ -9,8 +9,8 @@ metadata:
   name: ibm-apiconnect
   namespace: {{.Values.metadata.argocd_app_namespace}}
 spec:
-  channel: v5.0
+  channel: v5.1
   installPlanApproval: Automatic
   name: ibm-apiconnect
-  source: ibm-operator-catalog
+  source: ibm-apiconnect-catalog
   sourceNamespace: openshift-marketplace

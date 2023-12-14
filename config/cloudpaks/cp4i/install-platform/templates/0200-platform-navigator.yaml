@@ -6,15 +6,14 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     argocd.argoproj.io/sync-wave: "200"
+  labels:
+    backup.integration.ibm.com/component: platformnavigator
   name: integration-navigator
   namespace: {{.Values.metadata.argocd_app_namespace}}
 spec:
   license:
     accept: true
     # https://ibm.biz/integration-licenses
-    license: L-YBXJ-ADJNSM
-  mqDashboard: true
+    license: L-VTPK-22YZPK
   replicas: 1
-  storage:
-    class: {{.Values.storageclass.rwx}}
-  version: 2023.2.1
+  version: 2023.4.1

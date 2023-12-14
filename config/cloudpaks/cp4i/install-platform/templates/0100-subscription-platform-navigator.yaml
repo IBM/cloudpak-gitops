@@ -8,8 +8,8 @@ metadata:
   name: ibm-integration-platform-navigator
   namespace: {{.Values.metadata.argocd_app_namespace}}
 spec:
-  channel: v7.1
+  channel: v7.2
   installPlanApproval: Automatic
   name: ibm-integration-platform-navigator
-  source: ibm-operator-catalog
+  source: ibm-integration-platform-navigator-catalog
   sourceNamespace: openshift-marketplace

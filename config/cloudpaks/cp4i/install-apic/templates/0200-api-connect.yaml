@@ -4,6 +4,7 @@ apiVersion: apiconnect.ibm.com/v1beta1
 kind: APIConnectCluster
 metadata:
   annotations:
+    apiconnect-operator/backups-not-configured: "true"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     argocd.argoproj.io/sync-wave: "200"
   labels:
@@ -13,11 +14,21 @@ metadata:
   name: apis-minimum
   namespace: {{.Values.metadata.argocd_app_namespace}}
 spec:
+  analytics:
+    ingestion:
+      queue:
+        type: persisted
+    storage:
+      enabled: true
+      type: shared
+    mtlsValidateClient: true
   license:
     accept: true
     use: nonproduction
-    # https://www.ibm.com/docs/en/api-connect/10.0.5.x_lts?topic=requirements-api-connect-licenses
-    license: L-KZXM-S7SNCU
+    # https://www.ibm.com/docs/en/api-connect/10.0.x?topic=requirements-api-connect-licenses
+    license: L-MMBZ-295QZQ
+  portal:
+    mtlsValidateClient: true
   storageClassName: {{.Values.storageclass.rwo}}
   profile: n1xc10.m48
-  version: 10.0.6.0
+  version: 10.0.7.0

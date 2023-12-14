@@ -8,3 +8,5 @@ metadata:
 storageclass:
   rwo: ocs-storagecluster-ceph-rbd
   rwx: ocs-storagecluster-cephfs
+spec:
+  ibm_common_service_operator_channel: v4.3
