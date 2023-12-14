@@ -331,14 +331,11 @@ After completing the list of activities listed in the previous sections, you can
    red_hat_cert_manager=false
 
    # If you want to override the default target namespace for 
-   # one or more Cloud Paks, you need to adjust the values below
+   # Cloud Pak for Security, you need to adjust the values below
    # to indicate the desired target namespace.
-   #
-   # This setting only affects CP4I and CP4S
    #
    dedicated_cs_enabled=false
 
-   cp4i_namespace=cp4i
    cp4s_namespace=cp4s
 
    argocd app create cp-shared-app \
@@ -351,7 +348,6 @@ After completing the list of activities listed in the previous sections, you can
          --helm-set-string metadata.argocd_app_namespace="${cp_namespace}" \
          --helm-set-string red_hat_cert_manager="${red_hat_cert_manager:-false}" \
          --helm-set-string dedicated_cs.enabled="${dedicated_cs_enabled:-false}" \
-         --helm-set-string dedicated_cs.namespace_mapping.cp4i="${cp4i_namespace:-cp4i}" \
          --helm-set-string dedicated_cs.namespace_mapping.cp4s="${cp4s_namespace:-cp4s}" \
          --helm-set-string targetRevision="${gitops_branch:?}" \
          --revision ${gitops_branch:?} \

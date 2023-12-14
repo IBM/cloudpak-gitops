@@ -1,0 +1,17 @@
+---
+# https://www.ibm.com/docs/en/cloud-paks/cp-integration/2023.4?topic=images-adding-catalog-sources-cluster
+apiVersion: operators.coreos.com/v1alpha1
+kind: CatalogSource
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: "50"
+  name: ibm-apiconnect-catalog
+  namespace: openshift-marketplace
+spec:
+  displayName: ibm-apiconnect-5.1.0
+  publisher: IBM
+  image: icr.io/cpopen/ibm-apiconnect-catalog@sha256:2058d863696e3adccd620ab3210a84f792c2953e42a9b61f350b4ad897723f1e
+  sourceType: grpc
+  updateStrategy:
+    registryPoll:
+      interval: 30m0s

@@ -5,7 +5,7 @@ metadata:
   name: sync-cluster-scoped-operators
   annotations:
     argocd.argoproj.io/hook: Sync
-    argocd.argoproj.io/sync-wave: "50"
+    argocd.argoproj.io/sync-wave: "150"
   namespace: openshift-gitops
 spec:
   template:
@@ -31,15 +31,6 @@ spec:
               set -x
 
               result=0
-              if [ "${RED_HAT_CERT_MANAGER_ENABLED}" == "true" ]; then
-                  oc delete Subscription.operators.coreos.com ibm-cert-manager-operator \
-                      -n "${IBM_CERT_MANAGER_NAMESPACE:?}" \
-                      --ignore-not-found=true
-                  oc delete Namespace "${IBM_CERT_MANAGER_NAMESPACE:?}" \
-                      --ignore-not-found=true
-                  exit "${result}"
-              fi
-
               ibm_cert_manager_count=$(oc get Subscription.operators.coreos.com \
                     -l operators.coreos.com/ibm-cert-manager-operator.ibm-cert-manager \
                     -A \
@@ -74,6 +65,7 @@ spec:
                 source: ibm-operator-catalog
                 sourceNamespace: openshift-marketplace
               EOF
+                      sleep 10
                       oc wait Subscription.operators.coreos.com ibm-cert-manager-operator -n ${IBM_CERT_MANAGER_NAMESPACE:?} --for=CatalogSourcesUnhealthy=False \
                       && oc wait Subscription.operators.coreos.com ibm-cert-manager-operator -n ${IBM_CERT_MANAGER_NAMESPACE:?} --for=jsonpath='state'="AtLatestKnown" \
                       && echo "INFO: Successfully installed IBM Cert Manager." \

@@ -2,6 +2,8 @@
 red_hat_cert_manager: false
 metadata:
   argocd_namespace: openshift-gitops
+  cert_manager_namespace: ibm-cert-manager
+  cert_manager_channel: v4.2
 serviceaccount:
   argocd_application_controller: openshift-gitops-argocd-application-controller
 online_catalog_source_priority: -1
