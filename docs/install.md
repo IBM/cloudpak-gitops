@@ -81,7 +81,7 @@
       name: openshift-gitops-operator
       namespace: openshift-operators
    spec:
-      channel: gitops-1.10
+      channel: latest
       installPlanApproval: Automatic
       name: openshift-gitops-operator
       source: redhat-operators

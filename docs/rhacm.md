@@ -49,7 +49,7 @@ This repository contains governance policies and placement rules for Argo CD and
 
 ### Install the OpenShift GitOps operator
 
-This section contains a simple shortcut, but you can choose to follow the instructions in the [Red Hat OpenShift GitOps Installation page](https://docs.openshift.com/gitops/1.10/installing_gitops/installing-openshift-gitops.html) instead, with special care to **use a release at or above `gitops-1.8`**.) These instructions were validated with the OpenShift GitOps 1.10 release.
+This section contains a simple shortcut, but you can choose to follow the instructions in the [Red Hat OpenShift GitOps Installation page](https://docs.openshift.com/gitops/1.11/installing_gitops/installing-openshift-gitops.html) instead, with special care to **use a release at or above `gitops-1.8`**.) These instructions are always validated with the latest OpenShift GitOps release.
 
 The shortcut in case you choose to skip the official instructions:
 
@@ -79,7 +79,7 @@ The shortcut in case you choose to skip the official instructions:
      name: openshift-gitops-operator
      namespace: openshift-gitops-operator
    spec:
-     channel: gitops-1.10
+     channel: latest
      installPlanApproval: Automatic
      name: openshift-gitops-operator
      source: redhat-operators
