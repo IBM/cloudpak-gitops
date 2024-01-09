@@ -7,6 +7,11 @@ serviceaccount:
 metadata:
   argocd_app_namespace: ibm-cloudpaks
   argocd_namespace: openshift-gitops
+  ibm_cert_manager_channel: v4.2
+  ibm_cert_manager_namespace: ibm-cert-manager
+  ibm_cert_manager_operator_group: ibm-cert-manager-operator-group
+  redhat_cert_manager_namespace: cert-manager-operator
+  redhat_cert_manager_operator_group: cert-manager-operator-group
 dedicated_cs:
   control_namespace: cs-control
   enabled: false

@@ -20,9 +20,11 @@ spec:
             - name: RED_HAT_CERT_MANAGER_ENABLED
               value: "{{.Values.red_hat_cert_manager}}"
             - name: IBM_CERT_MANAGER_NAMESPACE
-              value: {{.Values.metadata.cert_manager_namespace}}
+              value: {{.Values.metadata.ibm_cert_manager_namespace}}
+            - name: IBM_CERT_MANAGER_OPERATOR_GROUP
+              value: {{.Values.metadata.ibm_cert_manager_operator_group}}
             - name: IBM_CERT_MANAGER_CHANNEL
-              value: {{.Values.metadata.cert_manager_channel}}
+              value: {{.Values.metadata.ibm_cert_manager_channel}}
           command:
             - /bin/sh
             - -c
@@ -48,7 +50,7 @@ spec:
               apiVersion: operators.coreos.com/v1
               kind: OperatorGroup
               metadata:
-                name: ibm-cert-manager
+                name: ${IBM_CERT_MANAGER_OPERATOR_GROUP:?}
                 namespace: ${IBM_CERT_MANAGER_NAMESPACE:?}
               spec:
                 upgradeStrategy: Default

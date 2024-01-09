@@ -6,10 +6,10 @@ kind: OperatorGroup
 metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "100"
-  name: cert-manager-operator
-  namespace: cert-manager-operator
+  name: {{.Values.metadata.redhat_cert_manager_operator_group}}
+  namespace: {{.Values.metadata.redhat_cert_manager_namespace}}
 spec:
   targetNamespaces:
-    - cert-manager-operator
+    - {{.Values.metadata.redhat_cert_manager_namespace}}
   upgradeStrategy: Default
 {{- end }}
