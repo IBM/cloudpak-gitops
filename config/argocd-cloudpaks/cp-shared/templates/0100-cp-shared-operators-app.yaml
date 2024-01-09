@@ -23,6 +23,16 @@ spec:
   source:
     helm:
       parameters:
+        - name: metadata.ibm_cert_manager_channel
+          value: {{.Values.metadata.ibm_cert_manager_channel}}
+        - name: metadata.ibm_cert_manager_namespace
+          value: {{.Values.metadata.ibm_cert_manager_namespace}}
+        - name: metadata.ibm_cert_manager_operator_group
+          value: {{.Values.metadata.ibm_cert_manager_operator_group}}
+        - name: metadata.redhat_cert_manager_namespace
+          value: {{.Values.metadata.redhat_cert_manager_namespace}}
+        - name: metadata.redhat_cert_manager_operator_group
+          value: {{.Values.metadata.redhat_cert_manager_operator_group}}
         - name: online_catalog_source_priority
           value: "{{.Values.online_catalog_source_priority}}"
         - name: red_hat_cert_manager
