@@ -40,10 +40,17 @@ function usage() {
     echo ""
     echo "Usage: ${scriptname} [OPTIONS]...[ARGS]"
     echo
-    echo "   -t | --type <aws|fyre|fyre-quick-burn|ibmcloud|ibmcloud-gen2|rosa>"
+    echo "   -t | --type <aro|aws|aws-hosted|azure|fyre|fyre-quick-burn|gcp|ibmcloud|ibmcloud-gen2|rosa|rosa-hosted>"
     echo "                      Indicates the type of cluster to be built. Default is: fyre-quick-burn"
     echo "   -r | --rhacm-server <server_name>"
     echo "                      Uses RHACM to create the cluster. "
+    echo "        --rhacm-server-type <ocp|ibmcloud|ibmcloud-gen2>"
+    # shellcheck disable=SC2153
+    echo "                      Type of server hosting RHACM. Default is ${RHACM_SERVER_TYPE}"
+    echo "        --rhacm-server-region <region>"
+    echo "                      Region for the target RHACM cluster for the operation."
+    echo "        --rhacm-server-resource-group <name>"
+    echo "                      Resource group for the RHACM cluster (if applicable in target cloud provider)."
     echo "   -n | --cluster <name>"
     echo "                      Name of the server containing the ArgoCD definitions."
     echo "   -s | --setup-server"
@@ -77,6 +84,8 @@ function usage() {
     echo "                      API Key in the target platform."
     echo "        --ocp-token"
     echo "                      Key or token for managed OCP platform if not ROKS."
+    echo "        --red-hat-cert-manager"
+    echo "                      Installs the Red Hat Certificate Manager."
     echo ""
     echo "   -v | --verbose     Prints extra information about each command."
     echo "   -h | --help        Output this usage statement."
@@ -112,10 +121,10 @@ function set_argo_branch() {
     local new_branch=${1}
     local namespace=${2:-openshift-gitops}
     
-    kubectl get Application --namespace "${namespace}" \
+    oc get Application --namespace "${namespace}" \
         -o go-template='{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}' \
         | xargs -Iargoapp \
-            kubectl patch Application argoapp \
+            oc patch Application argoapp \
                 --namespace "${namespace}" \
                 --patch "\"spec\": { \"source\": { \"targetRevision\":\"${new_branch}\" } }" \
                 --type merge
@@ -247,12 +256,14 @@ function set_argo_tls() {
 # arg2 Git branch for the default gitops repository.
 # arg3 GitHub personal access token for the target git repository.
 # arg4 Comma-separated list of labels for pre-installation of applications.
+# arg5 0|1  Configures the applications to install and use the Red Hat Certficate Manager
 #
 function add_argo_cd_app() {
     local gitops_repo=${1}
     local gitops_branch=${2}
     local github_pat=${3}
     local app_labels=${4}
+    local red_hat_cert_manager=${5}
 
     local result=0
 
@@ -363,8 +374,14 @@ EOF
         fi
         local argocd_app_params=()
         local dedicated_cs_enabled=false
+        red_hat_cert_manager_param=false
+        if [ "${red_hat_cert_manager}" == "1" ]; then
+            red_hat_cert_manager_param=true
+        fi
         if [ "${cp}" == "cp-shared" ]; then
-            argocd_app_params=(--helm-set-string dedicated_cs.enabled="${dedicated_cs_enabled:-false}")
+            argocd_app_params=(\
+            --helm-set-string dedicated_cs.enabled="${dedicated_cs_enabled:-false}" \
+            --helm-set-string red_hat_cert_manager="${red_hat_cert_manager_param:-false}")
         fi
         argocd app create "${app_name}" \
             --project default \
@@ -427,7 +444,7 @@ function set_argo_admin_pwd() {
     local result=0
 
     case ${cluster_type} in
-        aws|fyre|fyre-quick-burn)
+        aws|aws-hosted|fyre|fyre-quick-burn)
             local kubeadmin_password
             if [[ "${cluster_type}" == *fyre* ]]; then
                 local status_contents="${WORKDIR}/fyre_status_content.json"
@@ -471,40 +488,54 @@ function set_argo_admin_pwd() {
 #
 # arg1 infrastructure type of the target cluster
 # arg2 name of the cluster to be configured
-# arg3 username for the target cloud
-# arg4 apikey for the target cloud
-# arg5 OCP key if creating a managed OCP cluster (other than ROKS)
-# arg6 RHACM server. If not empty, creation done through RHACM server.
-# arg7 Git URL for the default gitops repository.
-# arg8 Git branch for the default gitops repository.
-# arg9 GitHub personal access token for the target git repository
-# arg10 Comma-separated list of labels for pre-installation of applications. 
+# arg3 region of the cluster to be configured.
+# arg4 resource group of the cluster to be configured.
+# arg5 username for the target cloud
+# arg6 apikey for the target cloud
+# arg7 OCP key if creating a managed OCP cluster (other than ROKS)
+# arg8 Type for the RHACM server
+# arg9 RHACM server. If not empty, creation done through RHACM server.
+# arg10 cloud region of the RHACM server.
+# arg11 resource group of RHACM server.
+# arg12 Git URL for the default gitops repository.
+# arg13 Git branch for the default gitops repository.
+# arg14 GitHub personal access token for the target git repository
+# arg15 Comma-separated list of labels for pre-installation of applications. 
+# arg16 installs the Red Hat Cert Manager
 #
 function setup_gitops_server() {
     local cluster_type=${1}
     local cluster_name=${2}
-    local username=${3}
-    local api_key=${4}
-    local managed_ocp_token=${5}
-    local rhacm_server=${6}
-    local gitops_repo=${7}
-    local gitops_branch=${8}
-    local github_pat=${9}
-    local app_labels=${10}
+    local cluster_region=${3}
+    local cluster_resource_group=${4}
+    local username=${5}
+    local api_key=${6}
+    local managed_ocp_token=${7}
+    local rhacm_server_type=${8}
+    local rhacm_server=${9}
+    local rhacm_server_region=${10}
+    local rhacm_server_resource_group=${11}
+    local gitops_repo=${12}
+    local gitops_branch=${13}
+    local github_pat=${14}
+    local app_labels=${15}
+    local red_hat_cert_manager=${16}
 
     local result=0
 
     if [ -n "${rhacm_server}" ]; then
         PIPELINE_DEBUG=${PIPELINE_DEBUG} "${scriptdir}/rhacm.sh" \
-            --type "ocp" \
+            --type "${rhacm_server_type}" \
             --cluster "${rhacm_server}" \
+            --cluster-region "${rhacm_server_region}" \
+            --cluster-resource-group "${rhacm_server_resource_group}" \
             --username "${username}" \
             --apikey "${api_key}" \
             --login \
             --managed-cluster "${cluster_name}" \
-        || result=1
+        || return 1
     else
-        login_cluster "${cluster_type}" "${cluster_name}" "${username}" "${api_key}" "${managed_ocp_token}" 5 \
+        login_cluster "${cluster_type}" "${cluster_name}" "${cluster_region}" "${cluster_resource_group}" "${username}" "${api_key}" "${managed_ocp_token}" 5 \
         || return 1
     fi
 
@@ -558,13 +589,13 @@ function setup_gitops_server() {
     set_argo_admin_pwd "${cluster_type}" "${cluster_name}" "${username}" "${api_key}" \
         || result=1
 
-    add_argo_cd_app "${gitops_repo}" "${gitops_branch}" "${github_pat}" "${app_labels}" \
+    add_argo_cd_app "${gitops_repo}" "${gitops_branch}" "${github_pat}" "${app_labels}" "${red_hat_cert_manager}" \
         && log "INFO: ArgoCD added to the cluster." \
         || result=1
 
     if [ "${result}" -eq 1 ]; then
         log "ERROR: GitOps operators or instances could not be added to the cluster."
-        oc get csv -n openshift-gitops-operator
+        oc get csv -n openshift-operators
     fi
 
     set_argo_branch "${gitops_branch}" || \
@@ -614,21 +645,40 @@ function install_argocd() {
             log "INFO: Installing argocd client from ${argo_url}"
             local current_seconds=0
             local operation_limit_seconds=$(( $(date +%s) + 600 ))
-            local download_result=1
-            while [ ${download_result} -eq 1 ] &&
+            local cli_status="none"
+            while [ "${cli_status}" != "200" ] &&
                   [ ${current_seconds} -lt ${operation_limit_seconds} ]
             do
-                curl -skL "${argo_url}/download/argocd-linux-amd64" -o "${WORKDIR}/argocd" \
-                    && install -m 755 "${WORKDIR}/argocd" /usr/local/bin/argocd \
-                    && download_result=0
-                if [ ${download_result} -eq 1 ]; then
-                    log "INFO: Waiting for argocd client to be available."
-                    sleep 30
+                cli_status=$(curl -skL "${argo_url}/download/argocd-linux-amd64" \
+                    -o "${WORKDIR}/argocd" \
+                    -w "%{http_code}")
+
+                if [ "${cli_status}" == "200" ]; then
+                    log "INFO: Downloaded argocd client from OpenShift GitOps instance."
+                    break
                 fi
+                if [ "${cli_status}" == "404" ]; then
+                    log "INFO: OpenShift GitOps does not have the argocd client for download."
+                    break
+                fi
+
+                log "INFO: Waiting for argocd client to be available."
+                sleep 30
             done
 
-            if [ ${download_result} -eq 1 ]; then
-                log "WARNING: Unable to download argocd client."
+            if [ "${cli_status}" != "200" ]; then
+                log "INFO: Attempting downloading argocd client from public releases."
+                cli_status=$(curl -skL "https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64" \
+                    -o "${WORKDIR}/argocd" \
+                    -w "%{http_code}")
+            fi
+
+            if [ "${cli_status}" == "200" ]; then
+                log "INFO: Installing argocd client."
+                install -m 755 "${WORKDIR}/argocd" /usr/local/bin/argocd \
+                || result=1
+            else 
+                log "ERROR: Unable to download argocd client."
                 result=1
             fi
         }
@@ -660,55 +710,54 @@ function install_argocd() {
 #
 # arg1 infrastructure type of the target cluster
 # arg2 name of the cluster to be configured
-# arg3 username for the target cloud
-# arg4 apikey for the target cloud
-# arg5 OCP key if creating a managed OCP cluster (other than ROKS)
+# arg3 region of the cluster to be configured
+# arg4 resource group of the cluster to be configured.
+# arg5 username for the target cloud
+# arg6 apikey for the target cloud
+# arg7 OCP key if creating a managed OCP cluster (other than ROKS)
+# arg8 Type for the RHACM server
+# arg9 RHACM server. If not empty, creation done through RHACM server.
+# arg10 cloud region of the RHACM server.
+# arg11 resource group of RHACM server.
 #
 function setup_gitops_clients() {
     local cluster_type=${1}
     local cluster_name=${2}
-    local username=${3}
-    local api_key=${4}
-    local managed_ocp_token=${5}
+    local cluster_region=${3}
+    local cluster_resource_group=${4}
+    local username=${5}
+    local api_key=${6}
+    local managed_ocp_token=${7}
+    local rhacm_server_type=${8}
+    local rhacm_server=${9}
+    local rhacm_server_region=${10}
+    local rhacm_server_resource_group=${11}
 
     local result=0
 
     install_helm || result=1
 
-    log "INFO: Checking tekton client installation"
-    local tekton_version=0.17.1
-    tkn version > /dev/null 2>&1 ||
-    {
-        log "INFO: Installing tekton client."
-        curl -skL "https://github.com/tektoncd/cli/releases/download/v${tekton_version}/tkn_${tekton_version}_Linux_x86_64.tar.gz" | \
-            tar xzf - -C "${WORKDIR}" \
-            && install -m 755 "${WORKDIR}/tkn" /usr/local/bin/tkn \
-            || result=1
-    }
-
     log "INFO: Checking gitops client installation"
-    login_cluster "${cluster_type}" "${cluster_name}" "${username}" "${api_key}" "${managed_ocp_token}" \
+    if [ -n "${rhacm_server}" ]; then
+        PIPELINE_DEBUG=${PIPELINE_DEBUG} "${scriptdir}/rhacm.sh" \
+            --type "${rhacm_server_type}" \
+            --cluster "${rhacm_server}" \
+            --cluster-region "${rhacm_server_region}" \
+            --cluster-resource-group "${rhacm_server_resource_group}" \
+            --username "${username}" \
+            --apikey "${api_key}" \
+            --login \
+            --managed-cluster-type "${cluster_type}" \
+            --managed-cluster "${cluster_name}" \
+            --managed-cluster-region "${cluster_region}" \
+            --managed-cluster-resource-group "${cluster_resource_group}" \
         || result=1
-
-    kam version > /dev/null 2>&1 ||
-    {
-        local kam_version=0.0.39
-
-        log "INFO: Installing kam client."
-        curl -sL "https://github.com/redhat-developer/kam/releases/download/v${kam_version}/kam_linux_amd64" -o "${WORKDIR}/kam" \
-            && install -m 755 "${WORKDIR}/kam" /usr/local/bin/kam \
-            || result=1
-    }
+    else
+        login_cluster "${cluster_type}" "${cluster_name}" "${cluster_region}" "${cluster_resource_group}" "${username}" "${api_key}" "${managed_ocp_token}" \
+        || result=1
+    fi
 
     install_argocd || result=1
-
-    log "INFO: tekton client version"
-    tkn version \
-        || log "ERROR: tekton client still cannot be found."
-
-    log "INFO: gitops client version"
-    kam version \
-        || log "ERROR: gitops client still cannot be found."
 
     log "INFO: argoclient version"
     argocd version \
@@ -729,6 +778,8 @@ trap cleanRun EXIT
 
 apikey=""
 cluster_name=""
+cluster_region=""
+cluster_resource_group=""
 cluster_type="${NEW_CLUSTER_TYPE}"
 setup_server=0
 setup_client=0
@@ -738,7 +789,13 @@ github_pat="${GITHUB_PAT}"
 test=0
 username=""
 rhacm_server=""
+rhacm_server_type="${RHACM_SERVER_TYPE}"
+# shellcheck disable=SC2153
+rhacm_server_region="${RHACM_SERVER_REGION}"
+# shellcheck disable=SC2153
+rhacm_server_resource_group="${RHACM_SERVER_RESOURCE_GROUP}"
 app_labels=""
+red_hat_cert_manager=0
 while [[ $# -gt 0 ]]
 do
 key="$1"
@@ -794,6 +851,21 @@ case ${key} in
     rhacm_server=$1
     shift
     ;;
+    --rhacm-server-type)
+    rhacm_server_type=$1
+    shift
+    ;;
+    --rhacm-server-region)
+    rhacm_server_region=$1
+    shift
+    ;;
+    --rhacm-server-resource-group)
+    rhacm_server_resource_group=$1
+    shift
+    ;;
+    --red-hat-cert-manager)
+    red_hat_cert_manager=1
+    ;;
     -h|--help)
     usage
     exit
@@ -828,34 +900,75 @@ fi
 cluster_type=${NEW_CLUSTER_TYPE}
 
 case ${cluster_type} in
-    aws|gcp)
+    aro)
+        : "${username:=${AZURE_CLIENT_ID}}"
+        : "${apikey:=${AZURE_CLIENT_SECRET}}"
+        : "${redhat_pull_secret:=${REDHAT_PULL_SECRET}}"
+        : "${cluster_region:=${AZURE_CLOUD_REGION}}"
+        : "${cluster_resource_group:=${AZURE_RESOURCE_GROUP}}"
+
+        if [ -z "${redhat_pull_secret}" ]; then
+            log "ERROR: An Red Hat pull secret was not specified."
+        fi
+
+        azure_cli=0
+        install_azure_cli \
+            && install_azure_cli \
+            || azure_cli=1
+
+        if [ ${azure_cli} -eq 1 ]; then
+            log "ERROR: Unable to install Azure CLI."
+            exit 1
+        fi
+    ;;
+    aws|aws-hosted)
         if [ -z "${rhacm_server}" ]; then
             : "${username:=kubeadmin}"
             : "${apikey:=${AWS_API_KEY}}"
         fi
+        : "${cluster_region:=${AWS_CLOUD_REGION}}"
+    ;;
+    azure)
+        if [ -z "${rhacm_server}" ]; then
+            : "${username:=kubeadmin}"
+            : "${apikey:=${AWS_API_KEY}}"
+        fi
+        : "${cluster_region:=${AZURE_CLOUD_REGION}}"
+        : "${cluster_resource_group:=${AZURE_RESOURCE_GROUP}}"
     ;;
     fyre|fyre-quick-burn)
         : "${username:=${FYRE_USERNAME}}"
         : "${apikey:=${FYRE_API_KEY}}"
+        : "${cluster_region:=${FYRE_SITE}}"
 
         if [ -z "${username}" ]; then
             log "ERROR: A Fyre username was not specified."
             exit 1
         fi
     ;;
+    gcp)
+        if [ -z "${rhacm_server}" ]; then
+            : "${username:=kubeadmin}"
+            : "${apikey:=${AWS_API_KEY}}"
+        fi
+        : "${cluster_region:=${GCP_CLOUD_REGION}}"
+    ;;
     ibmcloud|ibmcloud-gen2)
         : "${username:=${IBM_CLOUD_USERNAME}}"
         : "${apikey:=${IBM_CLOUD_API_KEY}}"
+        : "${cluster_region:=${IBM_CLOUD_REGION}}"
+        : "${cluster_resource_group:=${IBM_CLOUD_GROUP}}"
     ;;
     ocp)
         if [ -z "${rhacm_server}" ]; then
             : "${username:=kubeadmin}"
         fi
     ;;
-    rosa)
+    rosa|rosa-hosted)
         : "${username:=${AWS_ACCESS_KEY_ID}}"
         : "${apikey:=${AWS_SECRET_ACCESS_KEY}}"
         : "${managed_ocp_token:=${ROSA_TOKEN}}"
+        : "${cluster_region:=${AWS_CLOUD_REGION}}"
 
         if [ -z "${managed_ocp_token}" ]; then
             log "ERROR: A ROSA token was not specified."
@@ -887,6 +1000,11 @@ if [ -z "${apikey}" ]; then
     exit 1
 fi
 
+if [ -n "${rhacm_server}" ] && [ -z "${rhacm_server_type}" ]; then
+    log "ERROR: RHACM ${cluster_type} was not specified."
+    exit 1
+fi
+
 check_install_oc || exit 1
 
 result=0
@@ -897,10 +1015,10 @@ if [ "${setup_server}" -eq 1 ]; then
         exit 1
     fi
 
-    setup_gitops_server "${cluster_type}" "${cluster_name}" "${username}" "${apikey}" "${managed_ocp_token}" "${rhacm_server}" "${gitops_repo}" "${gitops_branch}" "${github_pat}" "${app_labels}" \
+    setup_gitops_server "${cluster_type}" "${cluster_name}" "${cluster_region}" "${cluster_resource_group}" "${username}" "${apikey}" "${managed_ocp_token}" "${rhacm_server_type}" "${rhacm_server}" "${rhacm_server_region}" "${rhacm_server_resource_group}" "${gitops_repo}" "${gitops_branch}" "${github_pat}" "${app_labels}" "${red_hat_cert_manager}" \
         || result=1
 elif [ "${setup_client}" -eq 1 ]; then
-    setup_gitops_clients "${cluster_type}" "${cluster_name}" "${username}" "${apikey}" "${managed_ocp_token}" \
+    setup_gitops_clients "${cluster_type}" "${cluster_name}" "${cluster_region}" "${cluster_resource_group}" "${username}" "${apikey}" "${managed_ocp_token}" \
         || result=1
 fi
 

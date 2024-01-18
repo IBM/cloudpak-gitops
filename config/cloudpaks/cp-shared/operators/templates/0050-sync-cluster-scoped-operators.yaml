@@ -12,7 +12,7 @@ spec:
     spec:
       containers:
         - name: config
-          image: quay.io/openshift/origin-cli:latest
+          image: registry.redhat.io/openshift4/ose-cli:latest
           imagePullPolicy: IfNotPresent
           env:
             - name: ARGOCD_NAMESPACE
@@ -67,11 +67,22 @@ spec:
                 source: ibm-operator-catalog
                 sourceNamespace: openshift-marketplace
               EOF
-                      sleep 10
-                      oc wait Subscription.operators.coreos.com ibm-cert-manager-operator -n ${IBM_CERT_MANAGER_NAMESPACE:?} --for=CatalogSourcesUnhealthy=False \
-                      && oc wait Subscription.operators.coreos.com ibm-cert-manager-operator -n ${IBM_CERT_MANAGER_NAMESPACE:?} --for=jsonpath='state'="AtLatestKnown" \
-                      && echo "INFO: Successfully installed IBM Cert Manager." \
-                      || result=1
+
+                      while [ $SECONDS -lt 300 ]; do
+                          oc wait Subscription.operators.coreos.com ibm-cert-manager-operator \
+                              -n ${IBM_CERT_MANAGER_NAMESPACE:?} \
+                              --for=condition=CatalogSourcesUnhealthy=False \
+                          && oc wait Subscription.operators.coreos.com ibm-cert-manager-operator \
+                              -n ${IBM_CERT_MANAGER_NAMESPACE:?} \
+                              --for=jsonpath='{.status.state}'="AtLatestKnown" \
+                          && echo "INFO: Successfully installed IBM Cert Manager." \
+                          && result=0 \
+                          && break \
+                          || result=1
+
+                          echo "INFO: Waiting for the subscription to be ready."
+                          sleep 20
+                      done
                   else
                       echo "INFO: IBM Cert Manager already installed."
                       oc get Subscription.operators.coreos.com \
