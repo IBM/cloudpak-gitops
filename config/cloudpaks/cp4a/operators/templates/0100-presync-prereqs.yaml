@@ -12,15 +12,8 @@ spec:
     spec:
       containers:
         - name: config
-          image: quay.io/openshift/origin-cli:latest
+          image: registry.redhat.io/openshift4/ose-cli:latest
           imagePullPolicy: IfNotPresent
-          resources:
-            requests:
-              memory: "256Mi"
-              cpu: "200m"
-            limits:
-              memory: "256Mi"
-              cpu: "250m"
           env:
             - name: ARGOCD_NAMESPACE
               value: openshift-gitops
