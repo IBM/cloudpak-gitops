@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: config
-          image: quay.io/openshift/origin-cli:latest
+          image: registry.redhat.io/openshift4/ose-cli:latest
           imagePullPolicy: IfNotPresent
           env:
             - name: GROUP_NAME
