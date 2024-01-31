@@ -11,7 +11,7 @@ spec:
     spec:
       containers:
         - name: config
-          image: quay.io/openshift/origin-cli:latest
+          image: registry.redhat.io/openshift4/ose-cli:latest
           imagePullPolicy: IfNotPresent
           env:
             - name: ARGOCD_NAMESPACE
@@ -40,16 +40,31 @@ spec:
 
               echo "INFO: Install Argo CLI."
               # Install it from cluster, not from Internet, so airgap scenarios still work
-              argo_route=openshift-gitops-server
-              argo_secret=openshift-gitops-cluster
+              argo_route="${ARGOCD_NAMESPACE}-server"
+              argo_secret="${ARGOCD_NAMESPACE}-cluster"
 
               export HOME=/tmp
               argo_cmd="${HOME}/argocd"
               result=0
 
+              linux_arch=$(uname -p)
+              argocd_cli_arch=amd64
+              if [ "${linux_arch}" == "ppc64le" ] || [ "${linux_arch}" == "s390x" ]; then
+                  argocd_cli_arch=${linux_arch}
+              fi
+
               argo_url=$(oc get route ${argo_route} -n ${ARGOCD_NAMESPACE} -ojsonpath='{.spec.host}') \
-              && curl -skL "${argo_url}/download/argocd-linux-amd64" -o "${argo_cmd}" \
-              && chmod 755 "${argo_cmd}" \
+              && cli_status=$(curl -skL "${argo_url}/download/argocd-linux-${argocd_cli_arch}" \
+                  -o "${argo_cmd}" \
+                  -w "%{http_code}") \
+              || result=1
+
+              if [ "${cli_status}" != "200" ]; then
+                  echo "ERROR: Unable to download argocd client."
+                  exit 2
+              fi
+
+              chmod 755 "${argo_cmd}" \
               && argo_pwd=$(oc get secret ${argo_secret} -n ${ARGOCD_NAMESPACE} -ojsonpath='{.data.admin\.password}' | base64 -d ; echo ) \
               && "${argo_cmd}" login "${argo_url}" --username admin --password "${argo_pwd}" --insecure \
               || result=1
