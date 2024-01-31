@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: install-components
-          image: "icr.io/cpopen/cpd/olm-utils-v2:{{.Values.version}}"
+          image: "icr.io/cpopen/cpd/olm-utils-v2:{{.Values.version}}{{.Values.image_arch}}"
           env:
             - name: PROJECT_CPD_INST_OPERANDS
               value: {{.Values.metadata.operands_namespace}}
@@ -34,6 +34,20 @@ spec:
               set -x
 
               result=0
+
+              export KUBECONFIG=/tmp/kubeconfig
+              api_url=$(oc get Infrastructure cluster -o jsonpath='{.status.apiServerURL}')
+              oc login "${api_url}" --token="$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)" --insecure-skip-tls-verify \
+              || {
+                  echo "WARNING: Unable to login to the cluster."
+                  exit 1
+              }
+
+              # https://www.ibm.com/docs/en/cloud-paks/cp-data/4.8.x?topic=requirements-hardware#hardware-reqs__svc-power
+              linux_arch=$(uname -p)
+              if [ "${linux_arch}" == "ppc64le" ] || [ "${linux_arch}" == "s390x" ]; then
+                  COMPONENTS=${COMPONENTS/,rstudio/}
+              fi
 
               # https://www.ibm.com/docs/en/cloud-paks/cp-data/4.8.x?topic=data-installing-cloud-pak
               echo "INFO: Installing components in a specialized installation." \

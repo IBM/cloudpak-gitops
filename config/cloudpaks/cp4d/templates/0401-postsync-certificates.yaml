@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
         - name: config
-          image: "icr.io/cpopen/cpd/olm-utils-v2:{{.Values.version}}"
+          image: "icr.io/cpopen/cpd/olm-utils-v2:{{.Values.version}}{{.Values.image_arch}}"
           imagePullPolicy: IfNotPresent
           env:
             - name: PROJECT_CPD_INST_OPERANDS

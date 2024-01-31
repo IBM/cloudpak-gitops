@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: patch-zen-database
-          image: "icr.io/cpopen/cpd/olm-utils-v2:{{.Values.version}}"
+          image: "icr.io/cpopen/cpd/olm-utils-v2:{{.Values.version}}{{.Values.image_arch}}"
           env:
             - name: COMPONENTS
               value: {{.Values.components}}
