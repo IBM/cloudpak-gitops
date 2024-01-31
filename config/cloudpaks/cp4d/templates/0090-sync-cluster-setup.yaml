@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
         - name: configure-cluster
-          image: "icr.io/cpopen/cpd/olm-utils-v2:{{.Values.version}}"
+          image: "icr.io/cpopen/cpd/olm-utils-v2:{{.Values.version}}{{.Values.image_arch}}"
           env:
             - name: PROJECT_CERT_MANAGER
               value: ibm-cert-manager
@@ -25,8 +25,6 @@ spec:
               value: {{.Values.version}}
             - name: COMPONENTS
               value: {{.Values.components}}
-            - name: IMAGE_ARCH
-              value: {{.Values.image_arch}}
           command:
             - /bin/bash
             - -c

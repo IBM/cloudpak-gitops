@@ -18,6 +18,9 @@ storageclass:
 
 iam_integration: true
 
-image_arch: amd64
+# suffix for labels for the olm-v2 utils image
+image_arch: ""
+# image_arch: .s390x
+# image_arch: .ppc64le
 
 version: 4.8.0
