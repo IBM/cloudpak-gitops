@@ -8,6 +8,8 @@
     - [Shared cluster](#shared-cluster)
     - [GitOps](#gitops)
     - [Governance Policies](#governance-policies)
+  - [Hardware](#hardware)
+    - [Hardware support constraints](#hardware-support-constraints)
   - [Storage](#storage)
   - [Installation](#installation)
     - [Individual clusters](#individual-clusters)
@@ -16,7 +18,7 @@
 
 This repository contains Argo CD `Application` resources representing sample deployments of IBM Cloud Paks, and, as such, they are meant for inclusion in an Argo CD cluster. Different Cloud Paks are represented with different `Application` resources and grouped by a resource label tied to each Cloud Pak.
 
-**Important**: This repository is meant as a demonstration of how Cloud Pak deployments can be deployed and managed with GitOps practices. Adoption in a production environment can start from a repository fork, followed by customization of folders and files to match the desired configuration.
+**Important**: This repository demonstrates how Cloud Pak deployments can be deployed and managed with GitOps practices. Adoption in a production environment can start from a repository fork, followed by customization of folders and files to match the desired configuration.
 
 You may decide to include one or more of these `Application` objects to the target cluster and then determine which ones you want to synchronize into the cluster.
 
@@ -40,9 +42,9 @@ Supported versions:
 
 ### Shared cluster
 
-Starting with the v0.22 release, it is possible to deploy Cloud Paks using dedicated automation foundation instances.
+Starting with the v0.22 release, deploying Cloud Paks using dedicated automation foundation instances is possible.
 
-At the root of this configuration, lies a pre-synchronization hook inside the `cp-shared` application, which creates a default "common-service-maps" ConfigMap under the `kube-public` namespace, according to the instructions listed under <https://www.ibm.com/docs/en/cloud-paks/1.0?topic=cfs-installing-cloud-pak-foundational-services-in-multiple-namespaces>
+At the root of this configuration lies a pre-synchronization hook inside the `cp-shared` application, which creates a default "common-service-maps" ConfigMap under the `kube-public` namespace, according to the instructions listed under <https://www.ibm.com/docs/en/cloud-paks/1.0?topic=cfs-installing-cloud-pak-foundational-services-in-multiple-namespaces>
 
 Note that if you want to enable this feature and customize the target namespaces for Cloud Paks, you must update the parameters to the `cp-shared-app` application to override that default location.
 
@@ -52,18 +54,33 @@ GitOps is a declarative way to implement continuous deployment for cloud-native 
 
 ### Governance Policies
 
-Practicing GitOps at scale, with dozens or even hundreds of clusters, benefits from a level of abstraction where each cluster follows a few select policies. This repository contains a simple deployment of governance policies for the deployment of OpenShift GitOps and Cloud Paks to a fleet of clusters.
+Practicing GitOps at scale, with dozens or even hundreds of clusters, benefits from a level of abstraction where each cluster follows a few select policies. This repository contains a simple deployment of governance policies for deploying OpenShift GitOps and Cloud Paks to a fleet of clusters.
+
+## Hardware
+
+Within the hardware support constraints (see below) of each Cloud Pak, the Argo CD applications in this repository were tested with OpenShift clusters running in `amd64` and `ppc64le` processor architecture.
+
+The repository content is enabled to run in the `s390x` architecture but has not been directly tested with it.
+
+### Hardware support constraints
+
+- The API Connect component of Cloud Pak for Integration is not supported in the `ppc64le` processor architecture.
+- The R Studio component of Cloud Pak for Data is only supported in `amd64` processors.
+- The AI Manager component of Cloud Pak for AIOps is only supported in `amd64` processors.
+- Cloud Pak for Security is only supported in `amd64` processors.
+
+This section's list of exclusions and support is not exhaustive. Always consult the respective Cloud Pak documentation to determine if a component is supported in a given hardware platform.
 
 ## Storage
 
 The instructions in this repository assume the user already has an OpenShift cluster with storage capable of RWO and RWX access mode.
-The Argo CD `Application` resources have pre-synchronization hooks that will attempt auto-detection of the storage in the cluster from common storage providers, in decreasing order of precedence:
+The Argo CD `Application` resources have pre-synchronization hooks that will attempt auto-detection of the storage in the cluster from common storage providers in decreasing order of precedence:
 
 | Precedence | OpenShift platform | Storage | Storage classes |
 | ---------- | ------------ | ------- | --------------- |
 | Highest    | All          | OpenShift Data Foundation | `ocs-storagecluster-ceph-rbd` (RWO) and `ocs-storagecluster-cephfs` (RWX). |
 | High       | All          | Rook Ceph | `rook-ceph-block` (RWO) and `rook-cephfs` (RWX) |
-| Medium     | All          | NetApp ONTAP (Trident driver) | `trident-csi` (RWO and RWX.) Note about RWO access mode: the synchronization hooks give preference to a storage class named `trident-block-csi` if it can find one in the cluster. |
+| Medium     | All          | NetApp ONTAP (Trident driver) | `trident-csi` (RWO and RWX.) Note about RWO access mode: the synchronization hooks prefer a storage class named `trident-block-csi` if they can find one in the cluster. |
 | Low        | IBM Cloud (ROKS classic) | IBM Cloud File Storage | `ibmc-block-gold` (RWO) and `ibmc-file-gold-gid` (RWX) |
 | Low        | AWS (self-managed and ROSA) | Elastic Block Store and Elastic File System | First storage class with provisioner `ebs.csi.aws.com` (RWO) and first storage class with provisioner `efs.csi.aws.com` (RWX) |
 | Low        | Azure (self-managed and ARO) | Azure Disk (classic) and Azure File System | `managed-premium` (RWO) and `azure-file` (RWX) |
