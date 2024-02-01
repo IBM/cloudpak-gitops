@@ -33,7 +33,7 @@ Supported versions:
 | Cloud Pak | Version | Installation mode |
 | ----------|---------|-------------------|
 | Cloud Pak for Business Automation | [23.0.1](https://www.ibm.com/docs/en/cloud-paks/cp-biz-automation/23.0.1) | Multi-pattern starter deployment |
-| Cloud Pak for Data | [4.8.0](https://www.ibm.com/docs/en/cloud-paks/cp-data/4.8.x?topic=overview) | Online, specialized installation |
+| Cloud Pak for Data | [4.8.2](https://www.ibm.com/docs/en/cloud-paks/cp-data/4.8.x?topic=overview) | Online, specialized installation |
 | Cloud Pak for Integration | [2023.4](https://www.ibm.com/docs/en/cloud-paks/cp-integration/2023.4) | Online installation |
 | Cloud Pak for Security | [1.10.15](https://www.ibm.com/docs/en/cloud-paks/cp-security/1.10) | Online installation |
 | Cloud Pak for AIOps\* | [4.3.0](https://www.ibm.com/docs/en/cloud-paks/cloud-pak-watson-aiops/4.3.0) | Starter Installation |
