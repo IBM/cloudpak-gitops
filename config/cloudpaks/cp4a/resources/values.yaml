@@ -6,6 +6,7 @@ metadata:
 spec:
   shared_configuration:
     sc_deployment_platform: OCP
+    sc_deployment_profile_size: ""
 storageclass:
   block: ocs-storagecluster-ceph-rbd
   gold: ocs-storagecluster-cephfs
