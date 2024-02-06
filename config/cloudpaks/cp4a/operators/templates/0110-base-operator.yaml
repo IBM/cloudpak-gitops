@@ -4,12 +4,12 @@ kind: Subscription
 metadata:
   creationTimestamp: null
   name: ibm-cp4a-operator
-  namespace: {{.Values.argocd_app_namespace}}
+  namespace: {{.Values.metadata.argocd_app_namespace}}
   annotations:
     argocd.argoproj.io/sync-wave: "110"
 spec:
-  channel: v23.1
+  channel: v23.2
   installPlanApproval: Automatic
   name: ibm-cp4a-operator
-  source: ibm-operator-catalog
-  sourceNamespace: openshift-marketplace
+  source: ibm-cp4a-operator-catalog
+  sourceNamespace: {{.Values.metadata.argocd_app_namespace}}

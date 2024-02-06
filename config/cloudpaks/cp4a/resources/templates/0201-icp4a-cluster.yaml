@@ -2,87 +2,256 @@
 apiVersion: icp4a.ibm.com/v1
 kind: ICP4ACluster
 metadata:
-  name: icp4adeploy
+  annotations:
+    argocd.argoproj.io/sync-wave: "201"
   labels:
     app.kubernetes.io/instance: ibm-dba
     app.kubernetes.io/managed-by: ibm-dba
     app.kubernetes.io/name: ibm-dba
-  annotations:
-    argocd.argoproj.io/sync-wave: "201"
+  name: icp4adeploy
   namespace: {{.Values.argocd_app_namespace}}
 spec:
-  appVersion: 23.0.1
-  olm_deployment_type: Starter
-  olm_ibm_license: true
-  olm_starter_application: true
-  olm_starter_content: false
-  olm_starter_decisions: true
-  olm_starter_decisions_ads: false
-  olm_starter_document_processing: false
-  olm_starter_workflow: true
-  olm_production_application: false
-  olm_production_decisions_ads: false
-  olm_production_document_processing: false
-  olm_production_decisions: false
-  olm_production_content: false
-  olm_production_workflow: false
-  olm_production_workflow_process_service: false
+  appVersion: 23.0.2
+  datasource_configuration:
+    database_precheck: true
+    dc_ca_datasource:
+      database_ip: ""
+      database_name: ""
+      database_port: ""
+      database_servername: ""
+      dc_database_ssl_enabled: true
+      dc_database_type: postgresql
+      dc_hadr_max_retries_for_client_reroute: 3
+      dc_hadr_retry_interval_for_client_reroute: 15
+      dc_hadr_standby_ip: ""
+      dc_hadr_standby_port: ""
+      dc_hadr_standby_servername: ""
+      dc_hadr_validation_timeout: 15
+      tenant_databases: []
+    dc_gcd_datasource:
+      database_name: ""
+      database_port: ""
+      database_servername: ""
+      database_ssl_secret_name: ""
+      dc_common_gcd_datasource_name: FNGCDDS
+      dc_common_gcd_xa_datasource_name: FNGCDDSXA
+      dc_database_type: postgresql
+      dc_hadr_max_retries_for_client_reroute: 3
+      dc_hadr_retry_interval_for_client_reroute: 15
+      dc_hadr_standby_port: ""
+      dc_hadr_standby_servername: ""
+      dc_hadr_validation_timeout: 15
+      dc_oracle_gcd_jdbc_url: ""
+    dc_icn_datasource:
+      database_name: ""
+      database_port: ""
+      database_servername: ""
+      database_ssl_secret_name: ""
+      dc_common_icn_datasource_name: ECMClientDS
+      dc_database_type: postgresql
+      dc_hadr_max_retries_for_client_reroute: 3
+      dc_hadr_retry_interval_for_client_reroute: 15
+      dc_hadr_standby_port: ""
+      dc_hadr_standby_servername: ""
+      dc_hadr_validation_timeout: 15
+      dc_oracle_icn_jdbc_url: ""
+    dc_odm_datasource:
+      database_servername: ""
+      dc_common_database_instance_secret: ""
+      dc_common_database_name: ""
+      dc_common_database_port: ""
+      dc_common_ssl_enabled: true
+      dc_database_type: postgresql
+      dc_ssl_secret_name: ""
+    dc_ssl_enabled: true
+    olm_dc_os_adp_datasources:
+      - database_name: ""
+        database_port: ""
+        database_servername: ""
+        database_ssl_secret_name: ""
+        dc_common_os_datasource_name: DEVOS1DS
+        dc_common_os_xa_datasource_name: DEVOS1DSXA
+        dc_database_type: postgresql
+        dc_hadr_max_retries_for_client_reroute: 3
+        dc_hadr_retry_interval_for_client_reroute: 15
+        dc_hadr_standby_port: ""
+        dc_hadr_standby_servername: ""
+        dc_hadr_validation_timeout: 15
+        dc_oracle_os_jdbc_url: ""
+        dc_os_label: devos1
+    olm_dc_os_ae_datasources:
+      - database_name: ""
+        database_port: ""
+        database_servername: ""
+        database_ssl_secret_name: ""
+        dc_common_os_datasource_name: AEOS
+        dc_common_os_xa_datasource_name: AEOSXA
+        dc_database_type: postgresql
+        dc_hadr_max_retries_for_client_reroute: 3
+        dc_hadr_retry_interval_for_client_reroute: 15
+        dc_hadr_standby_port: ""
+        dc_hadr_standby_servername: ""
+        dc_hadr_validation_timeout: 15
+        dc_oracle_os_jdbc_url: ""
+        dc_os_label: aeos
+    olm_dc_os_content_datasources:
+      - database_name: ""
+        database_port: ""
+        database_servername: ""
+        database_ssl_secret_name: ""
+        dc_common_os_datasource_name: FNOS1DS
+        dc_common_os_xa_datasource_name: FNOS1DSXA
+        dc_database_type: postgresql
+        dc_hadr_max_retries_for_client_reroute: 3
+        dc_hadr_retry_interval_for_client_reroute: 15
+        dc_hadr_standby_port: ""
+        dc_hadr_standby_servername: ""
+        dc_hadr_validation_timeout: 15
+        dc_oracle_os_jdbc_url: ""
+        dc_os_label: os
+    olm_dc_os_workflow_datasources:
+      - database_name: ""
+        database_port: ""
+        database_servername: ""
+        database_ssl_secret_name: ""
+        dc_common_os_datasource_name: BAWDOCS
+        dc_common_os_xa_datasource_name: BAWDOCSXA
+        dc_database_type: postgresql
+        dc_hadr_max_retries_for_client_reroute: 3
+        dc_hadr_retry_interval_for_client_reroute: 15
+        dc_hadr_standby_port: ""
+        dc_hadr_standby_servername: ""
+        dc_hadr_validation_timeout: 15
+        dc_oracle_os_jdbc_url: ""
+        dc_os_label: ""
+      - database_name: ""
+        database_port: ""
+        database_servername: ""
+        database_ssl_secret_name: ""
+        dc_common_os_datasource_name: BAWDOS
+        dc_common_os_xa_datasource_name: BAWDOSXA
+        dc_database_type: postgresql
+        dc_hadr_max_retries_for_client_reroute: 3
+        dc_hadr_retry_interval_for_client_reroute: 15
+        dc_hadr_standby_port: ""
+        dc_hadr_standby_servername: ""
+        dc_hadr_validation_timeout: 15
+        dc_oracle_os_jdbc_url: ""
+        dc_os_label: ""
+      - database_name: ""
+        database_port: ""
+        database_servername: ""
+        database_ssl_secret_name: ""
+        dc_common_os_datasource_name: BAWTOS
+        dc_common_os_xa_datasource_name: BAWTOSXA
+        dc_database_type: postgresql
+        dc_hadr_max_retries_for_client_reroute: 3
+        dc_hadr_retry_interval_for_client_reroute: 15
+        dc_hadr_standby_port: ""
+        dc_hadr_standby_servername: ""
+        dc_hadr_validation_timeout: 15
+        dc_oracle_os_jdbc_url: ""
+        dc_os_label: ""
+      - database_name: ""
+        database_port: ""
+        database_servername: ""
+        database_ssl_secret_name: ""
+        dc_common_os_datasource_name: AWSINS1DOCS
+        dc_common_os_xa_datasource_name: AWSINS1DOCSXA
+        dc_database_type: postgresql
+        dc_hadr_max_retries_for_client_reroute: 3
+        dc_hadr_retry_interval_for_client_reroute: 15
+        dc_hadr_standby_port: ""
+        dc_hadr_standby_servername: ""
+        dc_hadr_validation_timeout: 15
+        dc_oracle_os_jdbc_url: ""
+        dc_os_label: ""
   initialize_configuration:
     ic_ldap_creation:
       ic_ldap_admins_groups_name:
-        - ''
+        - ""
     ic_obj_store_creation:
       object_stores:
         - oc_cpe_obj_store_conn:
-            name: OS1_dbconnection
             dc_os_datasource_name: FNOS1DS
             dc_os_xa_datasource_name: FNOS1DSXA
+            name: OS1_dbconnection
           oc_cpe_obj_store_display_name: OS1
           oc_cpe_obj_store_symb_name: OS1
         - oc_cpe_obj_store_admin_user_groups:
-            - ''
-            - ''
+            - ""
+            - ""
           oc_cpe_obj_store_conn:
-            name: DEVOS1_dbconnection
             dc_os_datasource_name: DEVOS1DS
             dc_os_xa_datasource_name: DEVOS1DSXA
+            name: DEVOS1_dbconnection
           oc_cpe_obj_store_display_name: DEVOS1
           oc_cpe_obj_store_symb_name: DEVOS1
         - oc_cpe_obj_store_conn:
-            name: BAWDOCS_dbconnection
             dc_os_datasource_name: BAWDOCS
             dc_os_xa_datasource_name: BAWDOCSXA
+            name: BAWDOCS_dbconnection
           oc_cpe_obj_store_display_name: BAWDOCS
           oc_cpe_obj_store_symb_name: BAWDOCS
         - oc_cpe_obj_store_conn:
-            name: BAWDOS_dbconnection
             dc_os_datasource_name: BAWDOS
             dc_os_xa_datasource_name: BAWDOSXA
+            name: BAWDOS_dbconnection
           oc_cpe_obj_store_display_name: BAWDOS
           oc_cpe_obj_store_symb_name: BAWDOS
         - oc_cpe_obj_store_conn:
-            name: BAWTOS_dbconnection
             dc_os_datasource_name: BAWTOS
             dc_os_xa_datasource_name: BAWTOSXA
+            name: BAWTOS_dbconnection
           oc_cpe_obj_store_display_name: BAWTOS
           oc_cpe_obj_store_enable_workflow: true
           oc_cpe_obj_store_symb_name: BAWTOS
-          oc_cpe_obj_store_workflow_admin_group: ''
-          oc_cpe_obj_store_workflow_config_group: ''
-          oc_cpe_obj_store_workflow_data_tbl_space: ''
-          oc_cpe_obj_store_workflow_pe_conn_point_name: ''
+          oc_cpe_obj_store_workflow_admin_group: ""
+          oc_cpe_obj_store_workflow_config_group: ""
+          oc_cpe_obj_store_workflow_data_tbl_space: ""
+          oc_cpe_obj_store_workflow_pe_conn_point_name: ""
         - oc_cpe_obj_store_conn:
-            name: AWSINS1DOCS_dbconnection
             dc_os_datasource_name: AWSINS1DOCS
             dc_os_xa_datasource_name: AWSINS1DOCSXA
+            name: AWSINS1DOCS_dbconnection
           oc_cpe_obj_store_display_name: AWSINS1DOCS
           oc_cpe_obj_store_symb_name: AWSINS1DOCS
         - oc_cpe_obj_store_conn:
-            name: AEOS_dbconnection
             dc_os_datasource_name: AEOS
             dc_os_xa_datasource_name: AEOSXA
+            name: AEOS_dbconnection
           oc_cpe_obj_store_display_name: AEOS
           oc_cpe_obj_store_symb_name: AEOS
+  ldap_configuration:
+    ad:
+      lc_ad_gc_host: ""
+      lc_ad_gc_port: ""
+      lc_group_filter: (&(cn=%v)(objectcategory=group))
+      lc_user_filter: (&(sAMAccountName=%v)(objectcategory=user))
+    lc_bind_secret: ldap-bind-secret
+    lc_ldap_base_dn: ""
+    lc_ldap_group_base_dn: ""
+    lc_ldap_group_display_name_attr: cn
+    lc_ldap_group_member_id_map: memberOf:member
+    lc_ldap_group_membership_search_filter: (&(cn=%v)(objectcategory=group))
+    lc_ldap_group_name_attribute: '*:cn'
+    lc_ldap_port: "636"
+    lc_ldap_server: ""
+    lc_ldap_ssl_enabled: true
+    lc_ldap_ssl_secret_name: ""
+    lc_ldap_user_display_name_attr: sAMAccountName
+    lc_ldap_user_name_attribute: user:sAMAccountName
+    lc_selected_ldap_type: Microsoft Active Directory
+    tds:
+      lc_group_filter: (&(cn=%v)(|(objectclass=groupofnames)(objectclass=groupofuniquenames)(objectclass=groupofurls)))
+      lc_user_filter: (&(cn=%v)(objectclass=person))
+  olm_deployment_type: Starter
+  olm_ibm_license: true
+  olm_production_application: false
+  olm_production_content: false
+  olm_production_decisions: false
+  olm_production_decisions_ads: false
+  olm_production_document_processing: false
   olm_production_option:
     adp:
       cmis: false
@@ -95,8 +264,8 @@ spec:
       ads_runtime: false
       bai: false
     application:
-      app_designer: false
       ae_data_persistence: false
+      app_designer: false
     content:
       bai: false
       cmis: false
@@ -112,12 +281,23 @@ spec:
       decisionServerRuntime: false
     wfps_authoring:
       bai: false
+      kafka: false
       pfs: false
     workfow_authoring:
       bai: false
+      kafka: false
       pfs: false
     workfow_runtime:
       bai: false
+      elasticsearch: false
+      kafka: false
+  olm_production_workflow: false
+  olm_production_workflow_process_service: false
+  olm_starter_application: false
+  olm_starter_content: false
+  olm_starter_decisions: true
+  olm_starter_decisions_ads: false
+  olm_starter_document_processing: false
   olm_starter_option:
     adp:
       cmis: false
@@ -137,214 +317,38 @@ spec:
     decisions:
       bai: true
     workstreams:
+      bai: true
+      baml: false
       case: false
       content_integration: false
-      workstreams: false
       pfs: false
-      bai: false
-      baml: false
-  datasource_configuration:
-    dc_ca_datasource:
-      tenant_databases: []
-      database_ip: ''
-      database_name: ''
-      database_port: ''
-      database_servername: ''
-      dc_database_ssl_enabled: true
-      dc_database_type: postgresql
-      dc_hadr_max_retries_for_client_reroute: 3
-      dc_hadr_retry_interval_for_client_reroute: 15
-      dc_hadr_standby_ip: ''
-      dc_hadr_standby_port: ''
-      dc_hadr_standby_servername: ''
-      dc_hadr_validation_timeout: 15
-    dc_odm_datasource:
-      database_servername: ''
-      dc_common_database_instance_secret: ''
-      dc_common_database_name: ''
-      dc_common_database_port: ''
-      dc_common_ssl_enabled: true
-      dc_database_type: postgresql
-      dc_ssl_secret_name: ''
-    dc_icn_datasource:
-      database_name: ''
-      database_port: ''
-      database_servername: ''
-      database_ssl_secret_name: ''
-      dc_common_icn_datasource_name: ECMClientDS
-      dc_database_type: postgresql
-      dc_hadr_max_retries_for_client_reroute: 3
-      dc_hadr_retry_interval_for_client_reroute: 15
-      dc_hadr_standby_port: ''
-      dc_hadr_standby_servername: ''
-      dc_hadr_validation_timeout: 15
-      dc_oracle_icn_jdbc_url: ''
-    olm_dc_os_adp_datasources:
-      - database_name: ''
-        database_port: ''
-        database_servername: ''
-        database_ssl_secret_name: ''
-        dc_common_os_datasource_name: DEVOS1DS
-        dc_common_os_xa_datasource_name: DEVOS1DSXA
-        dc_database_type: postgresql
-        dc_hadr_max_retries_for_client_reroute: 3
-        dc_hadr_retry_interval_for_client_reroute: 15
-        dc_hadr_standby_port: ''
-        dc_hadr_standby_servername: ''
-        dc_hadr_validation_timeout: 15
-        dc_oracle_os_jdbc_url: ''
-        dc_os_label: devos1
-    olm_dc_os_workflow_datasources:
-      - database_name: ''
-        database_port: ''
-        database_servername: ''
-        database_ssl_secret_name: ''
-        dc_common_os_datasource_name: BAWDOCS
-        dc_common_os_xa_datasource_name: BAWDOCSXA
-        dc_database_type: postgresql
-        dc_hadr_max_retries_for_client_reroute: 3
-        dc_hadr_retry_interval_for_client_reroute: 15
-        dc_hadr_standby_port: ''
-        dc_hadr_standby_servername: ''
-        dc_hadr_validation_timeout: 15
-        dc_oracle_os_jdbc_url: ''
-        dc_os_label: ''
-      - database_name: ''
-        database_port: ''
-        database_servername: ''
-        database_ssl_secret_name: ''
-        dc_common_os_datasource_name: BAWDOS
-        dc_common_os_xa_datasource_name: BAWDOSXA
-        dc_database_type: postgresql
-        dc_hadr_max_retries_for_client_reroute: 3
-        dc_hadr_retry_interval_for_client_reroute: 15
-        dc_hadr_standby_port: ''
-        dc_hadr_standby_servername: ''
-        dc_hadr_validation_timeout: 15
-        dc_oracle_os_jdbc_url: ''
-        dc_os_label: ''
-      - database_name: ''
-        database_port: ''
-        database_servername: ''
-        database_ssl_secret_name: ''
-        dc_common_os_datasource_name: BAWTOS
-        dc_common_os_xa_datasource_name: BAWTOSXA
-        dc_database_type: postgresql
-        dc_hadr_max_retries_for_client_reroute: 3
-        dc_hadr_retry_interval_for_client_reroute: 15
-        dc_hadr_standby_port: ''
-        dc_hadr_standby_servername: ''
-        dc_hadr_validation_timeout: 15
-        dc_oracle_os_jdbc_url: ''
-        dc_os_label: ''
-      - database_name: ''
-        database_port: ''
-        database_servername: ''
-        database_ssl_secret_name: ''
-        dc_common_os_datasource_name: AWSINS1DOCS
-        dc_common_os_xa_datasource_name: AWSINS1DOCSXA
-        dc_database_type: postgresql
-        dc_hadr_max_retries_for_client_reroute: 3
-        dc_hadr_retry_interval_for_client_reroute: 15
-        dc_hadr_standby_port: ''
-        dc_hadr_standby_servername: ''
-        dc_hadr_validation_timeout: 15
-        dc_oracle_os_jdbc_url: ''
-        dc_os_label: ''
-    dc_gcd_datasource:
-      database_name: ''
-      database_port: ''
-      database_servername: ''
-      database_ssl_secret_name: ''
-      dc_common_gcd_datasource_name: FNGCDDS
-      dc_common_gcd_xa_datasource_name: FNGCDDSXA
-      dc_database_type: postgresql
-      dc_hadr_max_retries_for_client_reroute: 3
-      dc_hadr_retry_interval_for_client_reroute: 15
-      dc_hadr_standby_port: ''
-      dc_hadr_standby_servername: ''
-      dc_hadr_validation_timeout: 15
-      dc_oracle_gcd_jdbc_url: ''
-    olm_dc_os_ae_datasources:
-      - database_name: ''
-        database_port: ''
-        database_servername: ''
-        database_ssl_secret_name: ''
-        dc_common_os_datasource_name: AEOS
-        dc_common_os_xa_datasource_name: AEOSXA
-        dc_database_type: postgresql
-        dc_hadr_max_retries_for_client_reroute: 3
-        dc_hadr_retry_interval_for_client_reroute: 15
-        dc_hadr_standby_port: ''
-        dc_hadr_standby_servername: ''
-        dc_hadr_validation_timeout: 15
-        dc_oracle_os_jdbc_url: ''
-        dc_os_label: aeos
-    olm_dc_os_content_datasources:
-      - database_name: ''
-        database_port: ''
-        database_servername: ''
-        database_ssl_secret_name: ''
-        dc_common_os_datasource_name: FNOS1DS
-        dc_common_os_xa_datasource_name: FNOS1DSXA
-        dc_database_type: postgresql
-        dc_hadr_max_retries_for_client_reroute: 3
-        dc_hadr_retry_interval_for_client_reroute: 15
-        dc_hadr_standby_port: ''
-        dc_hadr_standby_servername: ''
-        dc_hadr_validation_timeout: 15
-        dc_oracle_os_jdbc_url: ''
-        dc_os_label: os
-    database_precheck: true
-    dc_ssl_enabled: true
+      workstreams: false
+  olm_starter_workflow: true
   shared_configuration:
-    sc_iam:
-      default_admin_username: ''
-    trusted_certificate_list: []
-    sc_common_service:
-      operator_namespace: ''
-      services_namespace: ''
-    storage_configuration:
-      sc_block_storage_classname: {{.Values.storageclass.block}}
-      sc_dynamic_storage_classname: {{.Values.storageclass.gold}}
-      sc_fast_file_storage_classname: ''
-      sc_medium_file_storage_classname: ''
-      sc_slow_file_storage_classname: ''
-    encryption_key_secret: ''
-    external_tls_certificate_secret: ''
+    enable_fips: false
+    encryption_key_secret: ""
+    external_tls_certificate_secret: ""
     olm_sc_content_initialization: false
     olm_sc_content_verification: false
     root_ca_secret: icp4a-root-ca
+    sc_common_service:
+      operator_namespace: ""
+      services_namespace: ""
     sc_deployment_baw_license: non-production
     sc_deployment_context: CP4A
     sc_deployment_fncm_license: non-production
     sc_deployment_license: non-production
     sc_deployment_platform: {{.Values.spec.shared_configuration.sc_deployment_platform}}
-    sc_deployment_profile_size: ''
-    sc_drivers_url: ''
+    sc_deployment_profile_size: {{.Values.spec.sc_deployment_profile_size}}
+    sc_drivers_url: ""
+    sc_iam:
+      default_admin_username: ""
     sc_ingress_enable: false
-    sc_ingress_tls_secret_name: ''
-  ldap_configuration:
-    tds:
-      lc_group_filter: >-
-        (&(cn=%v)(|(objectclass=groupofnames)(objectclass=groupofuniquenames)(objectclass=groupofurls)))
-      lc_user_filter: (&(cn=%v)(objectclass=person))
-    ad:
-      lc_ad_gc_host: ''
-      lc_ad_gc_port: ''
-      lc_group_filter: (&(cn=%v)(objectcategory=group))
-      lc_user_filter: (&(sAMAccountName=%v)(objectcategory=user))
-    lc_bind_secret: ldap-bind-secret
-    lc_ldap_base_dn: ''
-    lc_ldap_group_base_dn: ''
-    lc_ldap_group_display_name_attr: cn
-    lc_ldap_group_member_id_map: 'memberOf:member'
-    lc_ldap_group_membership_search_filter: (&(cn=%v)(objectcategory=group))
-    lc_ldap_group_name_attribute: '*:cn'
-    lc_ldap_port: '636'
-    lc_ldap_server: ''
-    lc_ldap_ssl_enabled: true
-    lc_ldap_ssl_secret_name: ''
-    lc_ldap_user_display_name_attr: sAMAccountName
-    lc_ldap_user_name_attribute: 'user:sAMAccountName'
-    lc_selected_ldap_type: Microsoft Active Directory
+    sc_ingress_tls_secret_name: ""
+    storage_configuration:
+      sc_block_storage_classname: {{.Values.storageclass.block}}
+      sc_dynamic_storage_classname: {{ .Values.storageclass.gold}}
+      sc_fast_file_storage_classname: ""
+      sc_medium_file_storage_classname: ""
+      sc_slow_file_storage_classname: ""
+    trusted_certificate_list: []
