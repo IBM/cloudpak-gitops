@@ -1,5 +1,5 @@
 ---
-apiVersion: isc.ibm.com/v1
+apiVersion: isc.ibm.com/v2
 kind: CP4SThreatManagement
 metadata:
   annotations:
@@ -8,7 +8,8 @@ metadata:
   name: threatmgmt
   namespace: "{{.Values.metadata.argocd_app_namespace}}"
 spec:
-  acceptLicense: true
+  license:
+    accept: true
   basicDeploymentConfiguration:
     adminUser: {{.Values.admin_user}}
     domain: cp4s.{{.Values.cluster_domain}}
