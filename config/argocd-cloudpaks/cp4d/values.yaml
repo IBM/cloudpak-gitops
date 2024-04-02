@@ -23,4 +23,4 @@ image_arch: ""
 # image_arch: .s390x
 # image_arch: .ppc64le
 
-version: 4.8.2
+version: 4.8.4
