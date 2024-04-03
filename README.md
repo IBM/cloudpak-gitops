@@ -36,7 +36,7 @@ Supported versions:
 | Cloud Pak for Data | [4.8.4](https://www.ibm.com/docs/en/cloud-paks/cp-data/4.8.x?topic=overview) | Online, specialized installation |
 | Cloud Pak for Integration | [2023.4](https://www.ibm.com/docs/en/cloud-paks/cp-integration/2023.4) | Online installation |
 | Cloud Pak for Security | [1.10.15](https://www.ibm.com/docs/en/cloud-paks/cp-security/1.10) | Online installation |
-| Cloud Pak for AIOps\* | [4.3.0](https://www.ibm.com/docs/en/cloud-paks/cloud-pak-watson-aiops/4.3.0) | Starter Installation |
+| Cloud Pak for AIOps\* | [4.4.0](https://www.ibm.com/docs/en/cloud-paks/cloud-pak-watson-aiops/4.4.0) | Starter Installation |
 
 \* Starting with release 4.2.0, Cloud Pak for Watson AIOps was renamed Cloud Pak for AIOps, which required renaming several folders and labels from `cp4waiops` to `cp4aiops`. You can see all changes in [pull request #281](https://github.com/IBM/cloudpak-gitops/pull/281).
 

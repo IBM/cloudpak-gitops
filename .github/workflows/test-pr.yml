@@ -8,7 +8,7 @@ jobs:
   test:
     if: ${{ !contains( github.event.pull_request.labels.*.name, 'skip ci' ) }}
     runs-on: ubuntu-latest
-    container: icr.io/continuous-delivery/pipeline/pipeline-base-ubi:3.6
+    container: icr.io/continuous-delivery/pipeline/pipeline-base-ubi:3.40
 
     env:
       HOME: /root

@@ -2,6 +2,8 @@
 serviceaccount:
   argocd_application_controller: openshift-gitops-argocd-application-controller
   ibm_cloudpaks_installer: ibm-cloudpaks-installer
+spec:
+  size: small
 metadata:
   argocd_app_namespace: ibm-cloudpaks
   argocd_namespace: openshift-gitops

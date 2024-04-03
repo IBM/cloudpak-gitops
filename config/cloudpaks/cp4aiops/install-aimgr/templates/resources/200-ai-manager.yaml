@@ -20,7 +20,7 @@ spec:
       enabled: true
     - name: connection
       enabled: false
-  size: small
+  size: {{ .Values.spec.size }}
   storageClass: {{ .Values.storageclass.rwx }}
   storageClassLargeBlock: {{ .Values.storageclass.rwo }}
   topologyModel: application
