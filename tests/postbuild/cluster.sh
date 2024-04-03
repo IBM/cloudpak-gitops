@@ -17,7 +17,7 @@ oc_cmd=$(type -p oc)
 
 : "${NEW_CLUSTER_TYPE:=fyre-quick-burn}"
 : "${WORKER_FLAVOR:=medium}"
-: "${OCP_VERSION:=4.12}"
+: "${OCP_VERSION:=4.14}"
 
 # In hours
 : "${CLUSTER_EXPIRATION:=12}"
@@ -910,7 +910,7 @@ function create_fyre_cluster() {
         return 1
     else
         ocp_version=$(jq -r '.ocp_versions[]' "${ocp_contents}"  \
-            | grep "${ROF_VERSION}" \
+            | grep "^${ROF_VERSION}" \
             | sort  --version-sort -r \
             | head -n 1)
 

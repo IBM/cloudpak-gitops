@@ -5,6 +5,9 @@ metadata:
   ibm_cert_manager_channel: v4.2
   ibm_cert_manager_namespace: ibm-cert-manager
   ibm_cert_manager_operator_group: ibm-cert-manager-operator-group
+  ibm_license_manager_channel: v4.2
+  ibm_license_manager_namespace: ibm-licensing
+  ibm_license_manager_operator_group: ibm-licensing-operator-app
   redhat_cert_manager_namespace: cert-manager-operator
   redhat_cert_manager_operator_group: cert-manager-operator-group
 serviceaccount:

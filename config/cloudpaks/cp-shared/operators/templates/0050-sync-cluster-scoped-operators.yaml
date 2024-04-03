@@ -25,6 +25,12 @@ spec:
               value: {{.Values.metadata.ibm_cert_manager_operator_group}}
             - name: IBM_CERT_MANAGER_CHANNEL
               value: {{.Values.metadata.ibm_cert_manager_channel}}
+            - name: IBM_LICENSE_MANAGER_NAMESPACE
+              value: {{.Values.metadata.ibm_license_manager_namespace}}
+            - name: IBM_LICENSE_MANAGER_OPERATOR_GROUP
+              value: {{.Values.metadata.ibm_license_manager_operator_group}}
+            - name: IBM_LICENSE_MANAGER_CHANNEL
+              value: {{.Values.metadata.ibm_license_manager_channel}}
           command:
             - /bin/sh
             - -c
@@ -90,11 +96,72 @@ spec:
                           -A
                   fi
               else
-                  echo "ERROR: Unable to ascertain status of cert managers in the cluster."
+                  echo "ERROR: Unable to get status of cert managers in the cluster."
               fi
 
               if [ "${result}" -eq 1 ] ; then
                 echo "ERROR: Unable to locate a running IBM Cert Manager and to install one afterwards."
+              fi
+
+              ibm_license_manager_count=$(oc get Subscription.operators.coreos.com \
+                    -l operators.coreos.com/ibm-cert-manager-operator.ibm-cert-manager \
+                    -A \
+                    -o name | wc -l || result=1)
+              if [ "${result}" == 0 ]; then
+                  if [ "${ibm_license_manager_count}" == "0" ]; then
+                      echo "INFO: Installing IBM Cert Manager."
+                      cat << EOF | oc apply -f -
+              ---
+              kind: Namespace
+              apiVersion: v1
+              metadata:
+                  name: ${IBM_LICENSE_MANAGER_NAMESPACE:?}
+              ---
+              apiVersion: operators.coreos.com/v1
+              kind: OperatorGroup
+              metadata:
+                name: ibm-licensing-operator-app
+                namespace: ${IBM_LICENSE_MANAGER_NAMESPACE:?}
+              spec:
+                targetNamespaces:
+                  - ${IBM_LICENSE_MANAGER_NAMESPACE:?}
+              ---
+              apiVersion: operators.coreos.com/v1alpha1
+              kind: Subscription
+              metadata:
+                name: ibm-licensing-operator-app
+                namespace: ${IBM_LICENSE_MANAGER_NAMESPACE:?}
+              spec:
+                channel: v4.2
+                installPlanApproval: Automatic
+                name: ibm-licensing-operator-app
+                source: ibm-licensing-catalog
+                sourceNamespace: openshift-marketplace
+              EOF
+
+                      while [ $SECONDS -lt 300 ]; do
+                          oc wait Subscription.operators.coreos.com ibm-licensing-operator-app \
+                              -n ${IBM_LICENSE_MANAGER_NAMESPACE:?} \
+                              --for=condition=CatalogSourcesUnhealthy=False \
+                          && oc wait Subscription.operators.coreos.com ibm-licensing-operator-app \
+                              -n ${IBM_LICENSE_MANAGER_NAMESPACE:?} \
+                              --for=jsonpath='{.status.state}'="AtLatestKnown" \
+                          && echo "INFO: Successfully installed IBM License Manager." \
+                          && result=0 \
+                          && break \
+                          || result=1
+
+                          echo "INFO: Waiting for the subscription to be ready."
+                          sleep 20
+                      done
+                  else
+                      echo "INFO: IBM License Manager already installed."
+                      oc get Subscription.operators.coreos.com \
+                          -l operators.coreos.com/ibm-licensing-operator-app.ibm-licensing \
+                          -A
+                  fi
+              else
+                  echo "ERROR: Unable to get status of cert managers in the cluster."
               fi
 
               exit "${result}"
