@@ -138,6 +138,7 @@ Consider adding this application to your cluster if your organization does not h
          --dest-server https://kubernetes.default.svc \
          --repo ${gitops_url:?} \
          --path config/argocd \
+         --helm-set repoURL=${gitops_url:?} \
          --helm-set-string targetRevision="${gitops_branch}" \
          --revision ${gitops_branch:?} \
          --sync-policy automated \
