@@ -6,9 +6,65 @@ metadata:
   name: cloud-native-postgresql-catalog
   namespace: openshift-marketplace
 spec:
-  displayName: ibm-cloud-native-postgresql-4.18.0
+  displayName: ibm-cloud-native-postgresql-4.22.0+20240307.065137.1505
   publisher: IBM
-  image: icr.io/cpopen/ibm-cpd-cloud-native-postgresql-operator-catalog@sha256:c96aa2e6bce92f2e5e4874116cf1cc1cdd60676499cd04ab1631462b8b883357
+  image: icr.io/cpopen/ibm-cpd-cloud-native-postgresql-operator-catalog@sha256:3a44f3e7f01e4eb72d192008f1502777dc10751b68e40da2e1d38d23f2907ce7
+  sourceType: grpc
+  updateStrategy:
+    registryPoll:
+      interval: 30m0s
+---
+apiVersion: operators.coreos.com/v1alpha1
+kind: CatalogSource
+metadata:
+  name: ibm-cs-iam-catalog
+  namespace: openshift-marketplace
+spec:
+  displayName: ibm-cs-iam-4.5.0
+  publisher: IBM
+  image: icr.io/cpopen/ibm-iam-operator-catalog@sha256:dd64034fb63a04cb380e81b25d54708bb96080a1b6417d9d068b6f4a1904bebc
+  sourceType: grpc
+  updateStrategy:
+    registryPoll:
+      interval: 30m0s
+---
+apiVersion: operators.coreos.com/v1alpha1
+kind: CatalogSource
+metadata:
+  name: ibm-cs-install-catalog
+  namespace: openshift-marketplace
+spec:
+  displayName: ibm-cs-install-4.6.0
+  publisher: IBM
+  image: icr.io/cpopen/ibm-cs-install-catalog@sha256:1eb2d3fe9fdbcf1c413de123cd62344e72b4034054b02f08e351839d3f1dda9c
+  sourceType: grpc
+  updateStrategy:
+    registryPoll:
+      interval: 30m0s
+---
+apiVersion: operators.coreos.com/v1alpha1
+kind: CatalogSource
+metadata:
+  name: ibm-events-operator-catalog
+  namespace: openshift-marketplace
+spec:
+  displayName: ibm-events-operator-5.0.0
+  publisher: IBM
+  image: icr.io/cpopen/ibm-events-operator-catalog@sha256:2267b5677e10a25aa6522d2d60ef85e8be5d65bb32b8c4b82afcf854440e6d34
+  sourceType: grpc
+  updateStrategy:
+    registryPoll:
+      interval: 30m0s
+---
+apiVersion: operators.coreos.com/v1alpha1
+kind: CatalogSource
+metadata:
+  name: ibm-zen-operator-catalog
+  namespace: openshift-marketplace
+spec:
+  displayName: ibm-zen-3.1.3
+  publisher: IBM
+  image: icr.io/cpopen/ibm-zen-operator-catalog@sha256:320db8cf76a866450e1afb76066545aa04675b7f91246587d76eaf17bd92b5e0
   sourceType: grpc
   updateStrategy:
     registryPoll:
@@ -20,9 +76,9 @@ metadata:
   name: opencloud-operators
   namespace: openshift-marketplace
 spec:
-  displayName: ibm-cp-common-services-4.3.0
+  displayName: ibm-cp-common-services-4.6.0
   publisher: IBM
-  image: icr.io/cpopen/ibm-common-service-catalog@sha256:5f2ada10db36dd609913f806fc44051186a1b719a0c1e04edfae5a6807b0eb26
+  image: icr.io/cpopen/ibm-common-service-catalog@sha256:491916cce0da256b7b15d7cb1dc7fdd30465a366a5d8796d0dee898c99cde1a3
   sourceType: grpc
   updateStrategy:
     registryPoll:
