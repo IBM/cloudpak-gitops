@@ -8,7 +8,7 @@ metadata:
   name: case-queues-1-qmgr
   namespace: {{.Values.argocd_app_namespace}}
 spec:
-  version: 9.3.4.0-r1
+  version: 9.3.5.0-r2
   license:
     accept: true
     # http://ibm.biz/BdqvCF
