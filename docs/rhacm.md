@@ -39,7 +39,7 @@ This repository contains governance policies and placement rules for Argo CD and
 
 - Adequate worker node capacity in the cluster for RHACM to be installed.
 
-  Refer to the [RHACM documentation](https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/2.9/html/install/installing#sizing-your-cluster) to determine the required capacity for the cluster.
+  Refer to the [RHACM documentation](https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/2.10/html/install/installing#sizing-your-cluster) to determine the required capacity for the cluster.
 
 - [An entitlement key to the IBM Entitled Registry](#obtain-an-entitlement-key). This key is required in the RHACM cluster to be copied to the managed clusters when a cluster matches a policy to install a Cloud Pak.
 
@@ -244,7 +244,7 @@ Labels:
 - `gitops-branch` + `cp4i`: Placement for Cloud Pak for Integration.
 - `gitops-branch` + `cp4s`: Placement for Cloud Pak for Security.
 - `gitops-branch` + `cp4aiops`: Placement for Cloud Pak for AIOps.
-- `gitops-remote` + `true`: Assign cluster to the `gitops-cluster` cluster-set, registering it to the [GitOps Cluster](https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/2.9/html/applications/managing-applications#gitops-config).
+- `gitops-remote` + `true`: Assign cluster to the `gitops-cluster` cluster-set, registering it to the [GitOps Cluster](https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/2.10/html/applications/managing-applications#gitops-config).
 
 Values for each label:
 
