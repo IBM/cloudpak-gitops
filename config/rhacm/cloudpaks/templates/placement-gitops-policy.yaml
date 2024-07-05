@@ -2,7 +2,7 @@
 {{- range tuple "cp4a" "cp4aiops" "cp4d" "cp4i" "cp4s" }}
 ---
 apiVersion: apps.open-cluster-management.io/v1
-kind: PlacementRule
+kind: Placement
 metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "200"
@@ -27,7 +27,7 @@ metadata:
   namespace: "{{ $argocd_namespace }}"
 placementRef:
   name: placement-openshift-gitops-entitlement-key-{{.}}
-  kind: PlacementRule
+  kind: Placement
   apiGroup: apps.open-cluster-management.io
 subjects:
   - name: cloudpak-entitlement-key

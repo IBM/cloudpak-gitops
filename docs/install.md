@@ -36,7 +36,7 @@
 
 - Cluster storage configured with storage classes supporting both [RWO and RWX storage](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes).
 
-  The applications were tested with [OpenShift Container Storage](https://docs.openshift.com/container-platform/4.8/storage/persistent_storage/persistent-storage-ocs.html), [Rook Ceph](https://github.com/rook/rook), [AWS EFS](https://aws.amazon.com/efs/), and the built-in file storage in ROKS classic clusters.
+  The applications were tested with [OpenShift Data Foundation](https://access.redhat.com/documentation/en-us/red_hat_openshift_data_foundation), [Rook Ceph](https://github.com/rook/rook), [AWS EFS](https://aws.amazon.com/efs/), and the built-in file storage in ROKS classic clusters.
 
 - [An entitlement key to the IBM Entitled Registry](#obtain-an-entitlement-key)
 

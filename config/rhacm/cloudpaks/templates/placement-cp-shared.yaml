@@ -9,7 +9,7 @@ metadata:
   namespace: policy
 placementRef:
   name: openshift-gitops-{{.}}
-  kind: PlacementRule
+  kind: Placement
   apiGroup: apps.open-cluster-management.io
 subjects:
   - name: openshift-gitops-cloudpaks-cp-shared
