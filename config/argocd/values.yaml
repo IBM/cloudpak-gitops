@@ -1,5 +1,5 @@
 ---
-repoURL: https://github.com/IBM/cloudpak-gitops
+repoURL: https://github.com/PauloLuchini/cloudpak-gitops
 targetRevision: main
 metadata:
   argocd_namespace: openshift-gitops

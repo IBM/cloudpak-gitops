@@ -14,7 +14,15 @@ spec:
     spec:
       containers:
         - name: install-olm
-          image: "icr.io/cpopen/cpd/olm-utils-v2:{{.Values.version}}{{.Values.image_arch}}"
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: "icr.io/cpopen/cpd/olm-utils-v3:{{.Values.version}}{{.Values.image_arch}}"
           env:
             - name: PROJECT_CPD_INST_OPERATORS
               value: {{.Values.metadata.operators_namespace}}

@@ -12,8 +12,16 @@ spec:
   template:
     spec:
       containers:
-        - name: configure-cluster
-          image: "icr.io/cpopen/cpd/olm-utils-v2:{{.Values.version}}{{.Values.image_arch}}"
+        - name: configure-cluster    
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          image: "icr.io/cpopen/cpd/olm-utils-v3:{{.Values.version}}{{.Values.image_arch}}"
           env:
             - name: PROJECT_CERT_MANAGER
               value: ibm-cert-manager
@@ -56,6 +64,13 @@ spec:
               && echo "INFO: Scheduling service installed." \
               || result=1
 
+              # bin/apply-cluster-components \
+              #     --release=${VERSION:?} \
+              #     --license_acceptance=true \
+              #     --licensing_ns=${PROJECT_LICENSE_SERVICE:?} \
+              # && echo "INFO: Licensing service installed." || result=1
+
+
               if [[ ${COMPONENTS:?} =~ cognos_analytics ]] \
                   || [[ ${COMPONENTS} =~ db2 ]] \
                   || [[ ${COMPONENTS} =~ bigsql ]] \
@@ -92,4 +107,4 @@ spec:
       restartPolicy: Never
       serviceAccountName: {{.Values.serviceaccount.argocd_application_controller}}
 
-  backoffLimit: 1
+  backoffLimit: 4

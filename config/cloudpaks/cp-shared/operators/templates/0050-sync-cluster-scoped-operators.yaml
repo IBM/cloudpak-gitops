@@ -14,6 +14,14 @@ spec:
         - name: config
           image: registry.redhat.io/openshift4/ose-cli:latest
           imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            capabilities:
+              drop:
+                - ALL
+            seccompProfile:
+              type: RuntimeDefault
           env:
             - name: ARGOCD_NAMESPACE
               value: "openshift-gitops"
@@ -31,6 +39,12 @@ spec:
               value: {{.Values.metadata.ibm_license_manager_operator_group}}
             - name: IBM_LICENSE_MANAGER_CHANNEL
               value: {{.Values.metadata.ibm_license_manager_channel}}
+            - name: ODLM_NAMESPACE
+              value: {{.Values.metadata.odlm_namespace}}
+            - name: ODLM_OPERATOR_GROUP
+              value: {{.Values.metadata.odlm_operator_group}}
+            - name: ODLM_CHANNEL
+              value: {{.Values.metadata.odlm_channel}}
           command:
             - /bin/sh
             - -c
@@ -163,9 +177,7 @@ spec:
               else
                   echo "ERROR: Unable to get status of cert managers in the cluster."
               fi
-
               exit "${result}"
-
       restartPolicy: Never
       serviceAccountName: {{.Values.serviceaccount.argocd_application_controller}}
   backoffLimit: 2

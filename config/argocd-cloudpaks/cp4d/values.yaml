@@ -1,5 +1,5 @@
 ---
-repoURL: https://github.com/IBM/cloudpak-gitops
+repoURL: https://github.com/PauloLuchini/cloudpak-gitops
 targetRevision: main
 serviceaccount:
   argocd_application_controller: openshift-gitops-argocd-application-controller
@@ -10,7 +10,8 @@ metadata:
   operands_namespace: cp4d-operands
 
 # https://www.ibm.com/docs/en/cloud-paks/cp-data/4.8.x?topic=information-determining-which-components-install
-components: ibm-cert-manager,ibm-licensing,cpfs,cpd_platform,rstudio,wml,ws
+# components: ibm-cert-manager,ibm-licensing,cpfs,cpd_platform,rstudio,wml,ws
+components: ibm-cert-manager,ibm-licensing,cpfs,cpd_platform
 
 storageclass:
   rwo: ocs-storagecluster-ceph-rbd
@@ -23,4 +24,4 @@ image_arch: ""
 # image_arch: .s390x
 # image_arch: .ppc64le
 
-version: 4.8.4
+version: 5.0.1

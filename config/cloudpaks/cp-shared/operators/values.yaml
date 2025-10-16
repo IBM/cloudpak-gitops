@@ -10,6 +10,9 @@ metadata:
   ibm_license_manager_operator_group: ibm-licensing-operator-app
   redhat_cert_manager_namespace: cert-manager-operator
   redhat_cert_manager_operator_group: cert-manager-operator-group
+  odlm_namespace: cp4d
+  odlm_operator_group: odlm-operatorgroup
+  odlm_channel: stable
 serviceaccount:
   argocd_application_controller: openshift-gitops-argocd-application-controller
 online_catalog_source_priority: -1
